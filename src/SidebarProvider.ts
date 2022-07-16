@@ -1,13 +1,13 @@
+import { join } from "path";
 import * as vscode from "vscode";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
   _doc?: vscode.TextDocument;
 
-  constructor(private readonly _extensionUri: vscode.Uri) { console.log('constructor sidebar provider') }
+  constructor(private readonly _extensionUri: vscode.Uri) { }
 
   public resolveWebviewView(webviewView: vscode.WebviewView) {
-    console.log('resolve web view view')
     this._view = webviewView;
 
     webviewView.webview.options = {
@@ -60,22 +60,21 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
   private _getHtmlForWebview(webview: vscode.Webview) {
     const styleResetUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "reset.css")
+      vscode.Uri.file(join(this._extensionUri.path, "media", "reset.css"))
     );
     const styleVSCodeUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css")
+      vscode.Uri.file(join(this._extensionUri.path, "media", "vscode.css"))
     );
     const scriptUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "out", "compiled/sidebar.js")
+      vscode.Uri.file(join(this._extensionUri.path, "out", "compiled/sidebar.js"))
     );
     const styleMainUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "out", "compiled/sidebar.css")
+      vscode.Uri.file(join(this._extensionUri.path, "out", "compiled/sidebar.css"))
     );
 
     // Use a nonce to only allow a specific script to be run.
     const nonce = getNonce();
 
-    console.log('nonce', nonce)
     return `
       <!DOCTYPE html>
       <html lang="en">
