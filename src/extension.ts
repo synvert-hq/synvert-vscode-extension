@@ -1,6 +1,8 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { rubySpawn } from 'ruby-spawn';
+import { ChildProcess } from 'child_process';
 import { SidebarProvider } from './SidebarProvider';
 
 // this method is called when your extension is activated
@@ -38,7 +40,30 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   context.subscriptions.push(disposable);
+
+  vscode.window.showErrorMessage('Synvert gem not found. Run `gem install synvert` or update your Gemfile.', 'Install Now').then((item) => {
+    if (item === 'Install Now') {
+      installGem().then(() => {
+        vscode.window.showInformationMessage('Successfully installed the Synvert gem.');
+      }).catch(() => {
+        vscode.window.showErrorMessage('Failed to install the Synvert gem.');
+      });
+    }
+  });
 }
 
 // this method is called when your extension is deactivated
 export function deactivate() {}
+
+function installGem(): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    const child = rubySpawn('gem', ['install', 'synvert'], {}, true);
+    child.on('exit', (code) => {
+      if (code === 0) {
+        resolve(true);
+      } else {
+        reject(false);
+      }
+    });
+  });
+}
