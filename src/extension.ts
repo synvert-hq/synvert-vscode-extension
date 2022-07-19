@@ -2,16 +2,14 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { rubySpawn } from 'ruby-spawn';
-import { ChildProcess } from 'child_process';
 import { SidebarProvider } from './SidebarProvider';
+import { log } from './log';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-  // Use the console to output diagnostic information (console.log) and errors (console.error)
-  // This line of code will only be executed once when your extension is activated
-  console.log('Congratulations, your extension "synvert" is now active!');
+  log('Congratulations, your extension "synvert" is now active!');
 
   const sidebarProvider = new SidebarProvider(context.extensionUri);
   context.subscriptions.push(
@@ -20,6 +18,11 @@ export function activate(context: vscode.ExtensionContext) {
       sidebarProvider
     )
   );
+
+	const currentlyOpenTabfilePath = vscode.window.activeTextEditor?.document.fileName;
+	if (currentlyOpenTabfilePath) {
+		sidebarProvider._view?.webview.postMessage({ type: "currentFileExtensionName", value: currentlyOpenTabfilePath.split('.').pop() });
+	}
 
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with registerCommand

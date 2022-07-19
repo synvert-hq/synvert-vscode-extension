@@ -1,5 +1,8 @@
 import { join } from "path";
+import * as shellescape from 'shell-escape';
+import { exec } from "promisify-child-process";
 import * as vscode from "vscode";
+import { log } from "./log";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
@@ -20,19 +23,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
     // Listen for messages from the Sidebar component and execute action
-    webviewView.webview.onDidReceiveMessage(async (data) => {
+    webviewView.webview.onDidReceiveMessage((data) => {
       switch (data.type) {
-        case "onFetchText": {
-          let editor = vscode.window.activeTextEditor;
-
-          if (editor === undefined) {
-            vscode.window.showErrorMessage('No active text editor');
+        case "onRunSnippet": {
+          if (!data.snippet) {
             return;
           }
-
-          let text = editor.document.getText(editor.selection);
-          // send message back to the sidebar component
-          this._view?.webview.postMessage({ type: "onSelectedText", value: text });
+          runSnippet(data.snippet);
           break;
         }
         case "onInfo": {
@@ -109,4 +106,17 @@ function getNonce() {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   }
   return text;
+}
+
+function runSnippet(snippet: string) {
+  const echoCommand = shellescape(['echo', snippet]);
+  vscode.workspace.workspaceFolders?.map(async folder => {
+    const path = folder.uri.path;
+    const { stdout, stderr } = await exec(`${echoCommand} | synvert-ruby --execute --format json ${path}`);
+    if (stderr) {
+      vscode.window.showErrorMessage(`Failed to run synvert: ${stderr.toString()}`);
+    } else {
+      vscode.window.showInformationMessage('Successfully run synvert');
+    }
+  });
 }
