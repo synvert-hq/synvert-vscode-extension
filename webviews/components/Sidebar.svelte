@@ -36,8 +36,6 @@
   }
 
   async function generateSnippet() {
-    // const token = machineIdSync({original: true});
-    const token = '1234567890';
     const platform = 'vscode';
     try {
       generateSnippetButtonDisabled = true;

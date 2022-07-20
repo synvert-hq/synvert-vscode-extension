@@ -1,6 +1,7 @@
 import { join } from "path";
 import * as shellescape from 'shell-escape';
 import { exec } from "promisify-child-process";
+import { machineIdSync } from 'node-machine-id';
 import * as vscode from "vscode";
 import { log } from "./log";
 
@@ -72,6 +73,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     // Use a nonce to only allow a specific script to be run.
     const nonce = getNonce();
+    const token = machineIdSync(true);
 
     return `
       <!DOCTYPE html>
@@ -89,6 +91,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           <link href="${styleMainUri}" rel="stylesheet">
           <script nonce="${nonce}">
               const tsvscode = acquireVsCodeApi();
+              const token = "${token}";
           </script>
 
         </head>
