@@ -91,7 +91,6 @@
   };
 </script>
 
-<h1>Synvert</h1>
 <label for="input"><b>Input</b></label>
 {#each $inputs as input}
 <textarea id="input" placeholder="e.g. FactoryBot.create(:user)" bind:value={input}></textarea>

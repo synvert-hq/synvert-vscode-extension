@@ -44,19 +44,34 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(disposable);
 
-  vscode.window.showErrorMessage('Synvert gem not found. Run `gem install synvert` or update your Gemfile.', 'Install Now').then((item) => {
-    if (item === 'Install Now') {
-      installGem().then(() => {
-        vscode.window.showInformationMessage('Successfully installed the Synvert gem.');
-      }).catch(() => {
-        vscode.window.showErrorMessage('Failed to install the Synvert gem.');
-      });
-    }
+  checkGem().catch(() => {
+    vscode.window.showErrorMessage('Synvert gem not found. Run `gem install synvert` or update your Gemfile.', 'Install Now').then((item) => {
+      if (item === 'Install Now') {
+        installGem().then(() => {
+          vscode.window.showInformationMessage('Successfully installed the Synvert gem.');
+        }).catch(() => {
+          vscode.window.showErrorMessage('Failed to install the Synvert gem.');
+        });
+      }
+    });
   });
 }
 
 // this method is called when your extension is deactivated
 export function deactivate() {}
+
+function checkGem(): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    const child = rubySpawn('synvert-ruby', ['-v'], {}, true);
+    child.on('exit', (code) => {
+      if (code === 0) {
+        resolve(true);
+      } else {
+        reject(false);
+      }
+    });
+  });
+}
 
 function installGem(): Promise<boolean> {
   return new Promise((resolve, reject) => {
