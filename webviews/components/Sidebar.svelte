@@ -5,6 +5,8 @@
   let filePattern = "**/*.rb";
   let snippet = "";
   let errorMessage = "";
+  let generateSnippetButtonDisabled = false;
+  let runSnippetButtonDisabled = false;
 
   onMount(() => {
     window.addEventListener("message", (event) => {
@@ -18,6 +20,10 @@
         }
         case "selectedCode": {
           $inputs[0] = message.value;
+          break;
+        }
+        case "doneRunSnippet": {
+          runSnippetButtonDisabled = false;
           break;
         }
       }
@@ -34,6 +40,7 @@
     const token = '1234567890';
     const platform = 'vscode';
     try {
+      generateSnippetButtonDisabled = true;
       const response = await fetch(`https://synvert-api-ruby.xinminlabs.com/api/v1/call`, {
         method: "POST",
         headers: {
@@ -48,10 +55,13 @@
       snippet = composeCustomSnippet({ filePattern }, result);
     } catch (error) {
       errorMessage = (error as Error).message;
+    } finally {
+      generateSnippetButtonDisabled = false;
     }
   }
 
-  async function runSnippet() {
+  function runSnippet() {
+    runSnippetButtonDisabled = true;
     tsvscode.postMessage({ type: 'onRunSnippet', snippet });
   }
 
@@ -91,7 +101,7 @@
 <textarea id="output" placeholder="e.g. create(:user)" bind:value={output}></textarea>
 {/each}
 <button on:click={addMoreInputOutput}>Add More Input/Output</button>
-<button on:click={generateSnippet}>Generate Snippet</button>
+<button on:click={generateSnippet} disabled={generateSnippetButtonDisabled}>{generateSnippetButtonDisabled ? 'Generating...' : 'Generate Snippet'}</button>
 <p>{errorMessage}</p>
 <textarea rows=10 bind:value={snippet}></textarea>
-<button on:click={runSnippet}>Run Snippet</button>
+<button on:click={runSnippet} disabled={runSnippetButtonDisabled}>{runSnippetButtonDisabled ? 'Running...' : 'Run Snippet'}</button>

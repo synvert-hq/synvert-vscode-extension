@@ -23,13 +23,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
     // Listen for messages from the Sidebar component and execute action
-    webviewView.webview.onDidReceiveMessage((data) => {
+    webviewView.webview.onDidReceiveMessage(async (data) => {
       switch (data.type) {
         case "onRunSnippet": {
           if (!data.snippet) {
             return;
           }
-          runSnippet(data.snippet);
+          await runSnippet(data.snippet);
+          webviewView.webview.postMessage({ type: 'doneRunSnippet' });
           break;
         }
         case "onInfo": {
@@ -108,15 +109,17 @@ function getNonce() {
   return text;
 }
 
-function runSnippet(snippet: string) {
+async function runSnippet(snippet: string) {
   const echoCommand = shellescape(['echo', snippet]);
-  vscode.workspace.workspaceFolders?.map(async folder => {
-    const path = folder.uri.path;
-    const { stdout, stderr } = await exec(`${echoCommand} | synvert-ruby --execute --format json ${path}`);
-    if (stderr) {
-      vscode.window.showErrorMessage(`Failed to run synvert: ${stderr.toString()}`);
-    } else {
-      vscode.window.showInformationMessage('Successfully run synvert');
+  if (vscode.workspace.workspaceFolders) {
+    for (const folder of vscode.workspace.workspaceFolders) {
+      const path = folder.uri.path;
+      const { stdout, stderr } = await exec(`${echoCommand} | synvert-ruby --execute --format json ${path}`);
+      if (stderr) {
+        vscode.window.showErrorMessage(`Failed to run synvert: ${stderr.toString()}`);
+      } else {
+        vscode.window.showInformationMessage('Successfully run synvert');
+      }
     }
-  });
+  }
 }
