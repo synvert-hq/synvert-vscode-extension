@@ -35,6 +35,11 @@
     $outputs = [...$outputs, ""];
   }
 
+  function removeLastInputOutput() {
+    $inputs = $inputs.slice(0, -1);
+    $outputs = $outputs.slice(0, -1);
+  }
+
   async function generateSnippet() {
     const platform = 'vscode';
     try {
@@ -97,7 +102,10 @@
 {#each $outputs as output}
 <textarea id="output" placeholder="e.g. create(:user)" bind:value={output}></textarea>
 {/each}
-<a href="#" on:click={addMoreInputOutput}>Add More Input/Output</a>
+<p><a href="#" on:click={addMoreInputOutput}>Add More Input/Output</a></p>
+{#if $inputs.length > 1}
+<p><a href="#" on:click={removeLastInputOutput}>Remove Last Input/Output</a></p>
+{/if}
 <button on:click={generateSnippet} disabled={generateSnippetButtonDisabled}>{generateSnippetButtonDisabled ? 'Generating...' : 'Generate Snippet'}</button>
 <p>{errorMessage}</p>
 <textarea rows=10 bind:value={snippet}></textarea>
