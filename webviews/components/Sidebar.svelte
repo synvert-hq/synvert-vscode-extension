@@ -97,7 +97,7 @@
 {#each $outputs as output}
 <textarea id="output" placeholder="e.g. create(:user)" bind:value={output}></textarea>
 {/each}
-<button on:click={addMoreInputOutput}>Add More Input/Output</button>
+<a href="#" on:click={addMoreInputOutput}>Add More Input/Output</a>
 <button on:click={generateSnippet} disabled={generateSnippetButtonDisabled}>{generateSnippetButtonDisabled ? 'Generating...' : 'Generate Snippet'}</button>
 <p>{errorMessage}</p>
 <textarea rows=10 bind:value={snippet}></textarea>
