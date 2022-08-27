@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { spawn } from 'child_process';
 import { rubySpawn } from 'ruby-spawn';
 import { SidebarProvider } from './SidebarProvider';
 import { log } from './log';
@@ -44,13 +45,26 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(disposable);
 
-  checkGem().catch(() => {
-    vscode.window.showErrorMessage('Synvert gem not found. Run `gem install synvert` or update your Gemfile.', 'Install Now').then((item) => {
+  // TODO: install gem
+  // checkGem().catch(() => {
+  //   vscode.window.showErrorMessage('Synvert gem not found. Run `gem install synvert` or update your Gemfile.', 'Install Now').then((item) => {
+  //     if (item === 'Install Now') {
+  //       installGem().then(() => {
+  //         vscode.window.showInformationMessage('Successfully installed the Synvert gem.');
+  //       }).catch(() => {
+  //         vscode.window.showErrorMessage('Failed to install the Synvert gem.');
+  //       });
+  //     }
+  //   });
+  // });
+
+  checkNpm().catch(() => {
+    vscode.window.showErrorMessage('Synvert npm not found. Run `npm install synvert` or update your package.json.', 'Install Now').then((item) => {
       if (item === 'Install Now') {
-        installGem().then(() => {
-          vscode.window.showInformationMessage('Successfully installed the Synvert gem.');
+        installNpm().then(() => {
+          vscode.window.showInformationMessage('Successfully installed the Synvert npm.');
         }).catch(() => {
-          vscode.window.showErrorMessage('Failed to install the Synvert gem.');
+          vscode.window.showErrorMessage('Failed to install the Synvert npm.');
         });
       }
     });
@@ -59,6 +73,32 @@ export function activate(context: vscode.ExtensionContext) {
 
 // this method is called when your extension is deactivated
 export function deactivate() {}
+
+function checkNpm(): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    const child = spawn('synvert-javascript', ['-v']);
+    child.on('exit', (code) => {
+      if (code === 0) {
+        resolve(true);
+      } else {
+        reject(false);
+      }
+    });
+  });
+}
+
+function installNpm(): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    const child = spawn('npm', ['install', '-g', 'synvert']);
+    child.on('exit', (code) => {
+      if (code === 0) {
+        resolve(true);
+      } else {
+        reject(false);
+      }
+    });
+  });
+}
 
 function checkGem(): Promise<boolean> {
   return new Promise((resolve, reject) => {
@@ -75,7 +115,7 @@ function checkGem(): Promise<boolean> {
 
 function installGem(): Promise<boolean> {
   return new Promise((resolve, reject) => {
-    const child = rubySpawn('gem', ['install', 'synvert'], {}, true);
+    const child = rubySpawn('gem', ['install', '-g', 'synvert'], {}, true);
     child.on('exit', (code) => {
       if (code === 0) {
         resolve(true);

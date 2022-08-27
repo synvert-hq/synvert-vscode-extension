@@ -41,10 +41,12 @@
   }
 
   async function generateSnippet() {
-    const platform = 'vscode';
+    // TODO: dynamic token
+    const token = "1234567890";
+    const platform = "vscode";
     try {
       generateSnippetButtonDisabled = true;
-      const response = await fetch(`https://synvert-api-ruby.xinminlabs.com/api/v1/call`, {
+      const response = await fetch(`https://synvert-api-javascript.xinminlabs.com/generate-snippet`, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -55,7 +57,7 @@
         body: JSON.stringify({ inputs: $inputs, outputs: $outputs })
       })
       const result = await response.json();
-      snippet = composeCustomSnippet({ filePattern }, result);
+      snippet = composeJavascriptSnippet({ filePattern }, result);
     } catch (error) {
       errorMessage = (error as Error).message;
     } finally {
@@ -68,7 +70,7 @@
     tsvscode.postMessage({ type: 'onRunSnippet', snippet });
   }
 
-  const composeCustomSnippet = (
+  const composeRubySnippet = (
     data: { rubyVersion?: string, gemVersion?: string, filePattern: string },
     result: { snippet: string }
   ): string => {
@@ -92,6 +94,33 @@
     customSnippet += "end";
     return customSnippet;
   };
+
+  const composeJavascriptSnippet = (
+    data: { nodeVersion?: string, npmVersion?: string, filePattern: string },
+    result: { snippet: string}
+  ): string => {
+    let customSnippet = `const Synvert = require("synvert-core")\n`;
+    customSnippet += `new Synvert.Rewriter("group", "name", () => {\n`;
+    customSnippet += `  configure({ parser: "typescript" });`;
+    if (data.nodeVersion) {
+      customSnippet += `  ifNode("${data.nodeVersion}");\n`
+    }
+    if (data.npmVersion) {
+      const index = data.npmVersion.indexOf(" ");
+      const name = data.npmVersion.substring(0, index);
+      const version = data.npmVersion.substring(index + 1);
+      customSnippet += `  ifNpm '${name}', '${version}'\n`;
+    }
+    customSnippet += `  withinFiles("${data.filePattern}", () => {\n`;
+    if (result.snippet) {
+      customSnippet += "    ";
+      customSnippet += result.snippet.replace(/\n/g, "\n    ");
+      customSnippet += "\n";
+    }
+    customSnippet += `  });`;
+    customSnippet += `});`;
+    return customSnippet;
+  }
 </script>
 
 <label for="input"><b>Input</b></label>
