@@ -1,9 +1,7 @@
 import { join } from "path";
-import * as shellescape from 'shell-escape';
-import { exec } from "promisify-child-process";
 import { machineIdSync } from 'node-machine-id';
 import * as vscode from "vscode";
-import { log } from "./log";
+import { spawnSync } from "child_process";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
@@ -24,14 +22,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
     // Listen for messages from the Sidebar component and execute action
-    webviewView.webview.onDidReceiveMessage(async (data) => {
+    webviewView.webview.onDidReceiveMessage((data) => {
       switch (data.type) {
-        case "onRunSnippet": {
+        case "onSearch": {
           if (!data.snippet) {
             return;
           }
-          await runSnippet(data.snippet);
-          webviewView.webview.postMessage({ type: 'doneRunSnippet' });
+          const actions = testSnippet(data.snippet);
+          webviewView.webview.postMessage({ type: 'doneSearch', actions });
           break;
         }
         case "onInfo": {
@@ -112,17 +110,19 @@ function getNonce() {
   return text;
 }
 
-async function runSnippet(snippet: string) {
-  const echoCommand = shellescape(['echo', snippet]);
+function testSnippet(snippet: string): object[] {
+  let actions: object[] = [];
   if (vscode.workspace.workspaceFolders) {
     for (const folder of vscode.workspace.workspaceFolders) {
       const path = folder.uri.path;
-      const { stdout, stderr } = await exec(`${echoCommand} | synvert-ruby --execute --format json ${path}`);
-      if (stderr) {
-        vscode.window.showErrorMessage(`Failed to run synvert: ${stderr.toString()}`);
+      const result = spawnSync("synvert-javascript", ["--execute", "test", "--format", "json", "--path", path, "--skipFiles", '**/node_modules/**,**/dist/**'], { input: snippet });
+      if (result.stderr.toString().length > 0) {
+        vscode.window.showErrorMessage(`Failed to run synvert: ${result.stderr.toString()}`);
       } else {
         vscode.window.showInformationMessage('Successfully run synvert');
+        actions = [...actions, ...JSON.parse(result.stdout.toString())];
       }
     }
   }
+  return actions;
 }

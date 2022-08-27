@@ -6,15 +6,29 @@
   let snippet = "";
   let errorMessage = "";
   let generateSnippetButtonDisabled = false;
-  let runSnippetButtonDisabled = false;
+  let searchButtonDisabled = false;
 
   onMount(() => {
     window.addEventListener("message", (event) => {
       const message = event.data; // The json data that the extension sent
       switch (message.type) {
         case "currentFileExtensionName": {
-          if (message.value === "rb") {
-            filePattern = "**/*.rb";
+          switch (message.value) {
+            case "rb":
+              filePattern = "**/*.rb";
+              break;
+            case "js":
+              filePattern = "**/*.js";
+              break;
+            case "jsx":
+              filePattern = "**/*.jsx";
+              break;
+            case "ts":
+              filePattern = "**/*.ts";
+              break;
+            case "tsx":
+              filePattern = "**/*.tsx";
+              break;
           }
           break;
         }
@@ -22,8 +36,8 @@
           $inputs[0] = message.value;
           break;
         }
-        case "doneRunSnippet": {
-          runSnippetButtonDisabled = false;
+        case "doneSearch": {
+          searchButtonDisabled = false;
           break;
         }
       }
@@ -65,9 +79,9 @@
     }
   }
 
-  function runSnippet() {
-    runSnippetButtonDisabled = true;
-    tsvscode.postMessage({ type: 'onRunSnippet', snippet });
+  function search() {
+    searchButtonDisabled = true;
+    tsvscode.postMessage({ type: 'onSearch', snippet });
   }
 
   const composeRubySnippet = (
@@ -101,7 +115,7 @@
   ): string => {
     let customSnippet = `const Synvert = require("synvert-core")\n`;
     customSnippet += `new Synvert.Rewriter("group", "name", () => {\n`;
-    customSnippet += `  configure({ parser: "typescript" });`;
+    customSnippet += `  configure({ parser: "typescript" });\n`;
     if (data.nodeVersion) {
       customSnippet += `  ifNode("${data.nodeVersion}");\n`
     }
@@ -117,7 +131,7 @@
       customSnippet += result.snippet.replace(/\n/g, "\n    ");
       customSnippet += "\n";
     }
-    customSnippet += `  });`;
+    customSnippet += `  });\n`;
     customSnippet += `});`;
     return customSnippet;
   }
@@ -138,4 +152,4 @@
 <button on:click={generateSnippet} disabled={generateSnippetButtonDisabled}>{generateSnippetButtonDisabled ? 'Generating...' : 'Generate Snippet'}</button>
 <p>{errorMessage}</p>
 <textarea rows=10 bind:value={snippet}></textarea>
-<button on:click={runSnippet} disabled={runSnippetButtonDisabled}>{runSnippetButtonDisabled ? 'Running...' : 'Run Snippet'}</button>
+<button on:click={search} disabled={searchButtonDisabled}>{searchButtonDisabled ? 'Searching...' : 'Search'}</button>

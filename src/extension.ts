@@ -90,6 +90,7 @@ function checkNpm(): Promise<boolean> {
 function installNpm(): Promise<boolean> {
   return new Promise((resolve, reject) => {
     const child = spawn('npm', ['install', '-g', 'synvert']);
+    child.on('message', (data) => log(data.toString()));
     child.on('exit', (code) => {
       if (code === 0) {
         resolve(true);
