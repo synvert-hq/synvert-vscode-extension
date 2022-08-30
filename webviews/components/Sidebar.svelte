@@ -2,7 +2,9 @@
   import { onMount } from "svelte";
   import { inputs, outputs } from "./stores";
 
-  let filePattern = "**/*.rb";
+  let filePattern = "**/*.js";
+  let onlyPaths = "";
+  let skipPaths = "**/node_modules/**,**/dist/**";
   let snippet = "";
   let errorMessage = "";
   let generateSnippetButtonDisabled = false;
@@ -81,7 +83,7 @@
 
   function search() {
     searchButtonDisabled = true;
-    tsvscode.postMessage({ type: 'onSearch', snippet });
+    tsvscode.postMessage({ type: 'onSearch', snippet, onlyPaths, skipPaths });
   }
 
   const composeRubySnippet = (
@@ -152,4 +154,8 @@
 <button on:click={generateSnippet} disabled={generateSnippetButtonDisabled}>{generateSnippetButtonDisabled ? 'Generating...' : 'Generate Snippet'}</button>
 <p>{errorMessage}</p>
 <textarea rows=10 bind:value={snippet}></textarea>
-<button on:click={search} disabled={searchButtonDisabled}>{searchButtonDisabled ? 'Searching...' : 'Search'}</button>
+<label for="onlyPaths"><b>Files to include</b></label>
+<input id="onlyPaths" bind:value={onlyPaths} />
+<label for="skipPaths"><b>Files to exclude</b></label>
+<input id="skipPaths" bind:value={skipPaths} />
+<button on:click={search} disabled={snippet.length === 0 || searchButtonDisabled}>{searchButtonDisabled ? 'Searching...' : 'Search'}</button>

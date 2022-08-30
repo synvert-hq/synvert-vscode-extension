@@ -2,6 +2,7 @@ import { join } from "path";
 import { machineIdSync } from 'node-machine-id';
 import * as vscode from "vscode";
 import { spawnSync } from "child_process";
+import { log } from './log';
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
@@ -28,7 +29,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           if (!data.snippet) {
             return;
           }
-          const actions = testSnippet(data.snippet);
+          const actions = testSnippet(data.snippet, data.onlyPaths, data.skipPaths);
           webviewView.webview.postMessage({ type: 'doneSearch', actions });
           break;
         }
@@ -110,17 +111,18 @@ function getNonce() {
   return text;
 }
 
-function testSnippet(snippet: string): object[] {
+function testSnippet(snippet: string, onlyPaths: string, skipPaths: string): object[] {
   let actions: object[] = [];
   if (vscode.workspace.workspaceFolders) {
     for (const folder of vscode.workspace.workspaceFolders) {
       const path = folder.uri.path;
-      const result = spawnSync("synvert-javascript", ["--execute", "test", "--format", "json", "--path", path, "--skipFiles", '**/node_modules/**,**/dist/**'], { input: snippet });
+      log(["--execute", "test", "--format", "json", "--rootPath", path, "--onlyPaths", onlyPaths, "--skipPaths", skipPaths].join(" "));
+      const result = spawnSync("synvert-javascript", ["--execute", "test", "--format", "json", "--rootPath", path, "--onlyPaths", onlyPaths, "--skipPaths", skipPaths], { input: snippet });
       if (result.stderr.toString().length > 0) {
         vscode.window.showErrorMessage(`Failed to run synvert: ${result.stderr.toString()}`);
       } else {
-        vscode.window.showInformationMessage('Successfully run synvert');
         actions = [...actions, ...JSON.parse(result.stdout.toString())];
+        log(JSON.stringify(actions));
       }
     }
   }
