@@ -152,7 +152,7 @@
 {#if inputs.length > 1}
 <p><a href="#" on:click={removeLastInputOutput}>Remove Last Input/Output</a></p>
 {/if}
-<button on:click={generateSnippet} disabled={generateSnippetButtonDisabled}>{generateSnippetButtonDisabled ? 'Generating...' : 'Generate Snippet'}</button>
+<button on:click={generateSnippet} disabled={inputs[0].length === 0 || outputs[0].length === 0 || generateSnippetButtonDisabled}>{generateSnippetButtonDisabled ? 'Generating...' : 'Generate Snippet'}</button>
 <p>{errorMessage}</p>
 <textarea rows=10 bind:value={snippet}></textarea>
 <label for="onlyPaths"><b>Files to include</b></label>
