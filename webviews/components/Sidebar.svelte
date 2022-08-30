@@ -1,7 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { inputs, outputs } from "./stores";
 
+  let inputs = [""];
+  let outputs = [""];
   let filePattern = "**/*.js";
   let onlyPaths = "";
   let skipPaths = "**/node_modules/**,**/dist/**";
@@ -35,7 +36,7 @@
           break;
         }
         case "selectedCode": {
-          $inputs[0] = message.value;
+          inputs[0] = message.value;
           break;
         }
         case "doneSearch": {
@@ -47,13 +48,13 @@
   });
 
   function addMoreInputOutput() {
-    $inputs = [...$inputs, ""];
-    $outputs = [...$outputs, ""];
+    inputs = [...inputs, ""];
+    outputs = [...outputs, ""];
   }
 
   function removeLastInputOutput() {
-    $inputs = $inputs.slice(0, -1);
-    $outputs = $outputs.slice(0, -1);
+    inputs = inputs.slice(0, -1);
+    outputs = outputs.slice(0, -1);
   }
 
   async function generateSnippet() {
@@ -70,7 +71,7 @@
           "X-SYNVERT-TOKEN": token,
           "X-SYNVERT-PLATFORM": platform,
         },
-        body: JSON.stringify({ inputs: $inputs, outputs: $outputs })
+        body: JSON.stringify({ inputs, outputs })
       })
       const result = await response.json();
       snippet = composeJavascriptSnippet({ filePattern }, result);
@@ -140,15 +141,15 @@
 </script>
 
 <label for="input"><b>Input</b></label>
-{#each $inputs as input}
+{#each inputs as input}
 <textarea id="input" placeholder="e.g. FactoryBot.create(:user)" bind:value={input}></textarea>
 {/each}
 <label for="output"><b>Output</b></label>
-{#each $outputs as output}
+{#each outputs as output}
 <textarea id="output" placeholder="e.g. create(:user)" bind:value={output}></textarea>
 {/each}
 <p><a href="#" on:click={addMoreInputOutput}>Add More Input/Output</a></p>
-{#if $inputs.length > 1}
+{#if inputs.length > 1}
 <p><a href="#" on:click={removeLastInputOutput}>Remove Last Input/Output</a></p>
 {/if}
 <button on:click={generateSnippet} disabled={generateSnippetButtonDisabled}>{generateSnippetButtonDisabled ? 'Generating...' : 'Generate Snippet'}</button>
