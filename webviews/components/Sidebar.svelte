@@ -1,5 +1,8 @@
 <script lang="ts">
+import { start } from "repl";
+
   import { onMount } from "svelte";
+  import type { TestResultExtExt } from "../../src/types";
 
   let inputs = [""];
   let outputs = [""];
@@ -10,6 +13,7 @@
   let errorMessage = "";
   let generateSnippetButtonDisabled = false;
   let searchButtonDisabled = false;
+  let results: TestResultExtExt[] = [];
 
   onMount(() => {
     window.addEventListener("message", (event) => {
@@ -41,6 +45,7 @@
         }
         case "doneSearch": {
           searchButtonDisabled = false;
+          results = message.results;
           break;
         }
       }
@@ -84,6 +89,7 @@
 
   function search() {
     searchButtonDisabled = true;
+    // @ts-ignore
     tsvscode.postMessage({ type: 'onSearch', snippet, onlyPaths, skipPaths });
   }
 
@@ -160,3 +166,13 @@
 <label for="skipPaths"><b>Files to exclude</b></label>
 <input id="skipPaths" bind:value={skipPaths} />
 <button on:click={search} disabled={snippet.length === 0 || searchButtonDisabled}>{searchButtonDisabled ? 'Searching...' : 'Search'}</button>
+{#each results as result}
+<p>{result.filePath}</p>
+<ul>
+{#each result.actions as action}
+<li>
+  <span>{result.fileSource && result.fileSource.substring(action.start, action.end)}</span>
+</li>
+{/each}
+</ul>
+{/each}

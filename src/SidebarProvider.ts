@@ -1,8 +1,11 @@
 import { join } from "path";
 import { machineIdSync } from 'node-machine-id';
 import * as vscode from "vscode";
-import { spawnSync } from "child_process";
-import { log } from './log';
+import * as Synvert from "synvert-core";
+import { getLastSnippetGroupAndName } from "./utils";
+import fs from "fs";
+import path from "path";
+import type { TestResultExtExt } from "./types";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
@@ -29,8 +32,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           if (!data.snippet) {
             return;
           }
-          const actions = testSnippet(data.snippet, data.onlyPaths, data.skipPaths);
-          webviewView.webview.postMessage({ type: 'doneSearch', actions });
+          const results = testSnippet(data.snippet, data.onlyPaths, data.skipPaths);
+          webviewView.webview.postMessage({ type: 'doneSearch', results });
           break;
         }
         case "onInfo": {
@@ -112,19 +115,28 @@ function getNonce() {
 }
 
 function testSnippet(snippet: string, onlyPaths: string, skipPaths: string): object[] {
-  let actions: object[] = [];
+  let results: TestResultExtExt[] = [];
+  try {
   if (vscode.workspace.workspaceFolders) {
     for (const folder of vscode.workspace.workspaceFolders) {
-      const path = folder.uri.path;
-      log(["--execute", "test", "--format", "json", "--rootPath", path, "--onlyPaths", onlyPaths, "--skipPaths", skipPaths].join(" "));
-      const result = spawnSync("synvert-javascript", ["--execute", "test", "--format", "json", "--rootPath", path, "--onlyPaths", onlyPaths, "--skipPaths", skipPaths], { input: snippet });
-      if (result.stderr.toString().length > 0) {
-        vscode.window.showErrorMessage(`Failed to run synvert: ${result.stderr.toString()}`);
-      } else {
-        actions = [...actions, ...JSON.parse(result.stdout.toString())];
-        log(JSON.stringify(actions));
-      }
+      Synvert.Configuration.rootPath = folder.uri.path;
+      Synvert.Configuration.onlyPaths = onlyPaths.split(",").map((onlyFile) => onlyFile.trim());
+      Synvert.Configuration.skipPaths = skipPaths.split(",").map((skipFile) => skipFile.trim());
+      eval(snippet);
+      const [group, name] = getLastSnippetGroupAndName();
+      const rewriter = Synvert.Rewriter.fetch(group, name);
+      const testResults: TestResultExtExt[] = rewriter.test();
+      testResults.forEach((result) => {
+        const fileSource = fs.readFileSync(path.join(folder.uri.path, result.filePath), "utf-8");
+        result.fileSource = fileSource;
+      });
+
+      results = [...results, ...testResults];
     }
   }
-  return actions;
+  } catch (e) {
+    // @ts-ignore
+    vscode.window.showErrorMessage(`Failed to run synvert: ${e.message}`);
+  }
+  return results;
 }
