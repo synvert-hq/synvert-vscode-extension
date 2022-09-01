@@ -1,3 +1,3 @@
 import { TestResultExt } from "synvert-core";
 
-export type TestResultExtExt = TestResultExt & { fileSource?: string };
+export type TestResultExtExt = TestResultExt & { rootPath?: string, fileSource?: string };

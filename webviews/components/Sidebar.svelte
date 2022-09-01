@@ -1,6 +1,4 @@
 <script lang="ts">
-import { start } from "repl";
-
   import { onMount } from "svelte";
   import type { TestResultExtExt } from "../../src/types";
 
@@ -93,6 +91,11 @@ import { start } from "repl";
     tsvscode.postMessage({ type: 'onSearch', snippet, onlyPaths, skipPaths });
   }
 
+  function actionClicked(action: object, rootPath: string | undefined, filePath: string | undefined) {
+    // @ts-ignore
+    tsvscode.postMessage({ type: 'onOpenFile', action, rootPath, filePath });
+  }
+
   const composeRubySnippet = (
     data: { rubyVersion?: string, gemVersion?: string, filePattern: string },
     result: { snippet: string }
@@ -171,7 +174,7 @@ import { start } from "repl";
 <ul>
 {#each result.actions as action}
 <li>
-  <span>{result.fileSource && result.fileSource.substring(action.start, action.end)}</span>
+  <button on:click={() => actionClicked(action, result.rootPath, result.filePath)}>{result.fileSource && result.fileSource.substring(action.start, action.end)}</button>
 </li>
 {/each}
 </ul>

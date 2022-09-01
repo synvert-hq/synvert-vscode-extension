@@ -36,6 +36,21 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           webviewView.webview.postMessage({ type: 'doneSearch', results });
           break;
         }
+        case "onOpenFile": {
+          var openPath = vscode.Uri.parse(path.join(data.rootPath, data.filePath));
+          vscode.workspace.openTextDocument(openPath).then(doc => {
+            vscode.window.showTextDocument(doc).then(() => {
+              let activeEditor = vscode.window.activeTextEditor;
+              const startLineToGo = doc.getText().substring(0, data.action.start).split("\n").length;
+              let startRange = activeEditor!.document.lineAt(startLineToGo - 1).range;
+              const endLineToGo = doc.getText().substring(0, data.action.end).split("\n").length;
+              let endRange = activeEditor!.document.lineAt(endLineToGo - 1).range;
+              activeEditor!.selection =  new vscode.Selection(startRange.start, endRange.end);
+              activeEditor!.revealRange(startRange);
+          });
+          });
+          break;
+        }
         case "onInfo": {
           if (!data.value) {
             return;
@@ -129,6 +144,7 @@ function testSnippet(snippet: string, onlyPaths: string, skipPaths: string): obj
       testResults.forEach((result) => {
         const fileSource = fs.readFileSync(path.join(folder.uri.path, result.filePath), "utf-8");
         result.fileSource = fileSource;
+        result.rootPath = folder.uri.path;
       });
 
       results = [...results, ...testResults];
