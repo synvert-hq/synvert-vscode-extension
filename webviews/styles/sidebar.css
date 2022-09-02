@@ -4,6 +4,7 @@ ul.search-result {
   margin: 0;
 }
 ul.search-result a {
+  display: block;
   text-decoration: none;
-  margin: 10px 5px;
+  margin: 10px 10px;
 }
