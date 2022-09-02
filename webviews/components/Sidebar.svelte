@@ -141,7 +141,7 @@
     data: { nodeVersion?: string, npmVersion?: string, filePattern: string },
     result: { snippet: string}
   ): string => {
-    let customSnippet = `const Synvert = require("synvert-core")\n`;
+    let customSnippet = `const Synvert = require("synvert-core");\n`;
     customSnippet += `new Synvert.Rewriter("group", "name", () => {\n`;
     customSnippet += `  configure({ parser: "typescript" });\n`;
     if (data.nodeVersion) {

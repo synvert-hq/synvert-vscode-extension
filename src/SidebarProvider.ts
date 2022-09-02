@@ -161,7 +161,7 @@ function testSnippet(snippet: string, onlyPaths: string, skipPaths: string): obj
         Synvert.Configuration.rootPath = folder.uri.path;
         Synvert.Configuration.onlyPaths = onlyPaths.split(",").map((onlyFile) => onlyFile.trim());
         Synvert.Configuration.skipPaths = skipPaths.split(",").map((skipFile) => skipFile.trim());
-        eval(snippet);
+        eval(formatSnippet(snippet));
         const [group, name] = getLastSnippetGroupAndName();
         const rewriter = Synvert.Rewriter.fetch(group, name);
         const testResults: TestResultExtExt[] = rewriter.test();
@@ -188,7 +188,7 @@ function processSnippet(snippet: string, onlyPaths: string, skipPaths: string): 
         Synvert.Configuration.rootPath = folder.uri.path;
         Synvert.Configuration.onlyPaths = onlyPaths.split(",").map((onlyFile) => onlyFile.trim());
         Synvert.Configuration.skipPaths = skipPaths.split(",").map((skipFile) => skipFile.trim());
-        eval(snippet);
+        eval(formatSnippet(snippet));
         const [group, name] = getLastSnippetGroupAndName();
         const rewriter = Synvert.Rewriter.fetch(group, name);
         rewriter.process();
@@ -198,4 +198,8 @@ function processSnippet(snippet: string, onlyPaths: string, skipPaths: string): 
     // @ts-ignore
     vscode.window.showErrorMessage(`Failed to run synvert: ${e.message}`);
   }
+}
+
+function formatSnippet(snippet: string) {
+  return snippet.replace(/const Synvert = require\(['"]synvert-core['"]\);?/, "");
 }
