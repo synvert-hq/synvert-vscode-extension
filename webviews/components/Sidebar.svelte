@@ -49,6 +49,7 @@
         }
         case "doneReplaceAll": {
           replaceAllButtonDisabled = false;
+          results = [];
           break;
         }
       }
