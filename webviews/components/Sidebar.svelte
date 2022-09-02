@@ -11,6 +11,7 @@
   let errorMessage = "";
   let generateSnippetButtonDisabled = false;
   let searchButtonDisabled = false;
+  let replaceAllButtonDisabled = false;
   let results: TestResultExtExt[] = [];
 
   onMount(() => {
@@ -44,6 +45,10 @@
         case "doneSearch": {
           searchButtonDisabled = false;
           results = message.results;
+          break;
+        }
+        case "doneReplaceAll": {
+          replaceAllButtonDisabled = false;
           break;
         }
       }
@@ -89,6 +94,12 @@
     searchButtonDisabled = true;
     // @ts-ignore
     tsvscode.postMessage({ type: 'onSearch', snippet, onlyPaths, skipPaths });
+  }
+
+  function replaceAll() {
+    replaceAllButtonDisabled = true;
+    // @ts-ignore
+    tsvscode.postMessage({ type: 'onReplaceAll', results });
   }
 
   function actionClicked(action: object, rootPath: string | undefined, filePath: string | undefined) {
@@ -169,6 +180,7 @@
 <label for="skipPaths"><b>Files to exclude</b></label>
 <input id="skipPaths" bind:value={skipPaths} />
 <button on:click={search} disabled={snippet.length === 0 || searchButtonDisabled}>{searchButtonDisabled ? 'Searching...' : 'Search'}</button>
+<button on:click={replaceAll} disabled={snippet.length === 0 || replaceAllButtonDisabled}>{replaceAllButtonDisabled ? 'Replacing...' : 'Replace All'}</button>
 {#each results as result}
 <p>{result.filePath}</p>
 <ul class="search-result">

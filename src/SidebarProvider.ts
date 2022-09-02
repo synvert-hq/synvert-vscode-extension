@@ -36,18 +36,34 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           webviewView.webview.postMessage({ type: 'doneSearch', results });
           break;
         }
+        case "onReplaceAll": {
+          data.results.forEach((result: TestResultExtExt) => {
+            const absolutePath = path.join(result.rootPath!, result.filePath);
+            let source = result.fileSource!;
+            result.actions.reverse().forEach(action => {
+              source = source.slice(0, action.start) + action.newCode + source.slice(action.end);
+            });
+            fs.writeFileSync(absolutePath, source);
+          });
+          webviewView.webview.postMessage({ type: 'doneReplaceAll' });
+          break;
+        }
         case "onOpenFile": {
           var openPath = vscode.Uri.parse(path.join(data.rootPath, data.filePath));
           vscode.workspace.openTextDocument(openPath).then(doc => {
             vscode.window.showTextDocument(doc).then(() => {
-              let activeEditor = vscode.window.activeTextEditor;
+              const activeEditor = vscode.window.activeTextEditor;
+              if (!activeEditor) {
+                return;
+              }
+
               const startLineToGo = doc.getText().substring(0, data.action.start).split("\n").length;
-              let startRange = activeEditor!.document.lineAt(startLineToGo - 1).range;
+              let startRange = activeEditor.document.lineAt(startLineToGo - 1).range;
               const endLineToGo = doc.getText().substring(0, data.action.end).split("\n").length;
-              let endRange = activeEditor!.document.lineAt(endLineToGo - 1).range;
-              activeEditor!.selection =  new vscode.Selection(startRange.start, endRange.end);
-              activeEditor!.revealRange(startRange);
-          });
+              let endRange = activeEditor.document.lineAt(endLineToGo - 1).range;
+              activeEditor.selection =  new vscode.Selection(startRange.start, endRange.end);
+              activeEditor.revealRange(startRange);
+            });
           });
           break;
         }
