@@ -36,6 +36,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           webviewView.webview.postMessage({ type: 'doneSearch', results });
           break;
         }
+        case "onDirectReplaceAll": {
+          if (!data.snippet) {
+            return;
+          }
+          processSnippet(data.snippet, data.onlyPaths, data.skipPaths);
+          webviewView.webview.postMessage({ type: 'doneReplaceAll' });
+          break;
+        }
         case "onReplaceAll": {
           data.results.forEach((result: TestResultExtExt) => {
             const absolutePath = path.join(result.rootPath!, result.filePath);
@@ -148,27 +156,46 @@ function getNonce() {
 function testSnippet(snippet: string, onlyPaths: string, skipPaths: string): object[] {
   let results: TestResultExtExt[] = [];
   try {
-  if (vscode.workspace.workspaceFolders) {
-    for (const folder of vscode.workspace.workspaceFolders) {
-      Synvert.Configuration.rootPath = folder.uri.path;
-      Synvert.Configuration.onlyPaths = onlyPaths.split(",").map((onlyFile) => onlyFile.trim());
-      Synvert.Configuration.skipPaths = skipPaths.split(",").map((skipFile) => skipFile.trim());
-      eval(snippet);
-      const [group, name] = getLastSnippetGroupAndName();
-      const rewriter = Synvert.Rewriter.fetch(group, name);
-      const testResults: TestResultExtExt[] = rewriter.test();
-      testResults.forEach((result) => {
-        const fileSource = fs.readFileSync(path.join(folder.uri.path, result.filePath), "utf-8");
-        result.fileSource = fileSource;
-        result.rootPath = folder.uri.path;
-      });
+    if (vscode.workspace.workspaceFolders) {
+      for (const folder of vscode.workspace.workspaceFolders) {
+        Synvert.Configuration.rootPath = folder.uri.path;
+        Synvert.Configuration.onlyPaths = onlyPaths.split(",").map((onlyFile) => onlyFile.trim());
+        Synvert.Configuration.skipPaths = skipPaths.split(",").map((skipFile) => skipFile.trim());
+        eval(snippet);
+        const [group, name] = getLastSnippetGroupAndName();
+        const rewriter = Synvert.Rewriter.fetch(group, name);
+        const testResults: TestResultExtExt[] = rewriter.test();
+        testResults.forEach((result) => {
+          const fileSource = fs.readFileSync(path.join(folder.uri.path, result.filePath), "utf-8");
+          result.fileSource = fileSource;
+          result.rootPath = folder.uri.path;
+        });
 
-      results = [...results, ...testResults];
+        results = [...results, ...testResults];
+      }
     }
-  }
   } catch (e) {
     // @ts-ignore
     vscode.window.showErrorMessage(`Failed to run synvert: ${e.message}`);
   }
   return results;
+}
+
+function processSnippet(snippet: string, onlyPaths: string, skipPaths: string): void {
+  try {
+    if (vscode.workspace.workspaceFolders) {
+      for (const folder of vscode.workspace.workspaceFolders) {
+        Synvert.Configuration.rootPath = folder.uri.path;
+        Synvert.Configuration.onlyPaths = onlyPaths.split(",").map((onlyFile) => onlyFile.trim());
+        Synvert.Configuration.skipPaths = skipPaths.split(",").map((skipFile) => skipFile.trim());
+        eval(snippet);
+        const [group, name] = getLastSnippetGroupAndName();
+        const rewriter = Synvert.Rewriter.fetch(group, name);
+        rewriter.process();
+      }
+    }
+  } catch (e) {
+    // @ts-ignore
+    vscode.window.showErrorMessage(`Failed to run synvert: ${e.message}`);
+  }
 }

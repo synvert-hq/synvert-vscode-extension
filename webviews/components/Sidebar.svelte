@@ -98,8 +98,13 @@
 
   function replaceAll() {
     replaceAllButtonDisabled = true;
-    // @ts-ignore
-    tsvscode.postMessage({ type: 'onReplaceAll', results });
+    if (results.length > 0) {
+      // @ts-ignore
+      tsvscode.postMessage({ type: 'onReplaceAll', results });
+    } else {
+      // @ts-ignore
+      tsvscode.postMessage({ type: 'onDirectReplaceAll', snippet, onlyPaths, skipPaths });
+    }
   }
 
   function actionClicked(action: object, rootPath: string | undefined, filePath: string | undefined) {
