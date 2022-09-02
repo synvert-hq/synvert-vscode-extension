@@ -171,10 +171,10 @@
 <button on:click={search} disabled={snippet.length === 0 || searchButtonDisabled}>{searchButtonDisabled ? 'Searching...' : 'Search'}</button>
 {#each results as result}
 <p>{result.filePath}</p>
-<ul>
+<ul class="search-result">
 {#each result.actions as action}
 <li>
-  <button on:click={() => actionClicked(action, result.rootPath, result.filePath)}>{result.fileSource && result.fileSource.substring(action.start, action.end)}</button>
+<a href={"#"} on:click={() => actionClicked(action, result.rootPath, result.filePath)}>{result.fileSource && result.fileSource.substring(action.start, action.end)}</a>
 </li>
 {/each}
 </ul>

@@ -1,5 +1,9 @@
-ul {
+ul.search-result {
   list-style-type: none;
   padding: 0;
   margin: 0;
+}
+ul.search-result a {
+  text-decoration: none;
+  margin: 10px 5px;
 }
