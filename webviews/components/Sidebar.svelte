@@ -157,9 +157,9 @@
 {#each outputs as output}
 <textarea id="output" placeholder="e.g. create(:user)" bind:value={output}></textarea>
 {/each}
-<p><a href="#" on:click={addMoreInputOutput}>Add More Input/Output</a></p>
+<p><a href={"#"} on:click={addMoreInputOutput}>Add More Input/Output</a></p>
 {#if inputs.length > 1}
-<p><a href="#" on:click={removeLastInputOutput}>Remove Last Input/Output</a></p>
+<p><a href={"#"} on:click={removeLastInputOutput}>Remove Last Input/Output</a></p>
 {/if}
 <button on:click={generateSnippet} disabled={inputs[0].length === 0 || outputs[0].length === 0 || generateSnippetButtonDisabled}>{generateSnippetButtonDisabled ? 'Generating...' : 'Generate Snippet'}</button>
 <p>{errorMessage}</p>
