@@ -52,6 +52,13 @@
           results = [];
           break;
         }
+        case "doneReplaceAction": {
+          const { resultIndex, actionIndex } = message;
+          results[resultIndex].actions.splice(actionIndex, 1);
+          // trigger dom update
+          results = results;
+          break;
+        }
       }
     });
   });
@@ -111,6 +118,20 @@
   function actionClicked(action: object, rootPath: string | undefined, filePath: string | undefined) {
     // @ts-ignore
     tsvscode.postMessage({ type: 'onOpenFile', action, rootPath, filePath });
+  }
+
+  function replaceAction(resultIndex: number, actionIndex: number) {
+    const result = results[resultIndex];
+    const action = result.actions[actionIndex];
+    // @ts-ignore
+    tsvscode.postMessage({
+      type: 'onReplaceAction',
+      resultIndex,
+      actionIndex,
+      action,
+      rootPath: result.rootPath,
+      filePath: result.filePath,
+    });
   }
 
   const composeRubySnippet = (
@@ -187,12 +208,15 @@
 <input id="skipPaths" bind:value={skipPaths} />
 <button on:click={search} disabled={snippet.length === 0 || searchButtonDisabled}>{searchButtonDisabled ? 'Searching...' : 'Search'}</button>
 <button on:click={replaceAll} disabled={snippet.length === 0 || replaceAllButtonDisabled}>{replaceAllButtonDisabled ? 'Replacing...' : 'Replace All'}</button>
-{#each results as result}
+{#each results as result, resultIndex}
 <p>{result.filePath}</p>
 <ul class="search-result">
-{#each result.actions as action}
+{#each result.actions as action, actionIndex}
 <li>
-<a href={"#"} on:click={() => actionClicked(action, result.rootPath, result.filePath)}>{result.fileSource && result.fileSource.substring(action.start, action.end)}</a>
+<span class="toolkit">
+  <a class="replace-icon" href={"#"} on:click={() => replaceAction(resultIndex, actionIndex)}></a>
+</span>
+<a class="item" href={"#"} on:click={() => actionClicked(action, result.rootPath, result.filePath)}>{result.fileSource && result.fileSource.substring(action.start, action.end)}</a>
 </li>
 {/each}
 </ul>

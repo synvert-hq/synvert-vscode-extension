@@ -75,6 +75,15 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           });
           break;
         }
+        case "onReplaceAction": {
+          const { resultIndex, actionIndex, action, rootPath, filePath } = data;
+          const absolutePath = path.join(rootPath!, filePath);
+          let source = fs.readFileSync(absolutePath, "utf-8");
+          source = source.slice(0, action.start) + action.newCode + source.slice(action.end);
+          fs.writeFileSync(absolutePath, source);
+          webviewView.webview.postMessage({ type: 'doneReplaceAction', resultIndex, actionIndex });
+          break;
+        }
         case "onInfo": {
           if (!data.value) {
             return;
