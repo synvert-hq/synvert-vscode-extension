@@ -134,6 +134,12 @@
     });
   }
 
+  function removeAction(resultIndex: number, actionIndex: number) {
+    results[resultIndex].actions.splice(actionIndex, 1);
+    // trigger dom update
+    results = results
+  }
+
   const composeRubySnippet = (
     data: { rubyVersion?: string, gemVersion?: string, filePattern: string },
     result: { snippet: string }
@@ -214,7 +220,8 @@
 {#each result.actions as action, actionIndex}
 <li>
 <span class="toolkit">
-  <a class="replace-icon" href={"#"} on:click={() => replaceAction(resultIndex, actionIndex)}></a>
+  <a class="icon replace-icon" href={"#"} on:click={() => replaceAction(resultIndex, actionIndex)}>Replace</a>
+  <a class="icon close-icon" href={"#"} on:click={() => removeAction(resultIndex, actionIndex)}>Remove</a>
 </span>
 <a class="item" href={"#"} on:click={() => actionClicked(action, result.rootPath, result.filePath)}>{result.fileSource && result.fileSource.substring(action.start, action.end)}</a>
 </li>
