@@ -24,14 +24,14 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "configuration-view",
+          "id": "sidebar-view",
           "title": "Synvert",
           "icon": "media/logo.svg"
         }
       ]
     },
     "views": {
-      "configuration-view": [
+      "sidebar-view": [
         {
           "type": "webview",
           "id": "synvert-sidebar",
