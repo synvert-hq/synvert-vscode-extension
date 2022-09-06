@@ -77,9 +77,13 @@
     // TODO: dynamic token
     const token = "1234567890";
     const platform = "vscode";
+    const extension = "ts";
+    const nqlOrRules = "rules";
     try {
       generateSnippetButtonDisabled = true;
-      const response = await fetch(`https://synvert-api-javascript.xinminlabs.com/generate-snippet`, {
+      // FIXME: change it back before publishing
+      // const response = await fetch(`https://synvert-api-javascript.xinminlabs.com/generate-snippet`, {
+      const response = await fetch(`http://localhost:3000/generate-snippet`, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -87,7 +91,7 @@
           "X-SYNVERT-TOKEN": token,
           "X-SYNVERT-PLATFORM": platform,
         },
-        body: JSON.stringify({ inputs, outputs })
+        body: JSON.stringify({ extension, inputs, outputs, nql_or_rules: nqlOrRules })
       })
       const result = await response.json();
       snippet = composeJavascriptSnippet({ filePattern }, result);
