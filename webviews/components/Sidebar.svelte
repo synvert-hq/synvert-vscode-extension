@@ -55,6 +55,13 @@
           results = [];
           break;
         }
+        case "doneReplaceResult": {
+          const { resultIndex } = message;
+          results.splice(resultIndex, 1);
+          // trigger dom update
+          results = results;
+          break;
+        }
         case "doneReplaceAction": {
           const { resultIndex, actionIndex } = message;
           results[resultIndex].actions.splice(actionIndex, 1);
@@ -135,14 +142,40 @@
     }
   }
 
-  function handleMouseOver(resultIndex: number, actionIndex: number) {
+  function mouseOverResult(resultIndex: number) {
+    hoverResultIndex = resultIndex;
+  }
+
+  function mouseOutResult() {
+    hoverResultIndex = undefined;
+  }
+
+  function mouseOverAction(resultIndex: number, actionIndex: number) {
     hoverResultIndex = resultIndex;
     hoverActionIndex = actionIndex;
   }
 
-  function handleMouseOut() {
+  function mouseOutAction() {
     hoverResultIndex = undefined;
     hoverActionIndex = undefined;
+  }
+
+  function replaceResult(resultIndex: number) {
+    const result = results[resultIndex];
+    // @ts-ignore
+    tsvscode.postMessage({
+      type: 'onReplaceResult',
+      resultIndex,
+      result: result,
+      rootPath: result.rootPath,
+      filePath: result.filePath,
+    });
+  }
+
+  function removeResult(resultIndex: number) {
+    results.splice(resultIndex, 1);
+    // trigger dom update
+    results = results
   }
 
   function replaceAction(resultIndex: number, actionIndex: number) {
@@ -241,18 +274,24 @@
 <button on:click={replaceAll} disabled={snippet.length === 0 || replaceAllButtonDisabled}>{replaceAllButtonDisabled ? 'Replacing...' : 'Replace All'}</button>
 <div class="search-result">
   {#each results as result, resultIndex}
-    <a class="file-path" href={"#"} on:click={() => toggleResult(result.filePath)}>
+    <a class="file-path" href={"#"} on:click={() => toggleResult(result.filePath)} on:mouseover={() => mouseOverResult(resultIndex)} on:mouseout={() => mouseOutResult()} on:focus={() => mouseOverResult(resultIndex)} on:blur={() => mouseOutResult()}>
       {#if filesCollapse[result.filePath]}
         <i class="icon chevron-right-icon"></i>
       {:else}
         <i class="icon chevron-down-icon"></i>
       {/if}
       <span title={result.filePath}>{result.filePath}</span>
+      {#if resultIndex === hoverResultIndex && typeof hoverActionIndex === "undefined"}
+        <div class="toolkit">
+          <a class="icon replace-icon" href={"#"} on:click={() => replaceResult(resultIndex)}>Replace</a>
+          <a class="icon close-icon" href={"#"} on:click={() => removeResult(resultIndex)}>Remove</a>
+        </div>
+      {/if}
     </a>
     {#if !filesCollapse[result.filePath]}
       <ul>
         {#each result.actions as action, actionIndex}
-          <li on:mouseover={() => handleMouseOver(resultIndex, actionIndex)} on:mouseout={() => handleMouseOut()} on:focus={() => handleMouseOver(resultIndex, actionIndex)} on:blur={() => handleMouseOut()}>
+          <li on:mouseover={() => mouseOverAction(resultIndex, actionIndex)} on:mouseout={() => mouseOutAction()} on:focus={() => mouseOverAction(resultIndex, actionIndex)} on:blur={() => mouseOutAction()}>
             {#if resultIndex === hoverResultIndex && actionIndex === hoverActionIndex}
               <div class="toolkit">
                 <a class="icon replace-icon" href={"#"} on:click={() => replaceAction(resultIndex, actionIndex)}>Replace</a>

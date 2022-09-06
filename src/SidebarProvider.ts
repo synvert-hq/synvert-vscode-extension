@@ -6,6 +6,7 @@ import { getLastSnippetGroupAndName } from "./utils";
 import fs from "fs";
 import path from "path";
 import type { TestResultExtExt } from "./types";
+import { log } from "./log";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
@@ -73,6 +74,18 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
               activeEditor.revealRange(startRange);
             });
           });
+          break;
+        }
+        case "onReplaceResult": {
+          const { resultIndex, result, rootPath, filePath } = data;
+          log('on replace result')
+          const absolutePath = path.join(rootPath!, filePath);
+          let source = fs.readFileSync(absolutePath, "utf-8");
+          (result as TestResultExtExt).actions.reverse().forEach(action => {
+            source = source.slice(0, action.start) + action.newCode + source.slice(action.end);
+          });
+          fs.writeFileSync(absolutePath, source);
+          webviewView.webview.postMessage({ type: 'doneReplaceResult', resultIndex });
           break;
         }
         case "onReplaceAction": {

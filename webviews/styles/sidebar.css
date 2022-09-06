@@ -15,7 +15,7 @@
   top: 0;
   right: 0;
   display: flex;
-  z-index: 999;
+  z-index: 99999;
 }
 .search-result a {
   color: #ccc;
@@ -29,13 +29,20 @@
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 999;
+  z-index: 99999;
 }
 .search-result .file-path span {
   margin-left: 20px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.search-result .file-path .toolkit {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  z-index: 99999;
 }
 .search-result ul a.item {
   display: block;
