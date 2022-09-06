@@ -5,6 +5,7 @@ ul.search-result {
 }
 ul.search-result li {
   position: relative;
+  overflow: hidden;
   height: 16px;
   line-height: 16px;
   margin: 5px 0;

@@ -13,6 +13,8 @@
   let searchButtonDisabled = false;
   let replaceAllButtonDisabled = false;
   let results: TestResultExtExt[] = [];
+  let hoverResultIndex: number | undefined;
+  let hoverActionIndex: number | undefined;
 
   onMount(() => {
     window.addEventListener("message", (event) => {
@@ -124,6 +126,16 @@
     tsvscode.postMessage({ type: 'onOpenFile', action, rootPath, filePath });
   }
 
+  function handleMouseOver(resultIndex: number, actionIndex: number) {
+    hoverResultIndex = resultIndex;
+    hoverActionIndex = actionIndex;
+  }
+
+  function handleMouseOut() {
+    hoverResultIndex = undefined;
+    hoverActionIndex = undefined;
+  }
+
   function replaceAction(resultIndex: number, actionIndex: number) {
     const result = results[resultIndex];
     const action = result.actions[actionIndex];
@@ -222,11 +234,13 @@
 <p>{result.filePath}</p>
 <ul class="search-result">
 {#each result.actions as action, actionIndex}
-<li>
+<li on:mouseover={() => handleMouseOver(resultIndex, actionIndex)} on:mouseout={() => handleMouseOut()}>
+{#if resultIndex === hoverResultIndex && actionIndex === hoverActionIndex}
 <span class="toolkit">
   <a class="icon replace-icon" href={"#"} on:click={() => replaceAction(resultIndex, actionIndex)}>Replace</a>
   <a class="icon close-icon" href={"#"} on:click={() => removeAction(resultIndex, actionIndex)}>Remove</a>
 </span>
+{/if}
 <a class="item" href={"#"} on:click={() => actionClicked(action, result.rootPath, result.filePath)}>{result.fileSource && result.fileSource.substring(action.start, action.end)}</a>
 </li>
 {/each}
