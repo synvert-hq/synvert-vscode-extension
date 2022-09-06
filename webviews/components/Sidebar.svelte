@@ -15,6 +15,7 @@
   let results: TestResultExtExt[] = [];
   let hoverResultIndex: number | undefined;
   let hoverActionIndex: number | undefined;
+  let filesCollapse: { [filePath: string]: boolean } = {};
 
   onMount(() => {
     window.addEventListener("message", (event) => {
@@ -126,6 +127,14 @@
     tsvscode.postMessage({ type: 'onOpenFile', action, rootPath, filePath });
   }
 
+  function toggleResult(filePath: string) {
+    if (filesCollapse[filePath]) {
+      filesCollapse[filePath] = false;
+    } else {
+      filesCollapse[filePath] = true;
+    }
+  }
+
   function handleMouseOver(resultIndex: number, actionIndex: number) {
     hoverResultIndex = resultIndex;
     hoverActionIndex = actionIndex;
@@ -230,19 +239,30 @@
 <input id="skipPaths" bind:value={skipPaths} />
 <button on:click={search} disabled={snippet.length === 0 || searchButtonDisabled}>{searchButtonDisabled ? 'Searching...' : 'Search'}</button>
 <button on:click={replaceAll} disabled={snippet.length === 0 || replaceAllButtonDisabled}>{replaceAllButtonDisabled ? 'Replacing...' : 'Replace All'}</button>
-{#each results as result, resultIndex}
-<p>{result.filePath}</p>
-<ul class="search-result">
-{#each result.actions as action, actionIndex}
-<li on:mouseover={() => handleMouseOver(resultIndex, actionIndex)} on:mouseout={() => handleMouseOut()} on:focus={() => handleMouseOver(resultIndex, actionIndex)} on:blur={() => handleMouseOut()}>
-{#if resultIndex === hoverResultIndex && actionIndex === hoverActionIndex}
-<span class="toolkit">
-  <a class="icon replace-icon" href={"#"} on:click={() => replaceAction(resultIndex, actionIndex)}>Replace</a>
-  <a class="icon close-icon" href={"#"} on:click={() => removeAction(resultIndex, actionIndex)}>Remove</a>
-</span>
-{/if}
-<a class="item" href={"#"} on:click={() => actionClicked(action, result.rootPath, result.filePath)}>{result.fileSource && result.fileSource.substring(action.start, action.end)}</a>
-</li>
-{/each}
-</ul>
-{/each}
+<div class="search-result">
+  {#each results as result, resultIndex}
+    <a class="file-path" href={"#"} on:click={() => toggleResult(result.filePath)}>
+      {#if filesCollapse[result.filePath]}
+        <i class="icon chevron-right-icon"></i>
+      {:else}
+        <i class="icon chevron-down-icon"></i>
+      {/if}
+      <span title={result.filePath}>{result.filePath}</span>
+    </a>
+    {#if !filesCollapse[result.filePath]}
+      <ul>
+        {#each result.actions as action, actionIndex}
+          <li on:mouseover={() => handleMouseOver(resultIndex, actionIndex)} on:mouseout={() => handleMouseOut()} on:focus={() => handleMouseOver(resultIndex, actionIndex)} on:blur={() => handleMouseOut()}>
+            {#if resultIndex === hoverResultIndex && actionIndex === hoverActionIndex}
+              <div class="toolkit">
+                <a class="icon replace-icon" href={"#"} on:click={() => replaceAction(resultIndex, actionIndex)}>Replace</a>
+                <a class="icon close-icon" href={"#"} on:click={() => removeAction(resultIndex, actionIndex)}>Remove</a>
+              </div>
+            {/if}
+            <a class="item" href={"#"} on:click={() => actionClicked(action, result.rootPath, result.filePath)}>{result.fileSource && result.fileSource.substring(action.start, action.end)}</a>
+          </li>
+        {/each}
+      </ul>
+    {/if}
+  {/each}
+</div>
