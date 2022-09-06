@@ -144,20 +144,12 @@
 
   function mouseOverResult(resultIndex: number) {
     hoverResultIndex = resultIndex;
-  }
-
-  function mouseOutResult() {
-    hoverResultIndex = undefined;
+    hoverActionIndex = undefined;
   }
 
   function mouseOverAction(resultIndex: number, actionIndex: number) {
     hoverResultIndex = resultIndex;
     hoverActionIndex = actionIndex;
-  }
-
-  function mouseOutAction() {
-    hoverResultIndex = undefined;
-    hoverActionIndex = undefined;
   }
 
   function replaceResult(resultIndex: number) {
@@ -274,7 +266,7 @@
 <button on:click={replaceAll} disabled={snippet.length === 0 || replaceAllButtonDisabled}>{replaceAllButtonDisabled ? 'Replacing...' : 'Replace All'}</button>
 <div class="search-result">
   {#each results as result, resultIndex}
-    <a class="file-path" href={"#"} on:click={() => toggleResult(result.filePath)} on:mouseover={() => mouseOverResult(resultIndex)} on:mouseout={() => mouseOutResult()} on:focus={() => mouseOverResult(resultIndex)} on:blur={() => mouseOutResult()}>
+    <a class="file-path" href={"#"} on:click={() => toggleResult(result.filePath)} on:mouseover={() => mouseOverResult(resultIndex)} on:focus={() => mouseOverResult(resultIndex)}>
       {#if filesCollapse[result.filePath]}
         <i class="icon chevron-right-icon"></i>
       {:else}
@@ -291,7 +283,7 @@
     {#if !filesCollapse[result.filePath]}
       <ul>
         {#each result.actions as action, actionIndex}
-          <li on:mouseover={() => mouseOverAction(resultIndex, actionIndex)} on:mouseout={() => mouseOutAction()} on:focus={() => mouseOverAction(resultIndex, actionIndex)} on:blur={() => mouseOutAction()}>
+          <li on:mouseover={() => mouseOverAction(resultIndex, actionIndex)} on:focus={() => mouseOverAction(resultIndex, actionIndex)}>
             {#if resultIndex === hoverResultIndex && actionIndex === hoverActionIndex}
               <div class="toolkit">
                 <a class="icon replace-icon" href={"#"} on:click={() => replaceAction(resultIndex, actionIndex)}>Replace</a>
