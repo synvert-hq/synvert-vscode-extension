@@ -234,7 +234,7 @@
 <p>{result.filePath}</p>
 <ul class="search-result">
 {#each result.actions as action, actionIndex}
-<li on:mouseover={() => handleMouseOver(resultIndex, actionIndex)} on:mouseout={() => handleMouseOut()}>
+<li on:mouseover={() => handleMouseOver(resultIndex, actionIndex)} on:mouseout={() => handleMouseOut()} on:focus={() => handleMouseOver(resultIndex, actionIndex)} on:blur={() => handleMouseOut()}>
 {#if resultIndex === hoverResultIndex && actionIndex === hoverActionIndex}
 <span class="toolkit">
   <a class="icon replace-icon" href={"#"} on:click={() => replaceAction(resultIndex, actionIndex)}>Replace</a>
