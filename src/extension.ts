@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 import { spawn } from 'child_process';
 import { rubySpawn } from 'ruby-spawn';
 import { SidebarProvider } from './SidebarProvider';
+import { LocalStorageService } from './localStorageService';
 import { log } from './log';
 
 // this method is called when your extension is activated
@@ -12,7 +13,8 @@ export function activate(context: vscode.ExtensionContext) {
 
   log('Congratulations, your extension "synvert" is now active!');
 
-  const sidebarProvider = new SidebarProvider(context.extensionUri);
+  const storageService = new LocalStorageService(context.workspaceState);
+  const sidebarProvider = new SidebarProvider(context.extensionUri, storageService);
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
       "synvert-sidebar",
@@ -58,17 +60,17 @@ export function activate(context: vscode.ExtensionContext) {
   //   });
   // });
 
-  checkNpm().catch(() => {
-    vscode.window.showErrorMessage('Synvert npm not found. Run `npm install synvert` or update your package.json.', 'Install Now').then((item) => {
-      if (item === 'Install Now') {
-        installNpm().then(() => {
-          vscode.window.showInformationMessage('Successfully installed the Synvert npm.');
-        }).catch(() => {
-          vscode.window.showErrorMessage('Failed to install the Synvert npm.');
-        });
-      }
-    });
-  });
+  // checkNpm().catch(() => {
+  //   vscode.window.showErrorMessage('Synvert npm not found. Run `npm install synvert` or update your package.json.', 'Install Now').then((item) => {
+  //     if (item === 'Install Now') {
+  //       installNpm().then(() => {
+  //         vscode.window.showInformationMessage('Successfully installed the Synvert npm.');
+  //       }).catch(() => {
+  //         vscode.window.showErrorMessage('Failed to install the Synvert npm.');
+  //       });
+  //     }
+  //   });
+  // });
 }
 
 // this method is called when your extension is deactivated

@@ -6,13 +6,14 @@ import { getLastSnippetGroupAndName } from "./utils";
 import fs from "fs";
 import path from "path";
 import type { TestResultExtExt } from "./types";
+import { LocalStorageService } from "./localStorageService";
 import { log } from "./log";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
   _doc?: vscode.TextDocument;
 
-  constructor(private readonly _extensionUri: vscode.Uri) { }
+  constructor(private readonly _extensionUri: vscode.Uri, private readonly _storageService: LocalStorageService) { }
 
   public resolveWebviewView(webviewView: vscode.WebviewView) {
     this._view = webviewView;
@@ -29,6 +30,16 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     // Listen for messages from the Sidebar component and execute action
     webviewView.webview.onDidReceiveMessage((data) => {
       switch (data.type) {
+        case "onMount": {
+          if (this._storageService.getValue("data")) {
+            webviewView.webview.postMessage({ ...this._storageService.getValue("data"), type: "loadData" });
+          }
+          break;
+        }
+        case "afterUpdate": {
+          this._storageService.setValue("data", data);
+          break;
+        }
         case "onSearch": {
           if (!data.snippet) {
             return;
@@ -112,7 +123,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         }
       }
     });
-
   }
 
   public revive(panel: vscode.WebviewView) {

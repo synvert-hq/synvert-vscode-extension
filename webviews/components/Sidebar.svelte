@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, afterUpdate } from "svelte";
   import type { TestResultExtExt } from "../../src/types";
 
   let showGenerateSnippet = false;
@@ -22,6 +22,16 @@
     window.addEventListener("message", (event) => {
       const message = event.data; // The json data that the extension sent
       switch (message.type) {
+        case "loadData": {
+          showGenerateSnippet = message.showGenerateSnippet;
+          inputs = message.inputs;
+          outputs = message.outputs;
+          onlyPaths = message.onlyPaths;
+          skipPaths = message.skipPaths;
+          snippet = message.snippet;
+          results = message.results;
+          break;
+        }
         case "currentFileExtensionName": {
           switch (message.value) {
             case "rb":
@@ -72,6 +82,13 @@
         }
       }
     });
+    // @ts-ignore
+    tsvscode.postMessage({ type: "onMount" });
+  });
+
+  afterUpdate(() => {
+    // @ts-ignore
+    tsvscode.postMessage({ type: "afterUpdate", showGenerateSnippet, inputs, outputs, onlyPaths, skipPaths, snippet, results });
   });
 
   function toggleGenerateSnippet() {
