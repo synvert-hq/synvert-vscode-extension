@@ -1,55 +1,53 @@
-.search-result ul {
+.search-results ul {
   list-style-type: none;
   padding: 0;
   margin: 0;
 }
-.search-result ul li {
+.search-results ul li {
   position: relative;
   overflow: hidden;
   height: 16px;
   line-height: 16px;
   margin: 5px 0;
 }
-.search-result ul li .toolkit {
+.search-results .toolkit {
   position: absolute;
   top: 0;
   right: 0;
   display: flex;
   z-index: 99999;
 }
-.search-result a {
+.search-results a {
   color: #ccc;
 }
-.search-result .file-path {
+.search-results .search-result {
   position: relative;
   display: flex;
-  width: 100%;
 }
-.search-result .file-path i {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 99999;
-}
-.search-result .file-path span {
-  margin-left: 20px;
+.search-results .search-result .file-path {
+  margin-left: 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.search-result .file-path .toolkit {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  z-index: 99999;
+.search-results .item {
+  margin-left: 20px;
 }
-.search-result ul a.item {
-  display: block;
+
+.link-btn {
+  -webkit-appearance: none;
+  appearance: none;
   outline: 0;
   border: none;
-  text-decoration: none;
-  margin: 0 10px 0 20px;
+  background-color: transparent;
+  color: inherit;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+}
+.link-btn:hover, .link-btn:focus, .link-btn:active {
+  background-color: transparent;
+  color: inherit;
 }
 
 /* https://css-tricks.com/using-svg/ */

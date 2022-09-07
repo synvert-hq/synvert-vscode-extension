@@ -264,33 +264,41 @@
 <input id="skipPaths" bind:value={skipPaths} />
 <button on:click={search} disabled={snippet.length === 0 || searchButtonDisabled}>{searchButtonDisabled ? 'Searching...' : 'Search'}</button>
 <button on:click={replaceAll} disabled={snippet.length === 0 || replaceAllButtonDisabled}>{replaceAllButtonDisabled ? 'Replacing...' : 'Replace All'}</button>
-<div class="search-result">
+<div class="search-results">
   {#each results as result, resultIndex}
-    <a class="file-path" href={"#"} on:click={() => toggleResult(result.filePath)} on:mouseover={() => mouseOverResult(resultIndex)} on:focus={() => mouseOverResult(resultIndex)}>
+    <div class="search-result">
       {#if filesCollapse[result.filePath]}
         <i class="icon chevron-right-icon"></i>
       {:else}
         <i class="icon chevron-down-icon"></i>
       {/if}
-      <span title={result.filePath}>{result.filePath}</span>
+      <button class="link-btn file-path" on:click={() => toggleResult(result.filePath)} on:mouseover={() => mouseOverResult(resultIndex)} on:focus={() => mouseOverResult(resultIndex)} title={result.filePath}>{result.filePath}</button>
       {#if resultIndex === hoverResultIndex && typeof hoverActionIndex === "undefined"}
         <div class="toolkit">
-          <a class="icon replace-icon" href={"#"} on:click={() => replaceResult(resultIndex)}>Replace</a>
-          <a class="icon close-icon" href={"#"} on:click={() => removeResult(resultIndex)}>Remove</a>
+          <button class="link-btn" on:click|preventDefault={() => replaceResult(resultIndex)}>
+            <i class="icon replace-icon" />
+          </button>
+          <button class="link-btn" on:click|preventDefault={() => removeResult(resultIndex)}>
+            <i class="icon close-icon" />
+          </button>
         </div>
       {/if}
-    </a>
+    </div>
     {#if !filesCollapse[result.filePath]}
       <ul>
         {#each result.actions as action, actionIndex}
           <li on:mouseover={() => mouseOverAction(resultIndex, actionIndex)} on:focus={() => mouseOverAction(resultIndex, actionIndex)}>
             {#if resultIndex === hoverResultIndex && actionIndex === hoverActionIndex}
               <div class="toolkit">
-                <a class="icon replace-icon" href={"#"} on:click={() => replaceAction(resultIndex, actionIndex)}>Replace</a>
-                <a class="icon close-icon" href={"#"} on:click={() => removeAction(resultIndex, actionIndex)}>Remove</a>
+                <button class="link-btn" on:click={() => replaceAction(resultIndex, actionIndex)}>
+                  <i class="icon replace-icon" />
+                </button>
+                <button class="link-btn" on:click={() => removeAction(resultIndex, actionIndex)}>
+                  <i class="icon close-icon" />
+                </button>
               </div>
             {/if}
-            <a class="item" href={"#"} on:click={() => actionClicked(action, result.rootPath, result.filePath)}>{result.fileSource && result.fileSource.substring(action.start, action.end)}</a>
+            <button class="link-btn item" on:click={() => actionClicked(action, result.rootPath, result.filePath)}>{result.fileSource && result.fileSource.substring(action.start, action.end)}</button>
           </li>
         {/each}
       </ul>

@@ -78,7 +78,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         }
         case "onReplaceResult": {
           const { resultIndex, result, rootPath, filePath } = data;
-          log('on replace result')
           const absolutePath = path.join(rootPath!, filePath);
           let source = fs.readFileSync(absolutePath, "utf-8");
           (result as TestResultExtExt).actions.reverse().forEach(action => {
