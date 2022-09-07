@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import type { TestResultExtExt } from "../../src/types";
 
+  let showGenerateSnippet = false;
   let inputs = [""];
   let outputs = [""];
   let filePattern = "**/*.js";
@@ -72,6 +73,10 @@
       }
     });
   });
+
+  function toggleGenerateSnippet() {
+    showGenerateSnippet = !showGenerateSnippet;
+  }
 
   function addMoreInputOutput() {
     inputs = [...inputs, ""];
@@ -243,21 +248,35 @@
   }
 </script>
 
-<label for="input"><b>Input</b></label>
-{#each inputs as input}
-<textarea id="input" placeholder="e.g. FactoryBot.create(:user)" bind:value={input}></textarea>
-{/each}
-<label for="output"><b>Output</b></label>
-{#each outputs as output}
-<textarea id="output" placeholder="e.g. create(:user)" bind:value={output}></textarea>
-{/each}
-<p><a href={"#"} on:click={addMoreInputOutput}>Add More Input/Output</a></p>
-{#if inputs.length > 1}
-<p><a href={"#"} on:click={removeLastInputOutput}>Remove Last Input/Output</a></p>
+<div class="generate-snippet">
+  <button class="link-btn" on:click={toggleGenerateSnippet}>
+    {#if showGenerateSnippet}
+      <i class="icon chevron-down-icon"></i>
+      <span>Hide Generate Snippet Form</span>
+    {:else}
+      <i class="icon chevron-right-icon"></i>
+      <span>Show Generate Snippet Form</span>
+    {/if}
+  </button>
+</div>
+{#if showGenerateSnippet}
+  <label for="input"><b>Input</b></label>
+  {#each inputs as input}
+  <textarea id="input" placeholder="e.g. FactoryBot.create(:user)" bind:value={input}></textarea>
+  {/each}
+  <label for="output"><b>Output</b></label>
+  {#each outputs as output}
+  <textarea id="output" placeholder="e.g. create(:user)" bind:value={output}></textarea>
+  {/each}
+  <p><a href={"#"} on:click={addMoreInputOutput}>Add More Input/Output</a></p>
+  {#if inputs.length > 1}
+  <p><a href={"#"} on:click={removeLastInputOutput}>Remove Last Input/Output</a></p>
+  {/if}
+  <button on:click={generateSnippet} disabled={inputs[0].length === 0 || outputs[0].length === 0 || generateSnippetButtonDisabled}>{generateSnippetButtonDisabled ? 'Generating...' : 'Generate Snippet'}</button>
+  <p>{errorMessage}</p>
 {/if}
-<button on:click={generateSnippet} disabled={inputs[0].length === 0 || outputs[0].length === 0 || generateSnippetButtonDisabled}>{generateSnippetButtonDisabled ? 'Generating...' : 'Generate Snippet'}</button>
-<p>{errorMessage}</p>
-<textarea rows=10 bind:value={snippet}></textarea>
+<label for="snippet"><b>Snippet</b></label>
+<textarea id="snippet" rows=10 bind:value={snippet}></textarea>
 <label for="onlyPaths"><b>Files to include</b></label>
 <input id="onlyPaths" bind:value={onlyPaths} />
 <label for="skipPaths"><b>Files to exclude</b></label>
@@ -267,11 +286,13 @@
 <div class="search-results">
   {#each results as result, resultIndex}
     <div class="search-result">
-      {#if filesCollapse[result.filePath]}
-        <i class="icon chevron-right-icon"></i>
-      {:else}
-        <i class="icon chevron-down-icon"></i>
-      {/if}
+      <button class="link-btn" on:click={() => toggleResult(result.filePath)}>
+        {#if filesCollapse[result.filePath]}
+          <i class="icon chevron-right-icon"></i>
+        {:else}
+          <i class="icon chevron-down-icon"></i>
+        {/if}
+      </button>
       <button class="link-btn file-path" on:click={() => toggleResult(result.filePath)} on:mouseover={() => mouseOverResult(resultIndex)} on:focus={() => mouseOverResult(resultIndex)} title={result.filePath}>{result.filePath}</button>
       {#if resultIndex === hoverResultIndex && typeof hoverActionIndex === "undefined"}
         <div class="toolkit">
