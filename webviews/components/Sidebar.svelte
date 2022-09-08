@@ -5,7 +5,8 @@
   let showGenerateSnippet = false;
   let inputs = [""];
   let outputs = [""];
-  let filePattern = "**/*.js";
+  let extension = "ts";
+  let filePattern = "**/*.ts";
   let onlyPaths = "";
   let skipPaths = "**/node_modules/**,**/dist/**";
   let snippet = "";
@@ -24,6 +25,8 @@
       switch (message.type) {
         case "loadData": {
           showGenerateSnippet = message.showGenerateSnippet;
+          extension = message.extension;
+          filePattern = message.filePattern;
           inputs = message.inputs;
           outputs = message.outputs;
           onlyPaths = message.onlyPaths;
@@ -33,23 +36,8 @@
           break;
         }
         case "currentFileExtensionName": {
-          switch (message.value) {
-            case "rb":
-              filePattern = "**/*.rb";
-              break;
-            case "js":
-              filePattern = "**/*.js";
-              break;
-            case "jsx":
-              filePattern = "**/*.jsx";
-              break;
-            case "ts":
-              filePattern = "**/*.ts";
-              break;
-            case "tsx":
-              filePattern = "**/*.tsx";
-              break;
-          }
+          extension = message.value;
+          extensionChanged();
           break;
         }
         case "selectedCode": {
@@ -88,7 +76,7 @@
 
   afterUpdate(() => {
     // @ts-ignore
-    tsvscode.postMessage({ type: "afterUpdate", showGenerateSnippet, inputs, outputs, onlyPaths, skipPaths, snippet, results });
+    tsvscode.postMessage({ type: "afterUpdate", showGenerateSnippet, extension, filePattern, inputs, outputs, onlyPaths, skipPaths, snippet, results });
   });
 
   function toggleGenerateSnippet() {
@@ -105,11 +93,30 @@
     outputs = outputs.slice(0, -1);
   }
 
+  function extensionChanged() {
+    switch (extension) {
+      case "rb":
+        filePattern = "**/*.rb";
+        break;
+      case "js":
+        filePattern = "**/*.js";
+        break;
+      case "jsx":
+        filePattern = "**/*.jsx";
+        break;
+      case "ts":
+        filePattern = "**/*.ts";
+        break;
+      case "tsx":
+        filePattern = "**/*.tsx";
+        break;
+    }
+  }
+
   async function generateSnippet() {
     // TODO: dynamic token
     const token = "1234567890";
     const platform = "vscode";
-    const extension = "ts";
     const nqlOrRules = "rules";
     try {
       generateSnippetButtonDisabled = true;
@@ -265,6 +272,12 @@
   }
 </script>
 
+<select id="extension" bind:value={extension} on:change={extensionChanged}>
+  <option value="ts">Typescript</option>
+  <option value="tsx">Typescript + JSX</option>
+  <option value="js">Javascript</option>
+  <option value="jsx">Javascript + JSX</option>
+</select>
 <div class="generate-snippet">
   <button class="link-btn" on:click={toggleGenerateSnippet}>
     {#if showGenerateSnippet}
@@ -277,6 +290,8 @@
   </button>
 </div>
 {#if showGenerateSnippet}
+  <label for="filePattern"><b>File Pattern</b></label>
+  <input id="filePattern" bind:value={filePattern} />
   <label for="input"><b>Input</b></label>
   {#each inputs as input}
   <textarea id="input" placeholder="e.g. FactoryBot.create(:user)" bind:value={input}></textarea>
@@ -295,7 +310,7 @@
 <label for="snippet"><b>Snippet</b></label>
 <textarea id="snippet" rows=10 bind:value={snippet}></textarea>
 <label for="onlyPaths"><b>Files to include</b></label>
-<input id="onlyPaths" bind:value={onlyPaths} />
+<input id="onlyPaths" bind:value={onlyPaths} placeholder="e.g. frontend/src" />
 <label for="skipPaths"><b>Files to exclude</b></label>
 <input id="skipPaths" bind:value={skipPaths} />
 <button on:click={search} disabled={snippet.length === 0 || searchButtonDisabled}>{searchButtonDisabled ? 'Searching...' : 'Search'}</button>
