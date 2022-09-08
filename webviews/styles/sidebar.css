@@ -83,3 +83,12 @@ select {
 	outline-color: var(--vscode-input-border);
 	background-color: var(--vscode-input-background);
 }
+.nql-or-rules-select {
+  overflow: hidden;
+}
+.nql-or-rules-select input {
+  width: 16px;
+}
+.nql-or-rules-select input, .nql-or-rules-select label {
+  float: right;
+}

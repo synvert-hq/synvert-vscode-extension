@@ -11,6 +11,7 @@
   let npmVersion = "";
   let onlyPaths = "";
   let skipPaths = "**/node_modules/**,**/dist/**";
+  let nqlOrRules = "rules";
   let snippet = "";
   let errorMessage = "";
   let generateSnippetButtonDisabled = false;
@@ -33,6 +34,7 @@
           npmVersion = message.npmVersion || "";
           inputs = message.inputs;
           outputs = message.outputs;
+          nqlOrRules = message.nqlOrRules;
           onlyPaths = message.onlyPaths;
           skipPaths = message.skipPaths;
           snippet = message.snippet;
@@ -80,7 +82,7 @@
 
   afterUpdate(() => {
     // @ts-ignore
-    tsvscode.postMessage({ type: "afterUpdate", showGenerateSnippet, extension, filePattern, nodeVersion, npmVersion, inputs, outputs, onlyPaths, skipPaths, snippet, results });
+    tsvscode.postMessage({ type: "afterUpdate", showGenerateSnippet, extension, filePattern, nodeVersion, npmVersion, inputs, outputs, nqlOrRules, onlyPaths, skipPaths, snippet, results });
   });
 
   function toggleGenerateSnippet() {
@@ -121,7 +123,6 @@
     // TODO: dynamic token
     const token = "1234567890";
     const platform = "vscode";
-    const nqlOrRules = "rules";
     try {
       generateSnippetButtonDisabled = true;
       // FIXME: change it back before publishing
@@ -309,6 +310,12 @@
   {#if inputs.length > 1}
   <p><a href={"#"} on:click={removeLastInputOutput}>Remove Last Input/Output</a></p>
   {/if}
+  <div class="flex row-reverse nql-or-rules-select">
+    <label for="nql">NQL</label>
+    <input id="nql" type="radio" name="nql_or_rules" value="nql" bind:group={nqlOrRules}>
+    <label for="rules">Rules</label>
+    <input id="rules" type="radio" name="nql_or_rules" value="rules" bind:group={nqlOrRules}>
+  </div>
   <button on:click={generateSnippet} disabled={inputs[0].length === 0 || outputs[0].length === 0 || generateSnippetButtonDisabled}>{generateSnippetButtonDisabled ? 'Generating...' : 'Generate Snippet'}</button>
   <p>{errorMessage}</p>
 {/if}
