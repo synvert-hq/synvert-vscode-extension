@@ -120,8 +120,6 @@
   }
 
   async function generateSnippet() {
-    // TODO: dynamic token
-    const token = "1234567890";
     const platform = "vscode";
     try {
       generateSnippetButtonDisabled = true;
@@ -132,6 +130,7 @@
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
+          // @ts-ignore
           "X-SYNVERT-TOKEN": token,
           "X-SYNVERT-PLATFORM": platform,
         },
