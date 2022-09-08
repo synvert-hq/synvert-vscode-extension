@@ -7,6 +7,8 @@
   let outputs = [""];
   let extension = "ts";
   let filePattern = "**/*.ts";
+  let nodeVersion = "";
+  let npmVersion = "";
   let onlyPaths = "";
   let skipPaths = "**/node_modules/**,**/dist/**";
   let snippet = "";
@@ -27,6 +29,8 @@
           showGenerateSnippet = message.showGenerateSnippet;
           extension = message.extension;
           filePattern = message.filePattern;
+          nodeVersion = message.nodeVersion || "";
+          npmVersion = message.npmVersion || "";
           inputs = message.inputs;
           outputs = message.outputs;
           onlyPaths = message.onlyPaths;
@@ -76,7 +80,7 @@
 
   afterUpdate(() => {
     // @ts-ignore
-    tsvscode.postMessage({ type: "afterUpdate", showGenerateSnippet, extension, filePattern, inputs, outputs, onlyPaths, skipPaths, snippet, results });
+    tsvscode.postMessage({ type: "afterUpdate", showGenerateSnippet, extension, filePattern, nodeVersion, npmVersion, inputs, outputs, onlyPaths, skipPaths, snippet, results });
   });
 
   function toggleGenerateSnippet() {
@@ -133,7 +137,7 @@
         body: JSON.stringify({ extension, inputs, outputs, nql_or_rules: nqlOrRules })
       })
       const result = await response.json();
-      snippet = composeJavascriptSnippet({ filePattern }, result);
+      snippet = composeJavascriptSnippet(result);
     } catch (error) {
       errorMessage = (error as Error).message;
     } finally {
@@ -244,23 +248,20 @@
     return customSnippet;
   };
 
-  const composeJavascriptSnippet = (
-    data: { nodeVersion?: string, npmVersion?: string, filePattern: string },
-    result: { snippet: string}
-  ): string => {
+  const composeJavascriptSnippet = (result: { snippet: string}): string => {
     let customSnippet = `const Synvert = require("synvert-core");\n`;
     customSnippet += `new Synvert.Rewriter("group", "name", () => {\n`;
     customSnippet += `  configure({ parser: "typescript" });\n`;
-    if (data.nodeVersion) {
-      customSnippet += `  ifNode("${data.nodeVersion}");\n`
+    if (nodeVersion.length > 0) {
+      customSnippet += `  ifNode("${nodeVersion}");\n`
     }
-    if (data.npmVersion) {
-      const index = data.npmVersion.indexOf(" ");
-      const name = data.npmVersion.substring(0, index);
-      const version = data.npmVersion.substring(index + 1);
-      customSnippet += `  ifNpm '${name}', '${version}'\n`;
+    if (npmVersion.length > 0) {
+      const index = npmVersion.indexOf(" ");
+      const name = npmVersion.substring(0, index);
+      const version = npmVersion.substring(index + 1);
+      customSnippet += `  ifNpm('${name}', '${version}');\n`;
     }
-    customSnippet += `  withinFiles("${data.filePattern}", () => {\n`;
+    customSnippet += `  withinFiles("${filePattern}", () => {\n`;
     if (result.snippet) {
       customSnippet += "    ";
       customSnippet += result.snippet.replace(/\n/g, "\n    ");
@@ -272,12 +273,6 @@
   }
 </script>
 
-<select id="extension" bind:value={extension} on:change={extensionChanged}>
-  <option value="ts">Typescript</option>
-  <option value="tsx">Typescript + JSX</option>
-  <option value="js">Javascript</option>
-  <option value="jsx">Javascript + JSX</option>
-</select>
 <div class="generate-snippet">
   <button class="link-btn" on:click={toggleGenerateSnippet}>
     {#if showGenerateSnippet}
@@ -290,8 +285,18 @@
   </button>
 </div>
 {#if showGenerateSnippet}
+  <select id="extension" bind:value={extension} on:change={extensionChanged}>
+    <option value="ts">Typescript</option>
+    <option value="tsx">Typescript + JSX</option>
+    <option value="js">Javascript</option>
+    <option value="jsx">Javascript + JSX</option>
+  </select>
   <label for="filePattern"><b>File Pattern</b></label>
   <input id="filePattern" bind:value={filePattern} />
+  <label for="nodeVersion"><b>Node Version</b></label>
+  <input id="nodeVersion" bind:value={nodeVersion} placeholder="e.g. 18.0.0" />
+  <label for="npmVersion"><b>Npm Version</b></label>
+  <input id="npmVersion" bind:value={npmVersion} placeholder="e.g. react >= 18.0.0" />
   <label for="input"><b>Input</b></label>
   {#each inputs as input}
   <textarea id="input" placeholder="e.g. FactoryBot.create(:user)" bind:value={input}></textarea>
