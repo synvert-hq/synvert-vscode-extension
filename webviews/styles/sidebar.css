@@ -27,6 +27,9 @@
   position: relative;
   display: flex;
 }
+.search-results .search-result button:first-child {
+  width: fit-content;
+}
 .search-results .search-result .file-path {
   margin-left: 4px;
   white-space: nowrap;
