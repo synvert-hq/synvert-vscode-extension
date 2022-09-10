@@ -123,7 +123,7 @@
     const platform = "vscode";
     try {
       generateSnippetButtonDisabled = true;
-      const response = await fetch('https://synvert-api-javascript.xinminlabs.com/generate-snippet', {
+      const response = await fetch('https://api-javascript.synvert.net/generate-snippet', {
       // const response = await fetch('http://localhost:3000/generate-snippet', {
         method: "POST",
         headers: {
