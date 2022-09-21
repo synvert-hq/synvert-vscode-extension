@@ -123,6 +123,7 @@
     const platform = "vscode";
     try {
       generateSnippetButtonDisabled = true;
+      const outputsOrEmptyArray = outputs.every(output => output.length === 0) ? [] : outputs
       const response = await fetch('https://api-javascript.synvert.net/generate-snippet', {
       // const response = await fetch('http://localhost:3000/generate-snippet', {
         method: "POST",
@@ -133,7 +134,7 @@
           "X-SYNVERT-TOKEN": token,
           "X-SYNVERT-PLATFORM": platform,
         },
-        body: JSON.stringify({ extension, inputs, outputs, nql_or_rules: nqlOrRules })
+        body: JSON.stringify({ extension, inputs, outputs: outputsOrEmptyArray, nql_or_rules: nqlOrRules })
       })
       const result = await response.json();
       snippet = composeJavascriptSnippet(result);
@@ -314,7 +315,7 @@
     <label for="rules">Rules</label>
     <input id="rules" type="radio" name="nql_or_rules" value="rules" bind:group={nqlOrRules}>
   </div>
-  <button on:click={generateSnippet} disabled={inputs[0].length === 0 || outputs[0].length === 0 || generateSnippetButtonDisabled}>{generateSnippetButtonDisabled ? 'Generating...' : 'Generate Snippet'}</button>
+  <button on:click={generateSnippet} disabled={inputs[0].length === 0 || generateSnippetButtonDisabled}>{generateSnippetButtonDisabled ? 'Generating...' : 'Generate Snippet'}</button>
   <p>{errorMessage}</p>
 {/if}
 <label for="snippet"><b>Snippet</b></label>
@@ -338,9 +339,11 @@
       <button class="link-btn file-path" on:click={() => toggleResult(result.filePath)} on:mouseover={() => mouseOverResult(resultIndex)} on:focus={() => mouseOverResult(resultIndex)} title={result.filePath}>{result.filePath}</button>
       {#if resultIndex === hoverResultIndex && typeof hoverActionIndex === "undefined"}
         <div class="toolkit">
-          <button class="link-btn" on:click|preventDefault={() => replaceResult(resultIndex)}>
-            <i class="icon replace-icon" />
-          </button>
+          {#if result.actions.every(action => action.newCode)}
+            <button class="link-btn" on:click|preventDefault={() => replaceResult(resultIndex)}>
+              <i class="icon replace-icon" />
+            </button>
+          {/if}
           <button class="link-btn" on:click|preventDefault={() => removeResult(resultIndex)}>
             <i class="icon close-icon" />
           </button>
@@ -353,9 +356,11 @@
           <li on:mouseover={() => mouseOverAction(resultIndex, actionIndex)} on:focus={() => mouseOverAction(resultIndex, actionIndex)}>
             {#if resultIndex === hoverResultIndex && actionIndex === hoverActionIndex}
               <div class="toolkit">
-                <button class="link-btn" on:click={() => replaceAction(resultIndex, actionIndex)}>
-                  <i class="icon replace-icon" />
-                </button>
+                {#if action.newCode}
+                  <button class="link-btn" on:click={() => replaceAction(resultIndex, actionIndex)}>
+                    <i class="icon replace-icon" />
+                  </button>
+                {/if}
                 <button class="link-btn" on:click={() => removeAction(resultIndex, actionIndex)}>
                   <i class="icon close-icon" />
                 </button>
