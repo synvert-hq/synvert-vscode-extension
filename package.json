@@ -41,13 +41,7 @@
         }
       ]
     },
-    "commands": [
-      {
-        "command": "synvert.insertCode",
-        "category": "Synvert",
-        "title": "Insert code from current selection"
-      }
-    ]
+    "commands": []
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

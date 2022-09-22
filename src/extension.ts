@@ -27,26 +27,6 @@ export function activate(context: vscode.ExtensionContext) {
 		sidebarProvider._view?.webview.postMessage({ type: "currentFileExtensionName", value: currentlyOpenTabfilePath.split('.').pop() });
 	}
 
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with registerCommand
-  // The commandId parameter must match the command field in package.json
-  let disposable = vscode.commands.registerCommand('synvert.insertCode', () => {
-    let editor = vscode.window.activeTextEditor;
-
-    if (editor === undefined) {
-      vscode.window.showErrorMessage('No active text editor');
-      return;
-    }
-    let text = editor.document.getText(editor.selection);
-    if (text === "") {
-      vscode.window.showInformationMessage('Selection is empty');
-      return;
-    }
-    sidebarProvider._view?.webview.postMessage({ type: "selectedCode", value: text });
-  });
-
-  context.subscriptions.push(disposable);
-
   // TODO: install gem
   // checkGem().catch(() => {
   //   vscode.window.showErrorMessage('Synvert gem not found. Run `gem install synvert` or update your Gemfile.', 'Install Now').then((item) => {
