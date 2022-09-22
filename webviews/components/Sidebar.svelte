@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount, afterUpdate } from "svelte";
+  import Select from "svelte-select";
   import type { TestResultExtExt } from "../../src/types";
 
   let showGenerateSnippet = false;
@@ -271,6 +272,38 @@
     customSnippet += `});`;
     return customSnippet;
   }
+
+  async function querySnippets(query: string) {
+    const platform = "vscode";
+    try {
+      // const response = await fetch('https://api-javascript.synvert.net/query-snippets', {
+        const response = await fetch('http://localhost:3000/query-snippets', {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          // @ts-ignore
+          "X-SYNVERT-TOKEN": token,
+          "X-SYNVERT-PLATFORM": platform,
+        },
+        body: JSON.stringify({ query: query })
+      })
+      const result = await response.json();
+      return result.snippets;
+    } catch (error) {
+      errorMessage = (error as Error).message;
+      return [];
+    }
+  }
+
+  // const groupBy = (item: any) => item.group;
+  const optionIdentifier = 'id';
+  const getOptionLabel = (option: any) => `${option.group}/${option.name}`;
+  const getSelectionLabel = (option: any) => `${option.group}/${option.name}`;
+
+  function snippetSelected(event) {
+    errorMessage = JSON.stringify(event.detail)
+  }
 </script>
 
 <div class="generate-snippet">
@@ -291,6 +324,9 @@
     <option value="js">Javascript</option>
     <option value="jsx">Javascript + JSX</option>
   </select>
+  <div class="query-snippets-select">
+    <Select loadOptions={querySnippets} {optionIdentifier} {getSelectionLabel} {getOptionLabel} on:select={snippetSelected} placeholder="Search for an Official Snippet"></Select>
+  </div>
   <label for="filePattern"><b>File Pattern</b></label>
   <input id="filePattern" bind:value={filePattern} />
   <label for="nodeVersion"><b>Node Version</b></label>
