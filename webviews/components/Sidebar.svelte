@@ -301,8 +301,8 @@
   const getOptionLabel = (option: any) => `${option.group}/${option.name}`;
   const getSelectionLabel = (option: any) => `${option.group}/${option.name}`;
 
-  function snippetSelected(event) {
-    errorMessage = JSON.stringify(event.detail)
+  function snippetSelected(event: any) {
+    snippet = event.detail.source_code;
   }
 </script>
 
