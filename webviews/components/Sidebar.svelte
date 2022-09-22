@@ -306,6 +306,15 @@
   }
 </script>
 
+<select id="extension" bind:value={extension} on:change={extensionChanged}>
+  <option value="ts">Typescript</option>
+  <option value="tsx">Typescript + JSX</option>
+  <option value="js">Javascript</option>
+  <option value="jsx">Javascript + JSX</option>
+</select>
+<div class="query-snippets-select">
+  <Select loadOptions={querySnippets} {optionIdentifier} {getSelectionLabel} {getOptionLabel} on:select={snippetSelected} placeholder="Search for an Official Snippet"></Select>
+</div>
 <div class="generate-snippet">
   <button class="link-btn" on:click={toggleGenerateSnippet}>
     {#if showGenerateSnippet}
@@ -318,15 +327,6 @@
   </button>
 </div>
 {#if showGenerateSnippet}
-  <select id="extension" bind:value={extension} on:change={extensionChanged}>
-    <option value="ts">Typescript</option>
-    <option value="tsx">Typescript + JSX</option>
-    <option value="js">Javascript</option>
-    <option value="jsx">Javascript + JSX</option>
-  </select>
-  <div class="query-snippets-select">
-    <Select loadOptions={querySnippets} {optionIdentifier} {getSelectionLabel} {getOptionLabel} on:select={snippetSelected} placeholder="Search for an Official Snippet"></Select>
-  </div>
   <label for="filePattern"><b>File Pattern</b></label>
   <input id="filePattern" bind:value={filePattern} />
   <label for="nodeVersion"><b>Node Version</b></label>
