@@ -8,6 +8,8 @@
   let outputs = [""];
   let extension = "ts";
   let filePattern = "**/*.ts";
+  let rubyVersion = "";
+  let gemVersion = "";
   let nodeVersion = "";
   let npmVersion = "";
   let onlyPaths = "";
@@ -101,6 +103,7 @@
   }
 
   function extensionChanged() {
+    resetFormInputs();
     switch (extension) {
       case "rb":
         filePattern = "**/*.rb";
@@ -120,13 +123,23 @@
     }
   }
 
+  function resetFormInputs() {
+    rubyVersion = "";
+    gemVersion = "";
+    nodeVersion = "";
+    npmVersion = "";
+    inputs = [""];
+    outputs = [""];
+  }
+
   async function generateSnippet() {
     const platform = "vscode";
+    const url = extension === "rb" ? 'https://api-ruby.synvert.net/generate-snippet' : 'https://api-javascript.synvert.net/generate-snippet';
+    // const url = extension === "rb" ? 'http://localhost:9200/generate-snippet' : 'http://localhost:3000/generate-snippet';
     try {
       generateSnippetButtonDisabled = true;
       const outputsOrEmptyArray = outputs.every(output => output.length === 0) ? [] : outputs
-      const response = await fetch('https://api-javascript.synvert.net/generate-snippet', {
-      // const response = await fetch('http://localhost:3000/generate-snippet', {
+      const response = await fetch(url, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -138,7 +151,7 @@
         body: JSON.stringify({ extension, inputs, outputs: outputsOrEmptyArray, nql_or_rules: nqlOrRules })
       })
       const result = await response.json();
-      snippet = composeJavascriptSnippet(result);
+      snippet = extension === "rb" ? composeRubySnippet(result) : composeJavascriptSnippet(result);
     } catch (error) {
       errorMessage = (error as Error).message;
     } finally {
@@ -149,7 +162,7 @@
   function search() {
     searchButtonDisabled = true;
     // @ts-ignore
-    tsvscode.postMessage({ type: 'onSearch', snippet, onlyPaths, skipPaths });
+    tsvscode.postMessage({ type: 'onSearch', extension, snippet, onlyPaths, skipPaths });
   }
 
   function replaceAll() {
@@ -159,7 +172,7 @@
       tsvscode.postMessage({ type: 'onReplaceAll', results });
     } else {
       // @ts-ignore
-      tsvscode.postMessage({ type: 'onDirectReplaceAll', snippet, onlyPaths, skipPaths });
+      tsvscode.postMessage({ type: 'onDirectReplaceAll', extension, snippet, onlyPaths, skipPaths });
     }
   }
 
@@ -224,21 +237,18 @@
     results = results
   }
 
-  const composeRubySnippet = (
-    data: { rubyVersion?: string, gemVersion?: string, filePattern: string },
-    result: { snippet: string }
-  ): string => {
-    let customSnippet = "Synvert::Rewriter.execute do\n";
-    if (data.rubyVersion) {
-      customSnippet += `  if_ruby '${data.rubyVersion}'\n`;
+  const composeRubySnippet = (result: { snippet: string }): string => {
+    let customSnippet = "Synvert::Rewriter.new 'group', 'name' do\n";
+    if (rubyVersion.length > 0) {
+      customSnippet += `  if_ruby '${rubyVersion}'\n`;
     }
-    if (data.gemVersion) {
-      const index = data.gemVersion.indexOf(" ");
-      const name = data.gemVersion.substring(0, index);
-      const version = data.gemVersion.substring(index + 1);
+    if (gemVersion.length > 0) {
+      const index = gemVersion.indexOf(" ");
+      const name = gemVersion.substring(0, index);
+      const version = gemVersion.substring(index + 1);
       customSnippet += `  if_gem '${name}', '${version}'\n`;
     }
-    customSnippet += `  within_files '${data.filePattern}' do\n`;
+    customSnippet += `  within_files '${filePattern}' do\n`;
     if (result.snippet) {
       customSnippet += "    ";
       customSnippet += result.snippet.replace(/\n/g, "\n    ");
@@ -275,9 +285,10 @@
 
   async function querySnippets(query: string) {
     const platform = "vscode";
+    const url = extension === "rb" ? 'https://api-ruby.synvert.net/query-snippets' : 'https://api-javascript.synvert.net/query-snippets';
+    // const url = extension === "rb" ? 'https//localhost:9200/query-snippets' : 'http://localhost:3000/query-snippets';
     try {
-      // const response = await fetch('https://api-javascript.synvert.net/query-snippets', {
-        const response = await fetch('http://localhost:3000/query-snippets', {
+      const response = await fetch(url, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -311,6 +322,7 @@
   <option value="tsx">Typescript + JSX</option>
   <option value="js">Javascript</option>
   <option value="jsx">Javascript + JSX</option>
+  <option value="rb">Ruby</option>
 </select>
 <div class="query-snippets-select">
   <Select loadOptions={querySnippets} {optionIdentifier} {getSelectionLabel} {getOptionLabel} on:select={snippetSelected} placeholder="Search for an Official Snippet"></Select>
@@ -329,21 +341,28 @@
 {#if showGenerateSnippet}
   <label for="filePattern"><b>File Pattern</b></label>
   <input id="filePattern" bind:value={filePattern} />
-  <label for="nodeVersion"><b>Node Version</b></label>
-  <input id="nodeVersion" bind:value={nodeVersion} placeholder="e.g. 18.0.0" />
-  <label for="npmVersion"><b>Npm Version</b></label>
-  <input id="npmVersion" bind:value={npmVersion} placeholder="e.g. react >= 18.0.0" />
+  {#if extension === "rb"}
+    <label for="rubyVersion"><b>Ruby Version</b></label>
+    <input id="rubyVersion" bind:value={rubyVersion} placeholder="e.g. 3.0.0" />
+    <label for="gemVersion"><b>Gem Version</b></label>
+    <input id="gemVersion" bind:value={gemVersion} placeholder="e.g. rails ~> 6.0.0" />
+  {:else}
+    <label for="nodeVersion"><b>Node Version</b></label>
+    <input id="nodeVersion" bind:value={nodeVersion} placeholder="e.g. 18.0.0" />
+    <label for="npmVersion"><b>Npm Version</b></label>
+    <input id="npmVersion" bind:value={npmVersion} placeholder="e.g. react >= 18.0.0" />
+  {/if}
   <label for="input"><b>Input</b></label>
   {#each inputs as input}
-  <textarea id="input" placeholder="e.g. FactoryBot.create(:user)" bind:value={input}></textarea>
+    <textarea id="input" placeholder="e.g. FactoryBot.create(:user)" bind:value={input}></textarea>
   {/each}
   <label for="output"><b>Output</b></label>
   {#each outputs as output}
-  <textarea id="output" placeholder="e.g. create(:user)" bind:value={output}></textarea>
+    <textarea id="output" placeholder="e.g. create(:user)" bind:value={output}></textarea>
   {/each}
   <p><a href={"#"} on:click={addMoreInputOutput}>Add More Input/Output</a></p>
   {#if inputs.length > 1}
-  <p><a href={"#"} on:click={removeLastInputOutput}>Remove Last Input/Output</a></p>
+    <p><a href={"#"} on:click={removeLastInputOutput}>Remove Last Input/Output</a></p>
   {/if}
   <div class="flex row-reverse nql-or-rules-select">
     <label for="nql">NQL</label>

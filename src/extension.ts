@@ -28,17 +28,17 @@ export function activate(context: vscode.ExtensionContext) {
 	}
 
   // TODO: install gem
-  // checkGem().catch(() => {
-  //   vscode.window.showErrorMessage('Synvert gem not found. Run `gem install synvert` or update your Gemfile.', 'Install Now').then((item) => {
-  //     if (item === 'Install Now') {
-  //       installGem().then(() => {
-  //         vscode.window.showInformationMessage('Successfully installed the Synvert gem.');
-  //       }).catch(() => {
-  //         vscode.window.showErrorMessage('Failed to install the Synvert gem.');
-  //       });
-  //     }
-  //   });
-  // });
+  checkGem().catch(() => {
+    vscode.window.showErrorMessage('Synvert gem not found. Run `gem install synvert` or update your Gemfile.', 'Install Now').then((item) => {
+      if (item === 'Install Now') {
+        installGem().then(() => {
+          vscode.window.showInformationMessage('Successfully installed the Synvert gem.');
+        }).catch(() => {
+          vscode.window.showErrorMessage('Failed to install the Synvert gem.');
+        });
+      }
+    });
+  });
 
   // checkNpm().catch(() => {
   //   vscode.window.showErrorMessage('Synvert npm not found. Run `npm install synvert` or update your package.json.', 'Install Now').then((item) => {
