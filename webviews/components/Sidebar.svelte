@@ -104,6 +104,7 @@
 
   function extensionChanged() {
     resetFormInputs();
+    results = [];
     switch (extension) {
       case "rb":
         filePattern = "**/*.rb";
