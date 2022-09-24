@@ -1,6 +1,10 @@
+/* https://github.com/rob-balfre/svelte-select/blob/master/docs/theming_variables.md */
 .query-snippets-select {
   --background: #464646;
   --border: none;
+  --clearSelectColor: #C1C1C1;
+  --clearSelectFocusColor: #C1C1C1;
+  --clearSelectHoverColor: #C1C1C1;
   --inputColor: #C1C1C1;
   --itemActiveBackground: #A9A9A9;
   --itemHoverColor: #000000;
