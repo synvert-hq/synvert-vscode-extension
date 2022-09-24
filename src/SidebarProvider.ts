@@ -82,7 +82,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
               const startLineToGo = doc.getText().substring(0, data.action.start).split("\n").length;
               let startRange = activeEditor.document.lineAt(startLineToGo - 1).range;
-              const endLineToGo = doc.getText().substring(0, data.action.end).split("\n").length;
+              const endLineToGo = doc.getText().substring(0, data.action.end).trimEnd().split("\n").length;
               let endRange = activeEditor.document.lineAt(endLineToGo - 1).range;
               activeEditor.selection =  new vscode.Selection(startRange.start, endRange.end);
               activeEditor.revealRange(startRange);
