@@ -104,6 +104,8 @@
 
   function extensionChanged() {
     resetFormInputs();
+    snippet = "";
+    errorMessage = "";
     results = [];
     switch (extension) {
       case "rb":
