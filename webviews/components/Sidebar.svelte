@@ -397,7 +397,7 @@
       <button class="link-btn file-path" on:click={() => toggleResult(result.filePath)} on:mouseover={() => mouseOverResult(resultIndex)} on:focus={() => mouseOverResult(resultIndex)} title={result.filePath}>{result.filePath}</button>
       {#if resultIndex === hoverResultIndex && typeof hoverActionIndex === "undefined"}
         <div class="toolkit">
-          {#if result.actions.every(action => action.newCode)}
+          {#if result.actions.every(action => (typeof action.newCode !== "undefined"))}
             <button class="link-btn" on:click|preventDefault={() => replaceResult(resultIndex)}>
               <i class="icon replace-icon" />
             </button>
@@ -414,7 +414,7 @@
           <li on:mouseover={() => mouseOverAction(resultIndex, actionIndex)} on:focus={() => mouseOverAction(resultIndex, actionIndex)}>
             {#if resultIndex === hoverResultIndex && actionIndex === hoverActionIndex}
               <div class="toolkit">
-                {#if action.newCode}
+                {#if (typeof action.newCode !== "undefined")}
                   <button class="link-btn" on:click={() => replaceAction(resultIndex, actionIndex)}>
                     <i class="icon replace-icon" />
                   </button>
