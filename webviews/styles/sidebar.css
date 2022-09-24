@@ -6,6 +6,7 @@
   --itemHoverColor: #000000;
   --listBackground: #464646;
   --placeholderColor: #A9A9A9;
+  --spinnerColor: #C1C1C1;
 }
 .generate-snippet button:first-child {
   display: flex;
