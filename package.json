@@ -18,7 +18,6 @@
     "Formatters"
   ],
   "activationEvents": [
-    "onCommand:synvert:insertCode",
     "onView:synvert-sidebar"
   ],
   "main": "./dist/extension.js",
