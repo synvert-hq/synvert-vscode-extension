@@ -6,7 +6,7 @@
   "author": {
     "name": "Ricahrd Huang"
   },
-  "icon": "media/logo.png",
+  "icon": "https://synvert.net/img/logo_96.png",
   "engines": {
     "node": "^16.16.0",
     "vscode": "^1.69.0"
