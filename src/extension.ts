@@ -27,18 +27,20 @@ export function activate(context: vscode.ExtensionContext) {
 		sidebarProvider._view?.webview.postMessage({ type: "currentFileExtensionName", value: currentlyOpenTabfilePath.split('.').pop() });
 	}
 
-  // TODO: install gem
-  checkGem().catch(() => {
-    vscode.window.showErrorMessage('Synvert gem not found. Run `gem install synvert` or update your Gemfile.', 'Install Now').then((item) => {
-      if (item === 'Install Now') {
-        installGem().then(() => {
-          vscode.window.showInformationMessage('Successfully installed the Synvert gem.');
-        }).catch(() => {
-          vscode.window.showErrorMessage('Failed to install the Synvert gem.');
-        });
-      }
+  const rubyEnabled = vscode.workspace.getConfiguration('synvert').get('ruby.enabled') as boolean;
+  if (rubyEnabled) {
+    checkGem().catch(() => {
+      vscode.window.showErrorMessage('Synvert gem not found. Run `gem install synvert` or update your Gemfile.', 'Install Now').then((item) => {
+        if (item === 'Install Now') {
+          installGem().then(() => {
+            vscode.window.showInformationMessage('Successfully installed the Synvert gem.');
+          }).catch(() => {
+            vscode.window.showErrorMessage('Failed to install the Synvert gem.');
+          });
+        }
+      });
     });
-  });
+  }
 
   // checkNpm().catch(() => {
   //   vscode.window.showErrorMessage('Synvert npm not found. Run `npm install synvert` or update your package.json.', 'Install Now').then((item) => {

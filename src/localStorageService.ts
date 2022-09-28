@@ -1,5 +1,4 @@
 import { Memento } from "vscode";
-import { log } from "./log";
 
 export class LocalStorageService {
 

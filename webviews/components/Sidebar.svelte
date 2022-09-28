@@ -25,6 +25,17 @@
   let hoverActionIndex: number | undefined;
   let filesCollapse: { [filePath: string]: boolean } = {};
 
+  const extensionOptions = [
+    { value: "ts", label: "Typescript" },
+    { value: "tsx", label: "Typescript + JSX" },
+    { value: "js", label: "Javascript" },
+    { value: "jsx", label: "Javascript + JSX" }
+  ]
+  // @ts-ignore
+  if (rubyEnabled) {
+    extensionOptions.push({ value: "rb", label: "Ruby" });
+  }
+
   onMount(() => {
     window.addEventListener("message", (event) => {
       const message = event.data; // The json data that the extension sent
@@ -321,11 +332,9 @@
 </script>
 
 <select id="extension" bind:value={extension} on:change={extensionChanged}>
-  <option value="ts">Typescript</option>
-  <option value="tsx">Typescript + JSX</option>
-  <option value="js">Javascript</option>
-  <option value="jsx">Javascript + JSX</option>
-  <option value="rb">Ruby</option>
+  {#each extensionOptions as option}
+    <option value={option.value}>{option.label}</option>
+  {/each}
 </select>
 <div class="query-snippets-select">
   <Select loadOptions={querySnippets} {optionIdentifier} {getSelectionLabel} {getOptionLabel} on:select={snippetSelected} placeholder="Search for an Official Snippet"></Select>

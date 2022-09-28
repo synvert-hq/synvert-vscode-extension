@@ -41,7 +41,17 @@
         }
       ]
     },
-    "commands": []
+    "commands": [],
+    "configuration": {
+      "title": "Synvert",
+      "properties": {
+        "synvert.ruby.enabled": {
+          "type": "boolean",
+          "default": "true",
+          "description": "Enable synvert ruby."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

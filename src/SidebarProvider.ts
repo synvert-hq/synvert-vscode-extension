@@ -149,6 +149,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     // Use a nonce to only allow a specific script to be run.
     const nonce = getNonce();
     const token = machineIdSync(true);
+    const rubyEnabled =  vscode.workspace.getConfiguration('synvert').get('ruby.enabled') as boolean;
 
     return `
       <!DOCTYPE html>
@@ -167,6 +168,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           <script nonce="${nonce}">
               const tsvscode = acquireVsCodeApi();
               const token = "${token}";
+              const rubyEnabled = ${rubyEnabled};
           </script>
 
         </head>
