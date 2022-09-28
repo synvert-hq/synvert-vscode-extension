@@ -1,7 +1,7 @@
 {
-  "name": "synvert-vscode-extension",
-  "displayName": "synvert-vscode-extension",
-  "description": "vscode exension for synvert",
+  "name": "synvert",
+  "displayName": "Synvert",
+  "description": "An alternative find / replace based on AST nodes",
   "version": "0.0.1",
   "author": {
     "name": "Ricahrd Huang"
@@ -13,7 +13,9 @@
   },
   "publisher": "xinminlabs",
   "categories": [
-    "Other"
+    "Programming Languages",
+    "Linters",
+    "Formatters"
   ],
   "activationEvents": [
     "onCommand:synvert:insertCode",

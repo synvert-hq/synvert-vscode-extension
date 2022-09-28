@@ -1,28 +1,22 @@
 # Synvert README
 
-Synvert vscode extension provides an alternative search / replace based on AST nodes.
+Synvert vscode extension provides an alternative find / replace based on AST nodes.
 
 It supports Typescript, Javascript and Ruby so far.
 
 ## Features
 
-### Search and replace
+- Search and replace. After adding a snippet, you can search the code, and replace all or any of the results.
 
-After adding a snippet, you can search the code, and replace all or any of the results.
+![Search and Replace](demos/search-and-replace-1.gif)
 
-\!\[Search and Replace\]\(demos/search-and-replace-1.gif\)
+- Search a snippet. You can search a snippet by group, name or description.
 
-### Search a snippet
+![Search snippet](demos/search-snippet-1.gif)
 
-You can search a snippet by group, name or description.
+- Generate a snippet. You can generate a snippet by some input codes and output codes.
 
-\!\[Search snippet\]\(demos/search-snippet-1.gif\)
-
-### Generate a snippet
-
-You can generate a snippet by some input codes and output codes.
-
-\!\[Generate snippet\]\(demos/generate-snippet-1.gif\)
+![Generate snippet](demos/generate-snippet-1.gif)
 
 ## Requirements
 
@@ -38,7 +32,7 @@ This extension contributes the following settings:
 
 ## Known Issues
 
-Synvert vscode extension searches based on AST nodes, so it's slower than than the traditional search / replace.
+Synvert vscode extension searches based on AST nodes, so it's slower than than the traditional find / replace.
 
 But we are still in active development to improve the performance.
 
