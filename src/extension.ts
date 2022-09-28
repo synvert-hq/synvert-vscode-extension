@@ -5,6 +5,7 @@ import { spawn } from 'child_process';
 import { rubySpawn } from 'ruby-spawn';
 import { SidebarProvider } from './SidebarProvider';
 import { LocalStorageService } from './localStorageService';
+import { rubyEnabled } from './configuration';
 import { log } from './log';
 
 // this method is called when your extension is activated
@@ -27,8 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
 		sidebarProvider._view?.webview.postMessage({ type: "currentFileExtensionName", value: currentlyOpenTabfilePath.split('.').pop() });
 	}
 
-  const rubyEnabled = vscode.workspace.getConfiguration('synvert').get('ruby.enabled') as boolean;
-  if (rubyEnabled) {
+  if (rubyEnabled()) {
     checkGem().catch(() => {
       vscode.window.showErrorMessage('Synvert gem not found. Run `gem install synvert` or update your Gemfile.', 'Install Now').then((item) => {
         if (item === 'Install Now') {

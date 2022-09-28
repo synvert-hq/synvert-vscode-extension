@@ -8,7 +8,7 @@ import fs from "fs";
 import path from "path";
 import type { TestResultExtExt } from "./types";
 import { LocalStorageService } from "./localStorageService";
-import { log } from "./log";
+import { rubyEnabled } from "./configuration";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
@@ -149,7 +149,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     // Use a nonce to only allow a specific script to be run.
     const nonce = getNonce();
     const token = machineIdSync(true);
-    const rubyEnabled =  vscode.workspace.getConfiguration('synvert').get('ruby.enabled') as boolean;
 
     return `
       <!DOCTYPE html>
@@ -168,7 +167,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           <script nonce="${nonce}">
               const tsvscode = acquireVsCodeApi();
               const token = "${token}";
-              const rubyEnabled = ${rubyEnabled};
+              const rubyEnabled = ${rubyEnabled()};
           </script>
 
         </head>
@@ -221,6 +220,11 @@ function testJavascriptSnippet(snippet: string, rootPath: string, onlyPaths: str
 }
 
 function testRubySnippet(snippet: string, rootPath: string, onlyPaths: string, skipPaths: string, callback: (snippets: object[]) => void): void {
+  if (!rubyEnabled()) {
+    vscode.window.showErrorMessage('Synvert ruby is not enabled!');
+    callback([]);
+    return;
+  }
   const commandArgs = ['--execute', 'test'];
   if (onlyPaths.length > 0) {
     commandArgs.push('--only-paths');
@@ -299,6 +303,11 @@ function processJavascriptSnippet(snippet: string, rootPath: string, onlyPaths: 
 }
 
 function processRubySnippet(snippet: string, rootPath: string, onlyPaths: string, skipPaths: string, callback: () => void): void {
+  if (!rubyEnabled()) {
+    vscode.window.showErrorMessage('Synvert ruby is not enabled!');
+    callback();
+    return;
+  }
   const commandArgs = ['--execute', 'run'];
   if (onlyPaths.length > 0) {
     commandArgs.push('--only-paths');
