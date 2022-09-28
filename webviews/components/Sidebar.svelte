@@ -82,8 +82,18 @@
           break;
         }
         case "doneReplaceAction": {
-          const { resultIndex, actionIndex } = message;
-          results[resultIndex].actions.splice(actionIndex, 1);
+          const { resultIndex, actionIndex, offset, source } = message;
+          const actions = results[resultIndex].actions;
+          actions.splice(actionIndex, 1);
+          if (actions.length > 0) {
+            actions.slice(actionIndex).forEach(action => {
+              action.start = action.start + offset;
+              action.end = action.end + offset;
+            });
+            results[resultIndex].fileSource = source;
+          } else {
+            results.splice(resultIndex, 1);
+          }
           // trigger dom update
           results = results;
           break;

@@ -107,7 +107,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           let source = fs.readFileSync(absolutePath, "utf-8");
           source = source.slice(0, action.start) + action.newCode + source.slice(action.end);
           fs.writeFileSync(absolutePath, source);
-          webviewView.webview.postMessage({ type: 'doneReplaceAction', resultIndex, actionIndex });
+          const offset = action.newCode.length - (action.end - action.start);
+          webviewView.webview.postMessage({ type: 'doneReplaceAction', resultIndex, actionIndex, offset, source });
           break;
         }
         case "onInfo": {
