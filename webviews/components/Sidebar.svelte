@@ -337,7 +337,7 @@
   {/each}
 </select>
 <div class="query-snippets-select">
-  <Select loadOptions={querySnippets} {optionIdentifier} {getSelectionLabel} {getOptionLabel} on:select={snippetSelected} placeholder="Search for an Official Snippet"></Select>
+  <Select loadOptions={querySnippets} {optionIdentifier} {getSelectionLabel} {getOptionLabel} on:select={snippetSelected} placeholder="Search a snippet"></Select>
 </div>
 <div class="generate-snippet">
   <button class="link-btn" on:click={toggleGenerateSnippet}>
