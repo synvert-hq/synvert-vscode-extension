@@ -1,6 +1,12 @@
 # Synvert README
 
-Synvert vscode extension provides an alternative find / replace based on AST nodes.
+Synvert vscode extension provides a find / replace alternative based on AST nodes.
+
+Why do you need Synvert?
+
+1. It's more accurate. e.g. it can find parameters in function declaration in typescript but ignore the arguments in function call.
+
+2. It's more powerful. e.g. it can find all unused imports in typescript and remove them.
 
 It supports Typescript, Javascript and Ruby so far.
 
