@@ -212,7 +212,7 @@ function testJavascriptSnippet(snippet: string, rootPath: string, onlyPaths: str
   Synvert.Configuration.rootPath = rootPath;
   Synvert.Configuration.onlyPaths = onlyPaths.split(",").map((onlyFile) => onlyFile.trim());
   Synvert.Configuration.skipPaths = skipPaths.split(",").map((skipFile) => skipFile.trim());
-  eval(formatSnippet(snippet));
+  evalSnippet(snippet);
   const [group, name] = getLastSnippetGroupAndName();
   const rewriter = Synvert.Rewriter.fetch(group, name);
   const snippets: TestResultExtExt[] = rewriter.test();
@@ -296,7 +296,7 @@ function processJavascriptSnippet(snippet: string, rootPath: string, onlyPaths: 
   Synvert.Configuration.rootPath = rootPath;
   Synvert.Configuration.onlyPaths = onlyPaths.split(",").map((onlyFile) => onlyFile.trim());
   Synvert.Configuration.skipPaths = skipPaths.split(",").map((skipFile) => skipFile.trim());
-  eval(formatSnippet(snippet));
+  evalSnippet(snippet);
   const [group, name] = getLastSnippetGroupAndName();
   const rewriter = Synvert.Rewriter.fetch(group, name);
   rewriter.process();
@@ -338,6 +338,12 @@ function processRubySnippet(snippet: string, rootPath: string, onlyPaths: string
       callback();
     }
   });
+}
+
+function evalSnippet(snippet: string) {
+  // avoid group nam duplication.
+  Synvert.Rewriter.clear();
+  eval(formatSnippet(snippet));
 }
 
 function formatSnippet(snippet: string) {
