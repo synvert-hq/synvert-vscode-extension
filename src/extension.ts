@@ -100,7 +100,7 @@ function checkGem(): Promise<boolean> {
 
 function installGem(): Promise<boolean> {
   return new Promise((resolve, reject) => {
-    const child = rubySpawn('gem', ['install', '-g', 'synvert'], {}, true);
+    const child = rubySpawn('gem', ['install', 'synvert'], {}, true);
     child.on('exit', (code) => {
       if (code === 0) {
         resolve(true);
