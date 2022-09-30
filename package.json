@@ -2,7 +2,7 @@
   "name": "synvert",
   "displayName": "Synvert",
   "description": "A find / replace alternative based on AST nodes",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": {
     "name": "Ricahrd Huang"
   },
