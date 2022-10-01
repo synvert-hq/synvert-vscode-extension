@@ -17,6 +17,14 @@
     "Linters",
     "Formatters"
   ],
+  "keywords": [
+    "synvert",
+    "javascript",
+    "typescript",
+    "ruby",
+    "rewrite",
+    "refactor"
+  ],
   "activationEvents": [
     "onView:synvert-sidebar"
   ],
