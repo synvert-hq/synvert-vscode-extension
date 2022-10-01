@@ -55,6 +55,15 @@
   margin-left: 20px;
 }
 
+.search-results .item .old-code {
+  text-decoration: line-through;
+  background-color: #691719;
+}
+
+.search-results .item .new-code {
+  background-color: #2f381f;
+}
+
 .link-btn {
   -webkit-appearance: none;
   appearance: none;

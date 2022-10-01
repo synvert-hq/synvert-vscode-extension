@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, afterUpdate } from "svelte";
   import Select from "svelte-select";
+  import { sortAndDeduplicateDiagnostics } from "typescript";
   import type { TestResultExtExt } from "../../src/types";
 
   let showGenerateSnippet = false;
@@ -443,7 +444,12 @@
                 </button>
               </div>
             {/if}
-            <button class="link-btn item" on:click={() => actionClicked(action, result.rootPath, result.filePath)}>{result.fileSource && result.fileSource.substring(action.start, action.end)}</button>
+            {#if result.fileSource}
+              <button class="link-btn item" on:click={() => actionClicked(action, result.rootPath, result.filePath)}>
+                <span class="old-code">{result.fileSource.substring(action.start, action.end)}</span>
+                <span class="new-code">{action.newCode}</span>
+              </button>
+            {/if}
           </li>
         {/each}
       </ul>
