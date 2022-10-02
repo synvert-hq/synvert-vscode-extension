@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [0.1.3] - 2022-10-02
+
+### Added
+
+- Highlight selected search item
+
+### Fixed
+
+- Disable both search and replace all buttons
+
 ## [0.1.2] - 2022-10-01
 
 ### Added
