@@ -24,8 +24,8 @@
 .search-results ul li {
   position: relative;
   overflow: hidden;
-  height: 16px;
-  line-height: 16px;
+  height: 20px;
+  line-height: 20px;
   margin: 5px 0;
 }
 .search-results .toolkit {
@@ -34,6 +34,9 @@
   right: 0;
   display: flex;
   z-index: 99999;
+}
+.search-results .toolkit .link-btn {
+  padding: 2px 0;
 }
 .search-results a {
   color: #ccc;
@@ -52,7 +55,10 @@
   text-overflow: ellipsis;
 }
 .search-results .item {
-  margin-left: 20px;
+  padding: 2px 5px 2px 25px;
+}
+.search-results .item.selected {
+  background-color: #082a4b;
 }
 
 .search-results .item .old-code {

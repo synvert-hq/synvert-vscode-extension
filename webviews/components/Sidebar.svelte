@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount, afterUpdate } from "svelte";
   import Select from "svelte-select";
-  import { sortAndDeduplicateDiagnostics } from "typescript";
   import type { TestResultExtExt } from "../../src/types";
 
   let showGenerateSnippet = false;
@@ -24,6 +23,8 @@
   let results: TestResultExtExt[] = [];
   let hoverResultIndex: number | undefined;
   let hoverActionIndex: number | undefined;
+  let selectedResultIndex: number | undefined;
+  let selectedActionIndex: number | undefined;
   let filesCollapse: { [filePath: string]: boolean } = {};
 
   const extensionOptions = [
@@ -77,6 +78,7 @@
         }
         case "doneReplaceResult": {
           const { resultIndex } = message;
+          updateSelectedResult(resultIndex);
           results.splice(resultIndex, 1);
           // trigger dom update
           results = results;
@@ -84,6 +86,7 @@
         }
         case "doneReplaceAction": {
           const { resultIndex, actionIndex, offset, source } = message;
+          updateSelectedAction(resultIndex, actionIndex);
           const actions = results[resultIndex].actions;
           actions.splice(actionIndex, 1);
           if (actions.length > 0) {
@@ -109,6 +112,31 @@
     // @ts-ignore
     tsvscode.postMessage({ type: "afterUpdate", showGenerateSnippet, extension, filePattern, nodeVersion, npmVersion, inputs, outputs, nqlOrRules, onlyPaths, skipPaths, snippet, results });
   });
+
+  function updateSelectedResult(resultIndex: number) {
+    if (selectedResultIndex === resultIndex) {
+      selectedResultIndex = undefined;
+      selectedActionIndex = undefined;
+    }
+    if (selectedResultIndex && selectedResultIndex > resultIndex) {
+      selectedResultIndex = selectedResultIndex - 1;
+    }
+  }
+
+  function updateSelectedAction(resultIndex: number, actionIndex: number) {
+    if (selectedResultIndex === resultIndex) {
+      if (selectedActionIndex === actionIndex) {
+        selectedResultIndex = undefined;
+        selectedActionIndex = undefined;
+      }
+      if (selectedActionIndex && selectedActionIndex > actionIndex) {
+        selectedActionIndex = selectedActionIndex - 1;
+      }
+    }
+    if (selectedResultIndex && selectedResultIndex > resultIndex && results[resultIndex].actions.length == 1) {
+      selectedResultIndex = selectedResultIndex - 1;
+    }
+  }
 
   function toggleGenerateSnippet() {
     showGenerateSnippet = !showGenerateSnippet;
@@ -201,7 +229,10 @@
     }
   }
 
-  function actionClicked(action: object, rootPath: string | undefined, filePath: string | undefined) {
+  function actionClicked(resultIndex: number, actionIndex: number, rootPath: string | undefined, filePath: string | undefined) {
+    selectedResultIndex = resultIndex;
+    selectedActionIndex = actionIndex;
+    const action = results[resultIndex].actions[actionIndex];
     // @ts-ignore
     tsvscode.postMessage({ type: 'onOpenFile', action, rootPath, filePath });
   }
@@ -237,6 +268,7 @@
   }
 
   function removeResult(resultIndex: number) {
+    updateSelectedResult(resultIndex);
     results.splice(resultIndex, 1);
     // trigger dom update
     results = results
@@ -257,6 +289,7 @@
   }
 
   function removeAction(resultIndex: number, actionIndex: number) {
+    updateSelectedAction(resultIndex, actionIndex);
     results[resultIndex].actions.splice(actionIndex, 1);
     // trigger dom update
     results = results
@@ -445,7 +478,7 @@
               </div>
             {/if}
             {#if result.fileSource}
-              <button class="link-btn item" on:click={() => actionClicked(action, result.rootPath, result.filePath)}>
+              <button class="link-btn item {resultIndex === selectedResultIndex && actionIndex === selectedActionIndex ? 'selected' : ''}" on:click={() => actionClicked(resultIndex, actionIndex, result.rootPath, result.filePath)}>
                 <span class="old-code">{result.fileSource.substring(action.start, action.end)}</span>
                 <span class="new-code">{action.newCode}</span>
               </button>
