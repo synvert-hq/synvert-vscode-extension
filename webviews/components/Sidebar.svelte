@@ -435,8 +435,8 @@
 <input id="onlyPaths" bind:value={onlyPaths} placeholder="e.g. frontend/src" />
 <label for="skipPaths"><b>Files to exclude</b></label>
 <input id="skipPaths" bind:value={skipPaths} />
-<button on:click={search} disabled={snippet.length === 0 || searchButtonDisabled}>{searchButtonDisabled ? 'Searching...' : 'Search'}</button>
-<button on:click={replaceAll} disabled={snippet.length === 0 || replaceAllButtonDisabled}>{replaceAllButtonDisabled ? 'Replacing...' : 'Replace All'}</button>
+<button on:click={search} disabled={snippet.length === 0 || searchButtonDisabled || replaceAllButtonDisabled}>{searchButtonDisabled ? 'Searching...' : 'Search'}</button>
+<button on:click={replaceAll} disabled={snippet.length === 0 || replaceAllButtonDisabled || searchButtonDisabled}>{replaceAllButtonDisabled ? 'Replacing...' : 'Replace All'}</button>
 <div class="search-results">
   {#each results as result, resultIndex}
     <div class="search-result">
