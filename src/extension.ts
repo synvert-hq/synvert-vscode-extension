@@ -3,6 +3,8 @@
 import * as vscode from 'vscode';
 import { spawn } from 'child_process';
 import { rubySpawn } from 'ruby-spawn';
+import fetch from "node-fetch";
+import { compareVersions } from 'compare-versions';
 import { SidebarProvider } from './SidebarProvider';
 import { LocalStorageService } from './localStorageService';
 import { rubyEnabled } from './configuration';
@@ -29,13 +31,45 @@ export function activate(context: vscode.ExtensionContext) {
 	}
 
   if (rubyEnabled()) {
-    checkGem().catch(() => {
-      vscode.window.showErrorMessage('Synvert gem not found. Run `gem install synvert` or update your Gemfile.', 'Install Now').then((item) => {
+    checkGem().then((output) => {
+      const result = output.match(/(\d+\.\d+\.\d+) \(with synvert-core (\d+\.\d+\.\d+)/);
+      if (result) {
+        const localSynvertVersion = result[1];
+        const localSynvertCoreVersion = result[2];
+        checkRemoteVersions().then((data) => {
+          const remoteSynvertVersion = data.synvertVersion;
+          const remoteSynvertCoreVersion = data.synvertCoreVersion;
+          if (compareVersions(remoteSynvertVersion, localSynvertVersion) === 1) {
+            vscode.window.showErrorMessage(`synvert gem version is ${remoteSynvertVersion} available. (Current version: ${localSynvertVersion})`, 'Update Now').then((item) => {
+              if (item === 'Update Now') {
+                installGem('synvert').then(() => {
+                  vscode.window.showInformationMessage('Successfully updated the synvert gem.');
+                }).catch(() => {
+                  vscode.window.showErrorMessage('Failed to update the synvert gem.');
+                });
+              }
+            });
+          }
+          if (compareVersions(remoteSynvertCoreVersion, localSynvertCoreVersion) === 1) {
+            vscode.window.showErrorMessage(`synvert-core gem version is ${remoteSynvertCoreVersion} available. (Current version: ${localSynvertCoreVersion})`, 'Update Now').then((item) => {
+              if (item === 'Update Now') {
+                installGem('synvert-core').then(() => {
+                  vscode.window.showInformationMessage('Successfully updated the synvert-core gem.');
+                }).catch(() => {
+                  vscode.window.showErrorMessage('Failed to update the synvert gem.');
+                });
+              }
+            });
+          }
+        });
+      }
+    }).catch(() => {
+      vscode.window.showErrorMessage('synvert gem not found. Run `gem install synvert` or update your Gemfile.', 'Install Now').then((item) => {
         if (item === 'Install Now') {
-          installGem().then(() => {
-            vscode.window.showInformationMessage('Successfully installed the Synvert gem.');
+          installGem('synvert').then(() => {
+            vscode.window.showInformationMessage('Successfully installed the synvert gem.');
           }).catch(() => {
-            vscode.window.showErrorMessage('Failed to install the Synvert gem.');
+            vscode.window.showErrorMessage('Failed to install the synvert gem.');
           });
         }
       });
@@ -85,22 +119,35 @@ function installNpm(): Promise<boolean> {
   });
 }
 
-function checkGem(): Promise<boolean> {
+function checkGem(): Promise<string> {
   return new Promise((resolve, reject) => {
     const child = rubySpawn('synvert-ruby', ['-v'], {}, true);
+    let output = '';
+    if (child.stdout) {
+      child.stdout.on('data', data => {
+        output += data;
+      });
+    }
     child.on('exit', (code) => {
       if (code === 0) {
-        resolve(true);
+        resolve(output);
       } else {
-        reject(false);
+        reject('');
       }
     });
   });
 }
 
-function installGem(): Promise<boolean> {
+function checkRemoteVersions(): Promise<{ synvertVersion: string, synvertCoreVersion: string }> {
+  const url = "https://api-ruby.synvert.net/check-versions";
+  return fetch(url).then(response => response.json()).then((data: any) => ({
+    synvertVersion: data.synvert_version, synvertCoreVersion: data.synvert_core_version
+  }));
+}
+
+function installGem(gemName: string): Promise<boolean> {
   return new Promise((resolve, reject) => {
-    const child = rubySpawn('gem', ['install', 'synvert'], {}, true);
+    const child = rubySpawn('gem', ['install', gemName], {}, true);
     child.on('exit', (code) => {
       if (code === 0) {
         resolve(true);
