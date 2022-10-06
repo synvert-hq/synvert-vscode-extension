@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.1.4] - 2022-10-06
+
+### Added
+
+- Check gem version and update gem
+
 ## [0.1.3] - 2022-10-02
 
 ### Added
