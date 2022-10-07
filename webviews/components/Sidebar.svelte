@@ -155,6 +155,7 @@
   function extensionChanged() {
     resetFormInputs();
     snippet = "";
+    snippetChanged();
     errorMessage = "";
     results = [];
     switch (extension) {
@@ -205,11 +206,16 @@
       })
       const result = await response.json();
       snippet = extension === "rb" ? composeRubySnippet(result) : composeJavascriptSnippet(result);
+      snippetChanged();
     } catch (error) {
       errorMessage = (error as Error).message;
     } finally {
       generateSnippetButtonDisabled = false;
     }
+  }
+
+  function snippetChanged() {
+    results = [];
   }
 
   function search() {
@@ -372,6 +378,7 @@
 
   function snippetSelected(event: any) {
     snippet = event.detail.source_code;
+    snippetChanged();
   }
 </script>
 
@@ -430,7 +437,7 @@
   <p>{errorMessage}</p>
 {/if}
 <label for="snippet"><b>Snippet</b></label>
-<textarea id="snippet" rows=10 bind:value={snippet}></textarea>
+<textarea id="snippet" rows=10 bind:value={snippet} on:change={snippetChanged}></textarea>
 <label for="onlyPaths"><b>Files to include</b></label>
 <input id="onlyPaths" bind:value={onlyPaths} placeholder="e.g. frontend/src" />
 <label for="skipPaths"><b>Files to exclude</b></label>

@@ -238,7 +238,6 @@ function testRubySnippet(snippet: string, rootPath: string, onlyPaths: string, s
     }
     commandArgs.push(rootPath);
     const child = rubySpawn('synvert-ruby', commandArgs, { encoding: 'utf8' }, true);
-    // const child = rubySpawn('synvert-ruby', ['-v'], {}, true);
     if (child.stdin) {
       child.stdin.write(snippet);
       child.stdin.end();
