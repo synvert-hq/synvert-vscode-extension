@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.1.5] - 2022-10-07
+
+### Changed
+
+- Empty results after changing snippet
+
 ## [0.1.4] - 2022-10-06
 
 ### Added
