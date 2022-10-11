@@ -213,12 +213,12 @@ function testJavascriptSnippet(snippet: string, rootPath: string, onlyPaths: str
   Synvert.Configuration.rootPath = rootPath;
   Synvert.Configuration.onlyPaths = onlyPaths.split(",").map((onlyFile) => onlyFile.trim());
   Synvert.Configuration.skipPaths = skipPaths.split(",").map((skipFile) => skipFile.trim());
-  evalSnippet(snippet);
-  const [group, name] = getLastSnippetGroupAndName();
-  const rewriter = Synvert.Rewriter.fetch(group, name);
-  const snippets: TestResultExtExt[] = rewriter.test();
-  addFileSourceToSnippets(snippets, rootPath);
-  return Promise.resolve(snippets);
+  return new Promise((resolve, reject) => {
+    const rewriter = Synvert.evalSnippet(snippet);
+    const snippets: TestResultExtExt[] = rewriter.test();
+    addFileSourceToSnippets(snippets, rootPath);
+    return resolve(snippets);
+  });
 }
 
 function testRubySnippet(snippet: string, rootPath: string, onlyPaths: string, skipPaths: string): Promise<object[]> {
@@ -299,10 +299,8 @@ function processJavascriptSnippet(snippet: string, rootPath: string, onlyPaths: 
   Synvert.Configuration.rootPath = rootPath;
   Synvert.Configuration.onlyPaths = onlyPaths.split(",").map((onlyFile) => onlyFile.trim());
   Synvert.Configuration.skipPaths = skipPaths.split(",").map((skipFile) => skipFile.trim());
-  evalSnippet(snippet);
-  const [group, name] = getLastSnippetGroupAndName();
-  const rewriter = Synvert.Rewriter.fetch(group, name);
   return new Promise((resolve, reject) => {
+    const rewriter = Synvert.evalSnippet(snippet);
     rewriter.process();
     resolve(true);
   });
@@ -344,14 +342,4 @@ function processRubySnippet(snippet: string, rootPath: string, onlyPaths: string
       }
     });
   });
-}
-
-function evalSnippet(snippet: string) {
-  // avoid group nam duplication.
-  Synvert.Rewriter.clear();
-  eval(formatSnippet(snippet));
-}
-
-function formatSnippet(snippet: string) {
-  return snippet.replace(/const Synvert = require\(['"]synvert-core['"]\);?/, "");
 }
