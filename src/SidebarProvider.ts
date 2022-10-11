@@ -3,7 +3,7 @@ import { machineIdSync } from 'node-machine-id';
 import { rubySpawn } from 'ruby-spawn';
 import * as vscode from "vscode";
 import * as Synvert from "synvert-core";
-import { getLastSnippetGroupAndName, parseJSON } from "./utils";
+import { parseJSON } from "./utils";
 import fs from "fs";
 import path from "path";
 import type { TestResultExtExt } from "./types";
