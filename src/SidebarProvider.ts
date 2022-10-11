@@ -8,7 +8,7 @@ import fs from "fs";
 import path from "path";
 import type { TestResultExtExt } from "./types";
 import { LocalStorageService } from "./localStorageService";
-import { rubyEnabled } from "./configuration";
+import { rubyEnabled, rubyNumberOfWorkers } from "./configuration";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
@@ -235,6 +235,10 @@ function testRubySnippet(snippet: string, rootPath: string, onlyPaths: string, s
     if (skipPaths.length > 0) {
       commandArgs.push('--skip-paths');
       commandArgs.push('"' + skipPaths + '"');
+    }
+    if (rubyNumberOfWorkers() > 1) {
+      commandArgs.push('--number-of-workers');
+      commandArgs.push(String(rubyNumberOfWorkers()));
     }
     commandArgs.push(rootPath);
     const child = rubySpawn('synvert-ruby', commandArgs, { encoding: 'utf8' }, true);
