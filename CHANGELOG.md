@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [0.2.0] - 2022-10-11
+
+### Added
+
+- Add `ruby.number_of_workers` configuration
+- Test ruby snippet in parallel if `ruby.number_of_workers` is greather than 1
+
+### Changed
+
+- Use `evalSnippet` from synvert-core
+
 ## [0.1.5] - 2022-10-07
 
 ### Changed
