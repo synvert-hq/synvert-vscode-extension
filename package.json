@@ -58,6 +58,11 @@
           "type": "boolean",
           "default": "true",
           "description": "Enable synvert ruby."
+        },
+        "synvert.ruby.number_of_workers": {
+          "type": "number",
+          "default": 4,
+          "description": "number of workers to run in parallel"
         }
       }
     }
