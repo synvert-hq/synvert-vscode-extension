@@ -65,7 +65,12 @@
           "description": "number of workers to run in parallel"
         }
       }
-    }
+    },
+    "keybindings": [{
+      "command": "synvert-sidebar.focus",
+      "key": "ctrl+shift+s",
+      "mac": "cmd+shift+s"
+    }]
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

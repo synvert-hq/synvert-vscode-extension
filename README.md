@@ -37,6 +37,10 @@ This extension contributes the following settings:
 * `synvert.ruby.enable`: enable/disable synvert ruby, default is true.
 * `synvert.ruby.number_of_workers`: number of workers to run synvert ruby, default is 4.
 
+## Key Bindings
+
+* `ctrl+shift+s` / `cmd+shift+s`: open synvert sidebar view.
+
 ## Known Issues
 
 Synvert vscode extension searches based on AST nodes, so it's slower than than the traditional find / replace.
