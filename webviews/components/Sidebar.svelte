@@ -350,7 +350,7 @@
   async function querySnippets(query: string) {
     const platform = "vscode";
     const url = extension === "rb" ? 'https://api-ruby.synvert.net/query-snippets' : 'https://api-javascript.synvert.net/query-snippets';
-    // const url = extension === "rb" ? 'https//localhost:9200/query-snippets' : 'http://localhost:3000/query-snippets';
+    // const url = extension === "rb" ? 'http://localhost:9200/query-snippets' : 'http://localhost:3000/query-snippets';
     try {
       const response = await fetch(url, {
         method: "POST",
