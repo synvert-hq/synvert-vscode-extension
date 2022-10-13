@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.3.0] - 2022-10-13
+
+### Added
+
+- Add key binding `ctrl+shift+s` / `cmd+shift+s`
+
 ## [0.2.0] - 2022-10-11
 
 ### Added
