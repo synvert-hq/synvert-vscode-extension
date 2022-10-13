@@ -1,11 +1,10 @@
-import { join } from "path";
+import fs from "fs";
+import path from "path";
 import { machineIdSync } from 'node-machine-id';
 import { rubySpawn } from 'ruby-spawn';
 import * as vscode from "vscode";
 import * as Synvert from "synvert-core";
 import { parseJSON } from "./utils";
-import fs from "fs";
-import path from "path";
 import type { TestResultExtExt } from "./types";
 import { LocalStorageService } from "./localStorageService";
 import { rubyEnabled, rubyNumberOfWorkers } from "./configuration";
@@ -135,16 +134,16 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
   private _getHtmlForWebview(webview: vscode.Webview) {
     const styleResetUri = webview.asWebviewUri(
-      vscode.Uri.file(join(this._extensionUri.path, "media", "reset.css"))
+      vscode.Uri.file(path.join(this._extensionUri.path, "media", "reset.css"))
     );
     const styleVSCodeUri = webview.asWebviewUri(
-      vscode.Uri.file(join(this._extensionUri.path, "media", "vscode.css"))
+      vscode.Uri.file(path.join(this._extensionUri.path, "media", "vscode.css"))
     );
     const scriptUri = webview.asWebviewUri(
-      vscode.Uri.file(join(this._extensionUri.path, "out", "compiled/sidebar.js"))
+      vscode.Uri.file(path.join(this._extensionUri.path, "out", "compiled/sidebar.js"))
     );
     const styleMainUri = webview.asWebviewUri(
-      vscode.Uri.file(join(this._extensionUri.path, "out", "compiled/sidebar.css"))
+      vscode.Uri.file(path.join(this._extensionUri.path, "out", "compiled/sidebar.css"))
     );
 
     // Use a nonce to only allow a specific script to be run.
@@ -214,10 +213,14 @@ function testJavascriptSnippet(snippet: string, rootPath: string, onlyPaths: str
   Synvert.Configuration.onlyPaths = onlyPaths.split(",").map((onlyFile) => onlyFile.trim());
   Synvert.Configuration.skipPaths = skipPaths.split(",").map((skipFile) => skipFile.trim());
   return new Promise((resolve, reject) => {
-    const rewriter = Synvert.evalSnippet(snippet);
-    const snippets: TestResultExtExt[] = rewriter.test();
-    addFileSourceToSnippets(snippets, rootPath);
-    return resolve(snippets);
+    try {
+      const rewriter = evalSnippet(snippet);
+      const snippets: TestResultExtExt[] = rewriter.test();
+      addFileSourceToSnippets(snippets, rootPath);
+      return resolve(snippets);
+    } catch(e) {
+      return reject([]);
+    }
   });
 }
 
@@ -346,4 +349,14 @@ function processRubySnippet(snippet: string, rootPath: string, onlyPaths: string
       }
     });
   });
+}
+
+function evalSnippet(snippet: string): Synvert.Rewriter {
+  // avoid group name duplication.
+  Synvert.Rewriter.clear();
+  return eval(formatSnippet(snippet));
+}
+
+function formatSnippet(snippet: string): string {
+  return snippet.replace(/const Synvert = require\(['"]synvert-core['"]\);?/, "");
 }
