@@ -5,7 +5,7 @@ import { rubySpawn } from 'ruby-spawn';
 import * as vscode from "vscode";
 import * as Synvert from "synvert-core";
 import { parseJSON } from "./utils";
-import type { TestResultExtExt } from "./types";
+import type { SearchResults, TestResultExtExt } from "./types";
 import { LocalStorageService } from "./localStorageService";
 import { rubyEnabled, rubyNumberOfWorkers } from "./configuration";
 
@@ -44,8 +44,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           if (!data.snippet) {
             return;
           }
-          testSnippet(data.extension, data.snippet, data.onlyPaths, data.skipPaths).then((results) => {
-            webviewView.webview.postMessage({ type: 'doneSearch', results });
+          testSnippet(data.extension, data.snippet, data.onlyPaths, data.skipPaths).then((data) => {
+            webviewView.webview.postMessage({ type: 'doneSearch', ...data });
           });
           break;
         }
@@ -188,47 +188,38 @@ function getNonce(): string {
   return text;
 }
 
-function testSnippet(extension: string, snippet: string, onlyPaths: string, skipPaths: string): Promise<object[]> {
-  try {
-    if (vscode.workspace.workspaceFolders) {
-      for (const folder of vscode.workspace.workspaceFolders) {
-        const rootPath = folder.uri.path;
-        if (extension === "rb") {
-          return testRubySnippet(snippet, rootPath, onlyPaths, skipPaths);
-        } else {
-          return testJavascriptSnippet(snippet, rootPath, onlyPaths, skipPaths);
-        }
+function testSnippet(extension: string, snippet: string, onlyPaths: string, skipPaths: string): Promise<SearchResults> {
+  if (vscode.workspace.workspaceFolders) {
+    for (const folder of vscode.workspace.workspaceFolders) {
+      const rootPath = folder.uri.path;
+      if (extension === "rb") {
+        return testRubySnippet(snippet, rootPath, onlyPaths, skipPaths);
+      } else {
+        return testJavascriptSnippet(snippet, rootPath, onlyPaths, skipPaths);
       }
     }
-    return Promise.resolve([]);
-  } catch (e) {
-    // @ts-ignore
-    vscode.window.showErrorMessage(`Failed to run synvert: ${e.message}`);
-    return Promise.resolve([]);
   }
+  return Promise.resolve({ results: [], errorMessage: "" });
 }
 
-function testJavascriptSnippet(snippet: string, rootPath: string, onlyPaths: string, skipPaths: string): Promise<object[]> {
+function testJavascriptSnippet(snippet: string, rootPath: string, onlyPaths: string, skipPaths: string): Promise<SearchResults> {
   Synvert.Configuration.rootPath = rootPath;
   Synvert.Configuration.onlyPaths = onlyPaths.split(",").map((onlyFile) => onlyFile.trim());
   Synvert.Configuration.skipPaths = skipPaths.split(",").map((skipFile) => skipFile.trim());
-  return new Promise((resolve, reject) => {
-    try {
-      const rewriter = evalSnippet(snippet);
-      const snippets: TestResultExtExt[] = rewriter.test();
-      addFileSourceToSnippets(snippets, rootPath);
-      return resolve(snippets);
-    } catch(e) {
-      return reject([]);
-    }
-  });
+  try {
+    const rewriter = evalSnippet(snippet);
+    const snippets: TestResultExtExt[] = rewriter.test();
+    addFileSourceToSnippets(snippets, rootPath);
+    return Promise.resolve({ results: snippets, errorMessage: "" });
+  } catch (e) {
+    return Promise.resolve({ results: [], errorMessage: (e as Error).message });
+  }
 }
 
-function testRubySnippet(snippet: string, rootPath: string, onlyPaths: string, skipPaths: string): Promise<object[]> {
-  return new Promise((resolve, reject) => {
+function testRubySnippet(snippet: string, rootPath: string, onlyPaths: string, skipPaths: string): Promise<SearchResults> {
+  return new Promise((resolve) => {
     if (!rubyEnabled()) {
-      vscode.window.showErrorMessage('Synvert ruby is not enabled!');
-      return resolve([]);
+      return resolve({ results: [], errorMessage: "Synvert ruby is not enabled!" });
     }
     const commandArgs = ['--execute', 'test'];
     if (onlyPaths.length > 0) {
@@ -265,10 +256,9 @@ function testRubySnippet(snippet: string, rootPath: string, onlyPaths: string, s
       if (code === 0) {
         const snippets = parseJSON(output);
         addFileSourceToSnippets(snippets, rootPath);
-        return resolve(snippets);
+        return resolve({ results: snippets, errorMessage: "" });
       } else {
-        vscode.window.showErrorMessage(`Failed to run synvert: ${error}`);
-        return resolve([]);
+        return resolve({ results: [], errorMessage: error });
       }
     });
   });

@@ -69,6 +69,7 @@
         case "doneSearch": {
           searchButtonDisabled = false;
           results = message.results;
+          errorMessage = message.errorMessage;
           break;
         }
         case "doneReplaceAll": {
@@ -401,6 +402,9 @@
     {/if}
   </button>
 </div>
+{#if errorMessage.length > 0}
+  <p class="error-message">{errorMessage}</p>
+{/if}
 {#if showGenerateSnippet}
   <label for="filePattern"><b>File Pattern</b></label>
   <input id="filePattern" bind:value={filePattern} />
@@ -434,7 +438,6 @@
     <input id="rules" type="radio" name="nql_or_rules" value="rules" bind:group={nqlOrRules}>
   </div>
   <button on:click={generateSnippet} disabled={inputs[0].length === 0 || generateSnippetButtonDisabled}>{generateSnippetButtonDisabled ? 'Generating...' : 'Generate Snippet'}</button>
-  <p>{errorMessage}</p>
 {/if}
 <label for="snippet"><b>Snippet</b></label>
 <textarea id="snippet" rows=10 bind:value={snippet} on:change={snippetChanged}></textarea>

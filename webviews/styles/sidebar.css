@@ -13,6 +13,14 @@
   --placeholderColor: #A9A9A9;
   --spinnerColor: #C1C1C1;
 }
+.error-message {
+  color: #842029;
+  background-color: #f8d7da;
+  border-color: #f5c2c7;
+  border-radius: 6px;
+  padding: 8px;
+  margin: 8px 0;
+}
 .generate-snippet button:first-child {
   display: flex;
 }
