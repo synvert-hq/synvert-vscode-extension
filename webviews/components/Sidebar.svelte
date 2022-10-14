@@ -189,6 +189,7 @@
   }
 
   async function generateSnippet() {
+    errorMessage = "";
     const platform = "vscode";
     const url = extension === "rb" ? 'https://api-ruby.synvert.net/generate-snippet' : 'https://api-javascript.synvert.net/generate-snippet';
     // const url = extension === "rb" ? 'http://localhost:9200/generate-snippet' : 'http://localhost:3000/generate-snippet';
@@ -221,12 +222,14 @@
   }
 
   function search() {
+    errorMessage = "";
     searchButtonDisabled = true;
     // @ts-ignore
     tsvscode.postMessage({ type: 'onSearch', extension, snippet, onlyPaths, skipPaths });
   }
 
   function replaceAll() {
+    errorMessage = "";
     replaceAllButtonDisabled = true;
     if (results.length > 0) {
       // @ts-ignore
@@ -350,6 +353,7 @@
   }
 
   async function querySnippets(query: string) {
+    errorMessage = "";
     const platform = "vscode";
     const url = extension === "rb" ? 'https://api-ruby.synvert.net/query-snippets' : 'https://api-javascript.synvert.net/query-snippets';
     // const url = extension === "rb" ? 'http://localhost:9200/query-snippets' : 'http://localhost:3000/query-snippets';
