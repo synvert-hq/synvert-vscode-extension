@@ -53,8 +53,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           if (!data.snippet) {
             return;
           }
-          processSnippet(data.extension, data.snippet, data.onlyPaths, data.skipPath).then(() => {
-            webviewView.webview.postMessage({ type: 'doneReplaceAll' });
+          processSnippet(data.extension, data.snippet, data.onlyPaths, data.skipPaths).then((data) => {
+            webviewView.webview.postMessage({ type: 'doneReplaceAll', ...data });
           });
           break;
         }
@@ -67,7 +67,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             });
             fs.writeFileSync(absolutePath, source);
           });
-          webviewView.webview.postMessage({ type: 'doneReplaceAll' });
+          webviewView.webview.postMessage({ type: 'doneReplaceAll', errorMessage: "" });
           break;
         }
         case "onOpenFile": {
@@ -203,10 +203,10 @@ function testSnippet(extension: string, snippet: string, onlyPaths: string, skip
 }
 
 function testJavascriptSnippet(snippet: string, rootPath: string, onlyPaths: string, skipPaths: string): Promise<SearchResults> {
-  Synvert.Configuration.rootPath = rootPath;
-  Synvert.Configuration.onlyPaths = onlyPaths.split(",").map((onlyFile) => onlyFile.trim());
-  Synvert.Configuration.skipPaths = skipPaths.split(",").map((skipFile) => skipFile.trim());
   try {
+    Synvert.Configuration.rootPath = rootPath;
+    Synvert.Configuration.onlyPaths = onlyPaths.split(",").map((onlyFile) => onlyFile.trim());
+    Synvert.Configuration.skipPaths = skipPaths.split(",").map((skipFile) => skipFile.trim());
     const rewriter = evalSnippet(snippet);
     const snippets: TestResultExtExt[] = rewriter.test();
     addFileSourceToSnippets(snippets, rootPath);
@@ -272,42 +272,37 @@ function addFileSourceToSnippets(snippets: TestResultExtExt[], rootPath: string)
   });
 }
 
-function processSnippet(extension: string, snippet: string, onlyPaths: string, skipPaths: string): Promise<boolean> {
-  try {
-    if (vscode.workspace.workspaceFolders) {
-      for (const folder of vscode.workspace.workspaceFolders) {
-        const rootPath = folder.uri.path;
-        if (extension === "rb") {
-          return processRubySnippet(snippet, rootPath, onlyPaths, skipPaths);
-        } else {
-          return processJavascriptSnippet(snippet, rootPath, onlyPaths, skipPaths);
-        }
+function processSnippet(extension: string, snippet: string, onlyPaths: string, skipPaths: string): Promise<{ errorMessage: string }> {
+  if (vscode.workspace.workspaceFolders) {
+    for (const folder of vscode.workspace.workspaceFolders) {
+      const rootPath = folder.uri.path;
+      if (extension === "rb") {
+        return processRubySnippet(snippet, rootPath, onlyPaths, skipPaths);
+      } else {
+        return processJavascriptSnippet(snippet, rootPath, onlyPaths, skipPaths);
       }
     }
-    return Promise.resolve(true);
+  }
+  return Promise.resolve({ errorMessage: "" });
+}
+
+function processJavascriptSnippet(snippet: string, rootPath: string, onlyPaths: string, skipPaths: string): Promise<{ errorMessage: string }> {
+  try {
+    Synvert.Configuration.rootPath = rootPath;
+    Synvert.Configuration.onlyPaths = onlyPaths.split(",").map((onlyFile) => onlyFile.trim());
+    Synvert.Configuration.skipPaths = skipPaths.split(",").map((skipFile) => skipFile.trim());
+    const rewriter = evalSnippet(snippet);
+    rewriter.process();
+    return Promise.resolve({ errorMessage: "" });
   } catch (e) {
-    // @ts-ignore
-    vscode.window.showErrorMessage(`Failed to run synvert: ${e.message}`);
-    return Promise.resolve(false);
+    return Promise.resolve({ errorMessage: (e as Error).message });
   }
 }
 
-function processJavascriptSnippet(snippet: string, rootPath: string, onlyPaths: string, skipPaths: string): Promise<boolean> {
-  Synvert.Configuration.rootPath = rootPath;
-  Synvert.Configuration.onlyPaths = onlyPaths.split(",").map((onlyFile) => onlyFile.trim());
-  Synvert.Configuration.skipPaths = skipPaths.split(",").map((skipFile) => skipFile.trim());
-  return new Promise((resolve, reject) => {
-    const rewriter = Synvert.evalSnippet(snippet);
-    rewriter.process();
-    resolve(true);
-  });
-}
-
-function processRubySnippet(snippet: string, rootPath: string, onlyPaths: string, skipPaths: string): Promise<boolean> {
-  return new Promise((resolve, reject) => {
+function processRubySnippet(snippet: string, rootPath: string, onlyPaths: string, skipPaths: string): Promise<{ errorMessage: string }> {
+  return new Promise((resolve) => {
     if (!rubyEnabled()) {
-      vscode.window.showErrorMessage('Synvert ruby is not enabled!');
-      return resolve(true);
+      return resolve({ errorMessage: "Synvert ruby is not enabled!" });
     }
     const commandArgs = ['--execute', 'run'];
     if (onlyPaths.length > 0) {
@@ -332,10 +327,9 @@ function processRubySnippet(snippet: string, rootPath: string, onlyPaths: string
     }
     child.on('exit', (code) => {
       if (code === 0) {
-        return resolve(true);
+        return resolve({ errorMessage: "" });
       } else {
-        vscode.window.showErrorMessage(`Failed to run synvert: ${error}`);
-        return resolve(false);
+        return resolve({ errorMessage: error });
       }
     });
   });

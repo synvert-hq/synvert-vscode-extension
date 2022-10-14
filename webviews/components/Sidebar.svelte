@@ -75,6 +75,7 @@
         case "doneReplaceAll": {
           replaceAllButtonDisabled = false;
           results = [];
+          errorMessage = message.errorMessage;
           break;
         }
         case "doneReplaceResult": {
