@@ -388,6 +388,9 @@
   }
 </script>
 
+{#if errorMessage.length > 0}
+  <p class="error-message">{errorMessage}</p>
+{/if}
 <select id="extension" bind:value={extension} on:change={extensionChanged}>
   {#each extensionOptions as option}
     <option value={option.value}>{option.label}</option>
@@ -407,9 +410,6 @@
     {/if}
   </button>
 </div>
-{#if errorMessage.length > 0}
-  <p class="error-message">{errorMessage}</p>
-{/if}
 {#if showGenerateSnippet}
   <label for="filePattern"><b>File Pattern</b></label>
   <input id="filePattern" bind:value={filePattern} />
