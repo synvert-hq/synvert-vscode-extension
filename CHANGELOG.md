@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.4.0] - 2022-10-15
+
+- Allow to write snippet without `new Synvert.Rewriter`
+
 ## [0.3.2] - 2022-10-14
 
 ## Fixed
