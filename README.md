@@ -24,6 +24,10 @@ It supports Typescript, Javascript and Ruby so far.
 
 ![Generate snippet](demos/generate-snippet-1.gif)
 
+- Adopt a short snippet. You can write a short snippet without `new Synvert.Rewriter`.
+
+![Short snippet](demos/short-snippet-1.png)
+
 ## Requirements
 
 Javascript and typescript are supported internally.
