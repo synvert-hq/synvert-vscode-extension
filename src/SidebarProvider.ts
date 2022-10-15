@@ -341,6 +341,26 @@ function evalSnippet(snippet: string): Synvert.Rewriter {
   return eval(formatSnippet(snippet));
 }
 
-function formatSnippet(snippet: string): string {
-  return snippet.replace(/const Synvert = require\(['"]synvert-core['"]\);?/, "");
+const formatSnippet = (snippet: string): string => {
+  const input = snippet.replace(/const Synvert = require\(['"]synvert-core['"]\);?/, "").trim();
+  if (input.startsWith("new Synvert.Rewriter(")) {
+    return input;
+  }
+  if (input.startsWith("withinFiles")) {
+    return `
+      new Synvert.Rewriter("group", "name", () => {
+        configure({ parser: 'typescript' });
+        ${snippet}
+      });
+    `;
+  }
+
+  return `
+    new Synvert.Rewriter("group", "name", () => {
+      configure({ parser: 'typescript' });
+      withinFiles(Synvert.ALL_FILES, function () {
+        ${snippet}
+      });
+    });
+  `;
 }
