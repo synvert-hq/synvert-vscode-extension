@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.4.1] - 2022-10-19
+
+- Fix error handling when generating a snippet
+
 ## [0.4.0] - 2022-10-15
 
 - Allow to write snippet without `new Synvert.Rewriter`
