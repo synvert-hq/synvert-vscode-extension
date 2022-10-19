@@ -208,8 +208,12 @@
         body: JSON.stringify({ extension, inputs, outputs: outputsOrEmptyArray, nql_or_rules: nqlOrRules })
       })
       const data = await response.json();
-      snippet = extension === "rb" ? composeRubySnippet(data) : composeJavascriptSnippet(data);
-      snippetChanged();
+      if (data.error) {
+        errorMessage = data.error;
+      } else {
+        snippet = extension === "rb" ? composeRubySnippet(data) : composeJavascriptSnippet(data);
+        snippetChanged();
+      }
     } catch (error) {
       errorMessage = (error as Error).message;
     } finally {
@@ -369,8 +373,8 @@
         },
         body: JSON.stringify({ query: query })
       })
-      const result = await response.json();
-      return result.snippets;
+      const data = await response.json();
+      return data.snippets;
     } catch (error) {
       errorMessage = (error as Error).message;
       return [];
