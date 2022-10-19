@@ -207,8 +207,8 @@
         },
         body: JSON.stringify({ extension, inputs, outputs: outputsOrEmptyArray, nql_or_rules: nqlOrRules })
       })
-      const result = await response.json();
-      snippet = extension === "rb" ? composeRubySnippet(result) : composeJavascriptSnippet(result);
+      const data = await response.json();
+      snippet = extension === "rb" ? composeRubySnippet(data) : composeJavascriptSnippet(data);
       snippetChanged();
     } catch (error) {
       errorMessage = (error as Error).message;
@@ -306,7 +306,7 @@
     results = results
   }
 
-  const composeRubySnippet = (result: { snippet: string }): string => {
+  const composeRubySnippet = (data: { snippet: string }): string => {
     let customSnippet = "Synvert::Rewriter.new 'group', 'name' do\n";
     if (rubyVersion.length > 0) {
       customSnippet += `  if_ruby '${rubyVersion}'\n`;
@@ -318,9 +318,9 @@
       customSnippet += `  if_gem '${name}', '${version}'\n`;
     }
     customSnippet += `  within_files '${filePattern}' do\n`;
-    if (result.snippet) {
+    if (data.snippet) {
       customSnippet += "    ";
-      customSnippet += result.snippet.replace(/\n/g, "\n    ");
+      customSnippet += data.snippet.replace(/\n/g, "\n    ");
       customSnippet += "\n";
     }
     customSnippet += "  end\n";
@@ -328,7 +328,7 @@
     return customSnippet;
   };
 
-  const composeJavascriptSnippet = (result: { snippet: string}): string => {
+  const composeJavascriptSnippet = (data: { snippet: string}): string => {
     let customSnippet = `const Synvert = require("synvert-core");\n`;
     customSnippet += `new Synvert.Rewriter("group", "name", () => {\n`;
     customSnippet += `  configure({ parser: "typescript" });\n`;
@@ -342,9 +342,9 @@
       customSnippet += `  ifNpm('${name}', '${version}');\n`;
     }
     customSnippet += `  withinFiles("${filePattern}", () => {\n`;
-    if (result.snippet) {
+    if (data.snippet) {
       customSnippet += "    ";
-      customSnippet += result.snippet.replace(/\n/g, "\n    ");
+      customSnippet += data.snippet.replace(/\n/g, "\n    ");
       customSnippet += "\n";
     }
     customSnippet += `  });\n`;
