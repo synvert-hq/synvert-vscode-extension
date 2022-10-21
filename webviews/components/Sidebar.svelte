@@ -210,12 +210,14 @@
       const data = await response.json();
       if (data.error) {
         errorMessage = data.error;
+        snippet = "";
       } else {
         snippet = extension === "rb" ? composeRubySnippet(data) : composeJavascriptSnippet(data);
         snippetChanged();
       }
     } catch (error) {
       errorMessage = (error as Error).message;
+      snippet = "";
     } finally {
       generateSnippetButtonDisabled = false;
     }
