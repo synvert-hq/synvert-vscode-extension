@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [0.4.2] - 2022-10-24
+
+- Remove snippet if failed to generate snippet
+- Avoid multiple withinFile in `formatSnippet`
+
 ## [0.4.1] - 2022-10-19
 
 - Fix error handling when generating a snippet
