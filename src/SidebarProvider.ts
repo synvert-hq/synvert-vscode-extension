@@ -343,10 +343,10 @@ function evalSnippet(snippet: string): Synvert.Rewriter {
 
 const formatSnippet = (snippet: string): string => {
   const input = snippet.replace(/const Synvert = require\(['"]synvert-core['"]\);?/, "").trim();
-  if (input.startsWith("new Synvert.Rewriter(")) {
+  if (input.includes("new Synvert.Rewriter(")) {
     return input;
   }
-  if (input.startsWith("withinFiles")) {
+  if (input.includes("withinFile")) {
     return `
       new Synvert.Rewriter("group", "name", () => {
         configure({ parser: 'typescript' });
