@@ -2,16 +2,31 @@
 
 ## [Unreleased]
 
+## [0.4.3] - 2022-10-25
+
+## Changed
+
+- Update `synvert-core` to 1.21.1
+
 ## [0.4.2] - 2022-10-24
 
+## Changed
+
 - Remove snippet if failed to generate snippet
+
+## Fixed
+
 - Avoid multiple withinFile in `formatSnippet`
 
 ## [0.4.1] - 2022-10-19
 
+## Fixed
+
 - Fix error handling when generating a snippet
 
 ## [0.4.0] - 2022-10-15
+
+## Changed
 
 - Allow to write snippet without `new Synvert.Rewriter`
 
