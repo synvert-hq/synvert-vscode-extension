@@ -430,6 +430,9 @@
     <label for="npmVersion"><b>Npm Version</b></label>
     <input id="npmVersion" bind:value={npmVersion} placeholder="e.g. react >= 18.0.0" />
   {/if}
+  <a href="https://synvert.net/how_to_write_inputs_outputs" target="_blank" rel="noreferrer">
+    How to write inputs / outputs?
+  </a>
   <label for="input"><b>Input</b></label>
   {#each inputs as input}
     <textarea id="input" placeholder="e.g. FactoryBot.create(:user)" bind:value={input}></textarea>
