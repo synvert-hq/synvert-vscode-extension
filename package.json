@@ -63,6 +63,16 @@
           "type": "number",
           "default": 4,
           "description": "number of workers to run in parallel"
+        },
+        "synvert.javascript.enabled": {
+          "type": "boolean",
+          "default": "true",
+          "description": "Enable synvert javascript."
+        },
+        "synvert.typescript.enabled": {
+          "type": "boolean",
+          "default": "true",
+          "description": "Enable synvert typescript."
         }
       }
     },

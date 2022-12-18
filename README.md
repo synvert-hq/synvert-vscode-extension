@@ -40,6 +40,8 @@ This extension contributes the following settings:
 
 * `synvert.ruby.enable`: enable/disable synvert ruby, default is true.
 * `synvert.ruby.number_of_workers`: number of workers to run synvert ruby, default is 4.
+* `synvert.javascript.enable`: enable/disable synvert javascript, default is true.
+* `synvert.typescript.enable`: enable/disable synvert typescript, default is true.
 
 ## Key Bindings
 
