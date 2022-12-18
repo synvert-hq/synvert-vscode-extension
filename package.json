@@ -66,11 +66,13 @@
         }
       }
     },
-    "keybindings": [{
-      "command": "synvert-sidebar.focus",
-      "key": "ctrl+shift+s",
-      "mac": "cmd+shift+s"
-    }]
+    "keybindings": [
+      {
+        "command": "synvert-sidebar.focus",
+        "key": "ctrl+shift+s",
+        "mac": "cmd+shift+s"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
