@@ -1,14 +1,13 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { spawn } from 'child_process';
-import { rubySpawn } from 'ruby-spawn';
 import fetch from "node-fetch";
 import { compareVersions } from 'compare-versions';
 import { SidebarProvider } from './SidebarProvider';
 import { LocalStorageService } from './localStorageService';
 import { rubyEnabled } from './configuration';
 import { log } from './log';
+import { runRubyCommand } from './utils';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -92,14 +91,13 @@ export function activate(context: vscode.ExtensionContext) {
 // this method is called when your extension is deactivated
 export function deactivate() {}
 
-function checkNpm(): Promise<boolean> {
+function checkNpm(): Promise<string> {
   return new Promise((resolve, reject) => {
-    const child = spawn('synvert-javascript', ['-v']);
-    child.on('exit', (code) => {
-      if (code === 0) {
-        resolve(true);
+    runRubyCommand("synvert-javascript", ["-v"]).then(({ stdout, stderr }) => {
+      if (stderr.length === 0) {
+        return resolve(stdout);
       } else {
-        reject(false);
+        return reject(stderr);
       }
     });
   });
@@ -107,13 +105,11 @@ function checkNpm(): Promise<boolean> {
 
 function installNpm(): Promise<boolean> {
   return new Promise((resolve, reject) => {
-    const child = spawn('npm', ['install', '-g', 'synvert']);
-    child.on('message', (data) => log(data.toString()));
-    child.on('exit', (code) => {
-      if (code === 0) {
-        resolve(true);
+    runRubyCommand("npm", ["install", "-g", "synvert"]).then(({ stderr }) => {
+      if (stderr.length === 0) {
+        return resolve(true);
       } else {
-        reject(false);
+        return resolve(false);
       }
     });
   });
@@ -121,18 +117,11 @@ function installNpm(): Promise<boolean> {
 
 function checkGem(): Promise<string> {
   return new Promise((resolve, reject) => {
-    const child = rubySpawn('synvert-ruby', ['-v'], {}, true);
-    let output = '';
-    if (child.stdout) {
-      child.stdout.on('data', data => {
-        output += data;
-      });
-    }
-    child.on('exit', (code) => {
-      if (code === 0) {
-        resolve(output);
+    runRubyCommand("synvert-ruby", ["-v"]).then(({ stdout, stderr }) => {
+      if (stderr.length === 0) {
+        return resolve(stdout);
       } else {
-        reject('');
+        return reject(stderr);
       }
     });
   });
@@ -147,12 +136,11 @@ function checkRemoteVersions(): Promise<{ synvertVersion: string, synvertCoreVer
 
 function installGem(gemName: string): Promise<boolean> {
   return new Promise((resolve, reject) => {
-    const child = rubySpawn('gem', ['install', gemName], {}, true);
-    child.on('exit', (code) => {
-      if (code === 0) {
-        resolve(true);
+    runRubyCommand("gem", ["install", gemName]).then(({ stderr }) => {
+      if (stderr.length === 0) {
+        return resolve(true);
       } else {
-        reject(false);
+        return resolve(false);
       }
     });
   });

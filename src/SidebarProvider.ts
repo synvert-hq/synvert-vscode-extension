@@ -1,10 +1,9 @@
 import fs from "fs";
 import path from "path";
 import { machineIdSync } from 'node-machine-id';
-import { rubySpawn } from 'ruby-spawn';
 import * as vscode from "vscode";
 import * as Synvert from "synvert-core";
-import { parseJSON } from "./utils";
+import { parseJSON, runRubyCommand } from "./utils";
 import type { SearchResults, TestResultExtExt } from "./types";
 import { LocalStorageService } from "./localStorageService";
 import { rubyEnabled, rubyNumberOfWorkers } from "./configuration";
@@ -235,30 +234,13 @@ function testRubySnippet(snippet: string, rootPath: string, onlyPaths: string, s
       commandArgs.push(String(rubyNumberOfWorkers()));
     }
     commandArgs.push(rootPath);
-    const child = rubySpawn('synvert-ruby', commandArgs, { encoding: 'utf8' }, true);
-    if (child.stdin) {
-      child.stdin.write(snippet);
-      child.stdin.end();
-    }
-    let output = '';
-    if (child.stdout) {
-      child.stdout.on('data', data => {
-        output += data;
-      });
-    }
-    let error = "";
-    if (child.stderr) {
-      child.stderr.on('data', data => {
-        error += data;
-      });
-    }
-    child.on('exit', (code) => {
-      if (code === 0) {
-        const snippets = parseJSON(output);
+    runRubyCommand("synvert-ruby", commandArgs, snippet).then(({ stdout, stderr }) => {
+      if (stderr.length === 0) {
+        const snippets = parseJSON(stdout);
         addFileSourceToSnippets(snippets, rootPath);
         return resolve({ results: snippets, errorMessage: "" });
       } else {
-        return resolve({ results: [], errorMessage: error });
+        return resolve({ results: [], errorMessage: stderr });
       }
     });
   });
@@ -314,22 +296,11 @@ function processRubySnippet(snippet: string, rootPath: string, onlyPaths: string
       commandArgs.push('"' + skipPaths + '"');
     }
     commandArgs.push(rootPath);
-    const child = rubySpawn('synvert-ruby', commandArgs, { encoding: 'utf8' }, true);
-    if (child.stdin) {
-      child.stdin.write(snippet);
-      child.stdin.end();
-    }
-    let error = "";
-    if (child.stderr) {
-      child.stderr.on("data", (data) => {
-        error += data;
-      });
-    }
-    child.on('exit', (code) => {
-      if (code === 0) {
+    runRubyCommand("synvert-ruby", commandArgs, snippet).then(({ stdout, stderr }) => {
+      if (stderr.length === 0) {
         return resolve({ errorMessage: "" });
       } else {
-        return resolve({ errorMessage: error });
+        return resolve({ errorMessage: stderr });
       }
     });
   });
@@ -363,4 +334,4 @@ const formatSnippet = (snippet: string): string => {
       });
     });
   `;
-}
+};
