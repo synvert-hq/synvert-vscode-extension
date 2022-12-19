@@ -139,6 +139,25 @@
     tsvscode.postMessage({ type: "afterUpdate", showGenerateSnippet, language, filePattern, nodeVersion, npmVersion, inputs, outputs, nqlOrRules, onlyPaths, skipPaths, snippet, results });
   });
 
+  const PLACEHODERS: { [language: string]: { [name: string]: string } } = {
+    ruby: {
+      input: "FactoryBot.create(:user)",
+      output: "create(:user)",
+    },
+    javascript: {
+      input: "foo.substring(indexStart, indexEnd)",
+      output: "foo.slice(indexStart, indexEnd)",
+    },
+    typescript: {
+      input: "const x: Array<string> = ['a', 'b']",
+      output: "const x: string[] = ['a', 'b']",
+    }
+  }
+
+  function placeholderByLanguage(language: string): { [name: string]: string } {
+    return PLACEHODERS[language];
+  }
+
   function updateSelectedResult(resultIndex: number) {
     if (selectedResultIndex === resultIndex) {
       selectedResultIndex = undefined;
@@ -454,11 +473,11 @@
   <br />
   <label for="input"><b>Input</b></label>
   {#each inputs as input}
-    <textarea id="input" placeholder="e.g. FactoryBot.create(:user)" bind:value={input}></textarea>
+    <textarea id="input" placeholder={placeholderByLanguage(language).input} bind:value={input}></textarea>
   {/each}
   <label for="output"><b>Output</b></label>
   {#each outputs as output}
-    <textarea id="output" placeholder="e.g. create(:user)" bind:value={output}></textarea>
+    <textarea id="output" placeholder={placeholderByLanguage(language).output} bind:value={output}></textarea>
   {/each}
   <p><a href={"#"} on:click={addMoreInputOutput}>Add More Input/Output</a></p>
   {#if inputs.length > 1}
