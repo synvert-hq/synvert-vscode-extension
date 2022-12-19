@@ -2,11 +2,10 @@ import fs from "fs";
 import path from "path";
 import { machineIdSync } from 'node-machine-id';
 import * as vscode from "vscode";
-import * as Synvert from "synvert-core";
 import { parseJSON, runRubyCommand } from "./utils";
 import type { SearchResults, TestResultExtExt } from "./types";
 import { LocalStorageService } from "./localStorageService";
-import { rubyEnabled, rubyNumberOfWorkers } from "./configuration";
+import { typescriptEnabled, javascriptEnabled, rubyEnabled, rubyNumberOfWorkers } from "./configuration";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
@@ -43,7 +42,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           if (!data.snippet) {
             return;
           }
-          testSnippet(data.extension, data.snippet, data.onlyPaths, data.skipPaths).then((data) => {
+          testSnippet(data.language, data.snippet, data.onlyPaths, data.skipPaths).then((data) => {
             webviewView.webview.postMessage({ type: 'doneSearch', ...data });
           });
           break;
@@ -52,7 +51,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           if (!data.snippet) {
             return;
           }
-          processSnippet(data.extension, data.snippet, data.onlyPaths, data.skipPaths).then((data) => {
+          processSnippet(data.language, data.snippet, data.onlyPaths, data.skipPaths).then((data) => {
             webviewView.webview.postMessage({ type: 'doneReplaceAll', ...data });
           });
           break;
@@ -167,6 +166,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
               const tsvscode = acquireVsCodeApi();
               const token = "${token}";
               const rubyEnabled = ${rubyEnabled()};
+              const javascriptEnabled = ${javascriptEnabled()};
+              const typescriptEnabled = ${typescriptEnabled()};
           </script>
 
         </head>
@@ -187,14 +188,17 @@ function getNonce(): string {
   return text;
 }
 
-function testSnippet(extension: string, snippet: string, onlyPaths: string, skipPaths: string): Promise<SearchResults> {
+function testSnippet(language: string, snippet: string, onlyPaths: string, skipPaths: string): Promise<SearchResults> {
   if (vscode.workspace.workspaceFolders) {
     for (const folder of vscode.workspace.workspaceFolders) {
       const rootPath = folder.uri.path;
-      if (extension === "rb") {
-        return testRubySnippet(snippet, rootPath, onlyPaths, skipPaths);
-      } else {
-        return testJavascriptSnippet(snippet, rootPath, onlyPaths, skipPaths);
+      switch (language) {
+        case "ruby":
+          return testRubySnippet(snippet, rootPath, onlyPaths, skipPaths);
+        case "javascript":
+          return testJavascriptSnippet(snippet, rootPath, onlyPaths, skipPaths);
+        case "typewscript":
+          return testTypescriptSnippet(snippet, rootPath, onlyPaths, skipPaths);
       }
     }
   }
@@ -202,17 +206,59 @@ function testSnippet(extension: string, snippet: string, onlyPaths: string, skip
 }
 
 function testJavascriptSnippet(snippet: string, rootPath: string, onlyPaths: string, skipPaths: string): Promise<SearchResults> {
-  try {
-    Synvert.Configuration.rootPath = rootPath;
-    Synvert.Configuration.onlyPaths = onlyPaths.split(",").map((onlyFile) => onlyFile.trim());
-    Synvert.Configuration.skipPaths = skipPaths.split(",").map((skipFile) => skipFile.trim());
-    const rewriter = evalSnippet(snippet);
-    const snippets: TestResultExtExt[] = rewriter.test();
-    addFileSourceToSnippets(snippets, rootPath);
-    return Promise.resolve({ results: snippets, errorMessage: "" });
-  } catch (e) {
-    return Promise.resolve({ results: [], errorMessage: (e as Error).message });
-  }
+  return new Promise((resolve) => {
+    if (!javascriptEnabled()) {
+      return resolve({ results: [], errorMessage: "Synvert javascript is not enabled!" });
+    }
+    const commandArgs = ["--execute", "test"];
+    if (onlyPaths.length > 0) {
+      commandArgs.push("--onlyPaths");
+      commandArgs.push(onlyPaths);
+    }
+    if (skipPaths.length > 0) {
+      commandArgs.push("--skipPaths");
+      commandArgs.push(skipPaths);
+    }
+    commandArgs.push("--rootPath");
+    commandArgs.push(rootPath);
+    runRubyCommand("synvert-javascript", commandArgs, snippet).then(({ stdout, stderr }) => {
+      if (stderr.length === 0) {
+        const snippets = parseJSON(stdout);
+        addFileSourceToSnippets(snippets, rootPath);
+        return resolve({ results: snippets, errorMessage: "" });
+      } else {
+        return resolve({ results: [], errorMessage: stderr });
+      }
+    });
+  });
+}
+
+function testTypescriptSnippet(snippet: string, rootPath: string, onlyPaths: string, skipPaths: string): Promise<SearchResults> {
+  return new Promise((resolve) => {
+    if (!typescriptEnabled()) {
+      return resolve({ results: [], errorMessage: "Synvert typescript is not enabled!" });
+    }
+    const commandArgs = ["--execute", "test"];
+    if (onlyPaths.length > 0) {
+      commandArgs.push("--onlyPaths");
+      commandArgs.push(onlyPaths);
+    }
+    if (skipPaths.length > 0) {
+      commandArgs.push("--skipPaths");
+      commandArgs.push(skipPaths);
+    }
+    commandArgs.push("--rootPath");
+    commandArgs.push(rootPath);
+    runRubyCommand("synvert-javascript", commandArgs, snippet).then(({ stdout, stderr }) => {
+      if (stderr.length === 0) {
+        const snippets = parseJSON(stdout);
+        addFileSourceToSnippets(snippets, rootPath);
+        return resolve({ results: snippets, errorMessage: "" });
+      } else {
+        return resolve({ results: [], errorMessage: stderr });
+      }
+    });
+  });
 }
 
 function testRubySnippet(snippet: string, rootPath: string, onlyPaths: string, skipPaths: string): Promise<SearchResults> {
@@ -227,7 +273,7 @@ function testRubySnippet(snippet: string, rootPath: string, onlyPaths: string, s
     }
     if (skipPaths.length > 0) {
       commandArgs.push('--skip-paths');
-      commandArgs.push('"' + skipPaths + '"');
+      commandArgs.push(skipPaths);
     }
     if (rubyNumberOfWorkers() > 1) {
       commandArgs.push('--number-of-workers');
@@ -254,14 +300,17 @@ function addFileSourceToSnippets(snippets: TestResultExtExt[], rootPath: string)
   });
 }
 
-function processSnippet(extension: string, snippet: string, onlyPaths: string, skipPaths: string): Promise<{ errorMessage: string }> {
+function processSnippet(language: string, snippet: string, onlyPaths: string, skipPaths: string): Promise<{ errorMessage: string }> {
   if (vscode.workspace.workspaceFolders) {
     for (const folder of vscode.workspace.workspaceFolders) {
       const rootPath = folder.uri.path;
-      if (extension === "rb") {
-        return processRubySnippet(snippet, rootPath, onlyPaths, skipPaths);
-      } else {
-        return processJavascriptSnippet(snippet, rootPath, onlyPaths, skipPaths);
+      switch (language) {
+        case "ruby":
+          return processRubySnippet(snippet, rootPath, onlyPaths, skipPaths);
+        case "javascript":
+          return processJavascriptSnippet(snippet, rootPath, onlyPaths, skipPaths);
+        case "typescript":
+          return processTypescriptSnippet(snippet, rootPath, onlyPaths, skipPaths);
       }
     }
   }
@@ -269,16 +318,55 @@ function processSnippet(extension: string, snippet: string, onlyPaths: string, s
 }
 
 function processJavascriptSnippet(snippet: string, rootPath: string, onlyPaths: string, skipPaths: string): Promise<{ errorMessage: string }> {
-  try {
-    Synvert.Configuration.rootPath = rootPath;
-    Synvert.Configuration.onlyPaths = onlyPaths.split(",").map((onlyFile) => onlyFile.trim());
-    Synvert.Configuration.skipPaths = skipPaths.split(",").map((skipFile) => skipFile.trim());
-    const rewriter = evalSnippet(snippet);
-    rewriter.process();
-    return Promise.resolve({ errorMessage: "" });
-  } catch (e) {
-    return Promise.resolve({ errorMessage: (e as Error).message });
-  }
+  return new Promise((resolve) => {
+    if (!javascriptEnabled()) {
+      return resolve({ errorMessage: "Synvert javascript is not enabled!" });
+    }
+    const commandArgs = ["--execute", "run"];
+    if (onlyPaths.length > 0) {
+      commandArgs.push('--onlyPaths');
+      commandArgs.push(onlyPaths);
+    }
+    if (skipPaths.length > 0) {
+      commandArgs.push('--skipPaths');
+      commandArgs.push(skipPaths);
+    }
+    commandArgs.push("--rootPath");
+    commandArgs.push(rootPath);
+    runRubyCommand('synvert-javascript', commandArgs, snippet).then(({ stdout, stderr }) => {
+      if (stderr.length === 0) {
+        return resolve({ errorMessage: "" });
+      } else {
+        return resolve({ errorMessage: stderr });
+      }
+    });
+  });
+}
+
+function processTypescriptSnippet(snippet: string, rootPath: string, onlyPaths: string, skipPaths: string): Promise<{ errorMessage: string }> {
+  return new Promise((resolve) => {
+    if (!javascriptEnabled()) {
+      return resolve({ errorMessage: "Synvert typescript is not enabled!" });
+    }
+    const commandArgs = ["--execute", "run"];
+    if (onlyPaths.length > 0) {
+      commandArgs.push('--onlyPaths');
+      commandArgs.push(onlyPaths);
+    }
+    if (skipPaths.length > 0) {
+      commandArgs.push('--skipPaths');
+      commandArgs.push(skipPaths);
+    }
+    commandArgs.push("--rootPath");
+    commandArgs.push(rootPath);
+    runRubyCommand('synvert-javascript', commandArgs, snippet).then(({ stdout, stderr }) => {
+      if (stderr.length === 0) {
+        return resolve({ errorMessage: "" });
+      } else {
+        return resolve({ errorMessage: stderr });
+      }
+    });
+  });
 }
 
 function processRubySnippet(snippet: string, rootPath: string, onlyPaths: string, skipPaths: string): Promise<{ errorMessage: string }> {
@@ -293,7 +381,7 @@ function processRubySnippet(snippet: string, rootPath: string, onlyPaths: string
     }
     if (skipPaths.length > 0) {
       commandArgs.push('--skip-paths');
-      commandArgs.push('"' + skipPaths + '"');
+      commandArgs.push(skipPaths);
     }
     commandArgs.push(rootPath);
     runRubyCommand("synvert-ruby", commandArgs, snippet).then(({ stdout, stderr }) => {
@@ -304,12 +392,6 @@ function processRubySnippet(snippet: string, rootPath: string, onlyPaths: string
       }
     });
   });
-}
-
-function evalSnippet(snippet: string): Synvert.Rewriter {
-  // avoid group name duplication.
-  Synvert.Rewriter.clear();
-  return eval(formatSnippet(snippet));
 }
 
 const formatSnippet = (snippet: string): string => {
