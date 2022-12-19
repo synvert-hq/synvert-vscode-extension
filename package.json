@@ -69,10 +69,20 @@
           "default": "true",
           "description": "Enable synvert javascript."
         },
+        "synvert.javascript.max_file_size": {
+          "type": "number",
+          "default": 100,
+          "description": "Skip file if its size is more than the size. (KB)"
+        },
         "synvert.typescript.enabled": {
           "type": "boolean",
           "default": "true",
           "description": "Enable synvert typescript."
+        },
+        "synvert.typescript.max_file_size": {
+          "type": "number",
+          "default": 100,
+          "description": "Skip file if its size is more than the size. (KB)"
         }
       }
     },

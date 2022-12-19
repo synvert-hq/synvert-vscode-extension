@@ -12,6 +12,14 @@ export const javascriptEnabled = (): boolean => {
   return workspace.getConfiguration('synvert').get('javascript.enabled') as boolean;
 };
 
+export const javascriptMaxFileSize = (): number => {
+  return workspace.getConfiguration('synvert').get('javascript.max_file_size') as number;
+}
+
 export const typescriptEnabled = (): boolean => {
   return workspace.getConfiguration('synvert').get('typescript.enabled') as boolean;
 };
+
+export const typescriptMaxFileSize = (): number => {
+  return workspace.getConfiguration('synvert').get('typescript.max_file_size') as number;
+}

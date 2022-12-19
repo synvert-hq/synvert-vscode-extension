@@ -5,7 +5,7 @@ import * as vscode from "vscode";
 import { parseJSON, runRubyCommand } from "./utils";
 import type { SearchResults, TestResultExtExt } from "./types";
 import { LocalStorageService } from "./localStorageService";
-import { typescriptEnabled, javascriptEnabled, rubyEnabled, rubyNumberOfWorkers } from "./configuration";
+import { typescriptEnabled, javascriptEnabled, rubyEnabled, rubyNumberOfWorkers, javascriptMaxFileSize, typescriptMaxFileSize } from "./configuration";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
@@ -219,6 +219,8 @@ function testJavascriptSnippet(snippet: string, rootPath: string, onlyPaths: str
       commandArgs.push("--skipPaths");
       commandArgs.push(skipPaths);
     }
+    commandArgs.push("--maxFileSize");
+    commandArgs.push(String(javascriptMaxFileSize() * 1024));
     commandArgs.push("--rootPath");
     commandArgs.push(rootPath);
     runRubyCommand("synvert-javascript", commandArgs, snippet).then(({ stdout, stderr }) => {
@@ -247,6 +249,8 @@ function testTypescriptSnippet(snippet: string, rootPath: string, onlyPaths: str
       commandArgs.push("--skipPaths");
       commandArgs.push(skipPaths);
     }
+    commandArgs.push("--maxFileSize");
+    commandArgs.push(String(typescriptMaxFileSize() * 1024));
     commandArgs.push("--rootPath");
     commandArgs.push(rootPath);
     runRubyCommand("synvert-javascript", commandArgs, snippet).then(({ stdout, stderr }) => {
@@ -331,6 +335,8 @@ function processJavascriptSnippet(snippet: string, rootPath: string, onlyPaths: 
       commandArgs.push('--skipPaths');
       commandArgs.push(skipPaths);
     }
+    commandArgs.push("--maxFileSize");
+    commandArgs.push(String(javascriptMaxFileSize() * 1024));
     commandArgs.push("--rootPath");
     commandArgs.push(rootPath);
     runRubyCommand('synvert-javascript', commandArgs, snippet).then(({ stdout, stderr }) => {
@@ -357,6 +363,8 @@ function processTypescriptSnippet(snippet: string, rootPath: string, onlyPaths: 
       commandArgs.push('--skipPaths');
       commandArgs.push(skipPaths);
     }
+    commandArgs.push("--maxFileSize");
+    commandArgs.push(String(typescriptMaxFileSize() * 1024));
     commandArgs.push("--rootPath");
     commandArgs.push(rootPath);
     runRubyCommand('synvert-javascript', commandArgs, snippet).then(({ stdout, stderr }) => {
