@@ -1,12 +1,12 @@
 <script lang="ts">
   import { onMount, afterUpdate } from "svelte";
   import Select from "svelte-select";
-  import type { TestResultExtExt } from "../../src/types";
+  import type { SelectOption, TestResultExtExt } from "../../src/types";
 
   let showGenerateSnippet = false;
   let inputs = [""];
   let outputs = [""];
-  let extension = "ts";
+  let language = "typescript";
   let filePattern = "**/*.ts";
   let rubyVersion = "";
   let gemVersion = "";
@@ -27,15 +27,18 @@
   let selectedActionIndex: number | undefined;
   let filesCollapse: { [filePath: string]: boolean } = {};
 
-  const extensionOptions = [
-    { value: "ts", label: "Typescript" },
-    { value: "tsx", label: "Typescript + JSX" },
-    { value: "js", label: "Javascript" },
-    { value: "jsx", label: "Javascript + JSX" }
-  ]
+  const languageOptions: SelectOption[] = [];
   // @ts-ignore
   if (rubyEnabled) {
-    extensionOptions.push({ value: "rb", label: "Ruby" });
+    languageOptions.push({ value: "ruby", label: "Ruby" });
+  }
+  // @ts-ignore
+  if (javascriptEnabled) {
+    languageOptions.push({ value: "javascript", label: "Javascript" });
+  }
+  // @ts-ignore
+  if (typescriptEnabled) {
+    languageOptions.push({ value: "typescript", label: "Typescript" });
   }
 
   onMount(() => {
@@ -44,8 +47,8 @@
       switch (message.type) {
         case "loadData": {
           showGenerateSnippet = message.showGenerateSnippet;
-          extension = message.extension;
-          filePattern = message.filePattern;
+          language = message.language || "typescript";
+          filePattern = message.filePattern || "**/*.ts";
           nodeVersion = message.nodeVersion || "";
           npmVersion = message.npmVersion || "";
           inputs = message.inputs;
@@ -58,8 +61,29 @@
           break;
         }
         case "currentFileExtensionName": {
-          extension = message.value;
-          extensionChanged();
+          const extension = message.value;
+          switch (extension) {
+            case "rb":
+              language = "ruby";
+              filePattern = "**/*.rb";
+              break;
+            case "js":
+              language = "javascript";
+              filePattern = "**/*.js";
+              break;
+            case "jsx":
+              language = "javascript";
+              filePattern = "**/*.jsx";
+              break;
+            case "ts":
+              language = "typescript";
+              filePattern = "**/*.ts";
+              break;
+            case "tsx":
+              language = "typescript";
+              filePattern = "**/*.tsx";
+              break;
+          }
           break;
         }
         case "selectedCode": {
@@ -112,7 +136,7 @@
 
   afterUpdate(() => {
     // @ts-ignore
-    tsvscode.postMessage({ type: "afterUpdate", showGenerateSnippet, extension, filePattern, nodeVersion, npmVersion, inputs, outputs, nqlOrRules, onlyPaths, skipPaths, snippet, results });
+    tsvscode.postMessage({ type: "afterUpdate", showGenerateSnippet, language, filePattern, nodeVersion, npmVersion, inputs, outputs, nqlOrRules, onlyPaths, skipPaths, snippet, results });
   });
 
   function updateSelectedResult(resultIndex: number) {
@@ -154,27 +178,21 @@
     outputs = outputs.slice(0, -1);
   }
 
-  function extensionChanged() {
+  function languageChanged() {
     resetFormInputs();
     snippet = "";
     snippetChanged();
     errorMessage = "";
     results = [];
-    switch (extension) {
-      case "rb":
+    switch (language) {
+      case "ruby":
         filePattern = "**/*.rb";
         break;
-      case "js":
+      case "javascript":
         filePattern = "**/*.js";
         break;
-      case "jsx":
-        filePattern = "**/*.jsx";
-        break;
-      case "ts":
+      case "typescript":
         filePattern = "**/*.ts";
-        break;
-      case "tsx":
-        filePattern = "**/*.tsx";
         break;
     }
   }
@@ -191,8 +209,8 @@
   async function generateSnippet() {
     errorMessage = "";
     const platform = "vscode";
-    const url = extension === "rb" ? 'https://api-ruby.synvert.net/generate-snippet' : 'https://api-javascript.synvert.net/generate-snippet';
-    // const url = extension === "rb" ? 'http://localhost:9200/generate-snippet' : 'http://localhost:3000/generate-snippet';
+    const url = language === "ruby" ? 'https://api-ruby.synvert.net/generate-snippet' : 'https://api-javascript.synvert.net/generate-snippet';
+    // const url = language === "ruby" ? 'http://localhost:9200/generate-snippet' : 'http://localhost:3000/generate-snippet';
     try {
       generateSnippetButtonDisabled = true;
       const outputsOrEmptyArray = outputs.every(output => output.length === 0) ? [] : outputs
@@ -205,14 +223,14 @@
           "X-SYNVERT-TOKEN": token,
           "X-SYNVERT-PLATFORM": platform,
         },
-        body: JSON.stringify({ extension, inputs, outputs: outputsOrEmptyArray, nql_or_rules: nqlOrRules })
+        body: JSON.stringify({ inputs, outputs: outputsOrEmptyArray, nql_or_rules: nqlOrRules })
       })
       const data = await response.json();
       if (data.error) {
         errorMessage = data.error;
         snippet = "";
       } else {
-        snippet = extension === "rb" ? composeRubySnippet(data) : composeJavascriptSnippet(data);
+        snippet = language === "ruby" ? composeRubySnippet(data) : composeJavascriptSnippet(data);
         snippetChanged();
       }
     } catch (error) {
@@ -231,7 +249,7 @@
     errorMessage = "";
     searchButtonDisabled = true;
     // @ts-ignore
-    tsvscode.postMessage({ type: 'onSearch', extension, snippet, onlyPaths, skipPaths });
+    tsvscode.postMessage({ type: 'onSearch', language, snippet, onlyPaths, skipPaths });
   }
 
   function replaceAll() {
@@ -242,7 +260,7 @@
       tsvscode.postMessage({ type: 'onReplaceAll', results });
     } else {
       // @ts-ignore
-      tsvscode.postMessage({ type: 'onDirectReplaceAll', extension, snippet, onlyPaths, skipPaths });
+      tsvscode.postMessage({ type: 'onDirectReplaceAll', language, snippet, onlyPaths, skipPaths });
     }
   }
 
@@ -361,8 +379,8 @@
   async function querySnippets(query: string) {
     errorMessage = "";
     const platform = "vscode";
-    const url = extension === "rb" ? 'https://api-ruby.synvert.net/query-snippets' : 'https://api-javascript.synvert.net/query-snippets';
-    // const url = extension === "rb" ? 'http://localhost:9200/query-snippets' : 'http://localhost:3000/query-snippets';
+    const url = language === "ruby" ? 'https://api-ruby.synvert.net/query-snippets' : 'https://api-javascript.synvert.net/query-snippets';
+    // const url = language === "ruby" ? 'http://localhost:9200/query-snippets' : 'http://localhost:3000/query-snippets';
     try {
       const response = await fetch(url, {
         method: "POST",
@@ -397,8 +415,8 @@
 {#if errorMessage.length > 0}
   <p class="error-message">{errorMessage}</p>
 {/if}
-<select id="extension" bind:value={extension} on:change={extensionChanged}>
-  {#each extensionOptions as option}
+<select id="language" bind:value={language} on:change={languageChanged}>
+  {#each languageOptions as option}
     <option value={option.value}>{option.label}</option>
   {/each}
 </select>
@@ -419,7 +437,7 @@
 {#if showGenerateSnippet}
   <label for="filePattern"><b>File Pattern</b></label>
   <input id="filePattern" bind:value={filePattern} />
-  {#if extension === "rb"}
+  {#if language === "ruby"}
     <label for="rubyVersion"><b>Ruby Version</b></label>
     <input id="rubyVersion" bind:value={rubyVersion} placeholder="e.g. 3.0.0" />
     <label for="gemVersion"><b>Gem Version</b></label>
@@ -433,6 +451,7 @@
   <a href="https://synvert.net/how_to_write_inputs_outputs" target="_blank" rel="noreferrer">
     How to write inputs / outputs?
   </a>
+  <br />
   <label for="input"><b>Input</b></label>
   {#each inputs as input}
     <textarea id="input" placeholder="e.g. FactoryBot.create(:user)" bind:value={input}></textarea>
