@@ -1,38 +1,53 @@
 # Change Log
 
-## [Unreleased]
+## [0.5.0] - 2022-12-20
+
+### Addd
+
+- Add "How to write inputs / outputs" link
+- Add `javascript.enabled` and `typescript.enabled` configurations
+- Add `synvert.javascript.max_file_size` and `synvert.typescript.max_file_size` configurations
+- Use `synvert` npm
+
+### Changed
+
+- Select language instead of extension
+
+### Fixed
+
+- Set input/output placeholder for different language
 
 ## [0.4.3] - 2022-10-25
 
-## Changed
+### Changed
 
 - Update `synvert-core` to 1.21.1
 
 ## [0.4.2] - 2022-10-24
 
-## Changed
+### Changed
 
 - Remove snippet if failed to generate snippet
 
-## Fixed
+### Fixed
 
 - Avoid multiple withinFile in `formatSnippet`
 
 ## [0.4.1] - 2022-10-19
 
-## Fixed
+### Fixed
 
 - Fix error handling when generating a snippet
 
 ## [0.4.0] - 2022-10-15
 
-## Changed
+### Changed
 
 - Allow to write snippet without `new Synvert.Rewriter`
 
 ## [0.3.2] - 2022-10-14
 
-## Fixed
+### Fixed
 
 - Fix error handling for search and replace
 
