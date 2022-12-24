@@ -1,12 +1,15 @@
 <script lang="ts">
   import { onMount, afterUpdate } from "svelte";
   import Select from "svelte-select";
+  import type { Snippet } from "synvert-ui-common";
   import type { SelectOption, TestResultExtExt } from "../../src/types";
 
   let showGenerateSnippet = false;
   let inputs = [""];
   let outputs = [""];
   let language = "typescript";
+  let snippets: Snippet[] = [];
+  let snippetsLoading = false;
   let filePattern = "**/*.ts";
   let rubyVersion = "";
   let gemVersion = "";
@@ -41,8 +44,33 @@
     languageOptions.push({ value: "typescript", label: "Typescript" });
   }
 
+  async function fetchSnippets() {
+    snippetsLoading = true;
+    errorMessage = "";
+    const platform = "vscode";
+    const url = language === "ruby" ? 'https://api-ruby.synvert.net/snippets' : 'https://api-javascript.synvert.net/snippets';
+    // const url = language === "ruby" ? 'http://localhost:9200/snippets' : 'http://localhost:3000/snippets';
+    try {
+      const response = await fetch(url, {
+        headers: {
+          "Content-Type": "application/json",
+          // @ts-ignore
+          "X-SYNVERT-TOKEN": token,
+          "X-SYNVERT-PLATFORM": platform,
+        }
+      })
+      const data = await response.json();
+      snippetsLoading = false;
+      return data.snippets;
+    } catch (error) {
+      errorMessage = (error as Error).message;
+      snippetsLoading = false;
+      return [];
+    }
+  }
+
   onMount(() => {
-    window.addEventListener("message", (event) => {
+    window.addEventListener("message", async (event) => {
       const message = event.data; // The json data that the extension sent
       switch (message.type) {
         case "loadData": {
@@ -58,6 +86,8 @@
           skipPaths = message.skipPaths;
           snippet = message.snippet;
           results = message.results;
+
+          snippets = await fetchSnippets();
           break;
         }
         case "currentFileExtensionName": {
@@ -197,7 +227,8 @@
     outputs = outputs.slice(0, -1);
   }
 
-  function languageChanged() {
+  async function languageChanged() {
+    snippets = [];
     resetFormInputs();
     snippet = "";
     snippetChanged();
@@ -214,6 +245,7 @@
         filePattern = "**/*.ts";
         break;
     }
+    snippets = await fetchSnippets();
   }
 
   function resetFormInputs() {
@@ -395,35 +427,10 @@
     return customSnippet;
   }
 
-  async function querySnippets(query: string) {
-    errorMessage = "";
-    const platform = "vscode";
-    const url = language === "ruby" ? 'https://api-ruby.synvert.net/query-snippets' : 'https://api-javascript.synvert.net/query-snippets';
-    // const url = language === "ruby" ? 'http://localhost:9200/query-snippets' : 'http://localhost:3000/query-snippets';
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          // @ts-ignore
-          "X-SYNVERT-TOKEN": token,
-          "X-SYNVERT-PLATFORM": platform,
-        },
-        body: JSON.stringify({ query: query })
-      })
-      const data = await response.json();
-      return data.snippets;
-    } catch (error) {
-      errorMessage = (error as Error).message;
-      return [];
-    }
-  }
-
   // const groupBy = (item: any) => item.group;
   const optionIdentifier = 'id';
-  const getOptionLabel = (option: any) => `${option.group}/${option.name}`;
-  const getSelectionLabel = (option: any) => `${option.group}/${option.name}`;
+  const getOptionLabel = (snippet: any) => `${snippet.group}/${snippet.name}`;
+  const getSelectionLabel = (snippet: Snippet) => `${snippet.group}/${snippet.name}`;
 
   function snippetSelected(event: any) {
     snippet = event.detail.source_code;
@@ -440,7 +447,7 @@
   {/each}
 </select>
 <div class="query-snippets-select">
-  <Select loadOptions={querySnippets} {optionIdentifier} {getSelectionLabel} {getOptionLabel} on:select={snippetSelected} placeholder="Search a snippet"></Select>
+  <Select items={snippets} loading={snippetsLoading} {optionIdentifier} {getSelectionLabel} {getOptionLabel} on:select={snippetSelected} placeholder="Search a snippet"></Select>
 </div>
 <div class="generate-snippet">
   <button class="link-btn" on:click={toggleGenerateSnippet}>
