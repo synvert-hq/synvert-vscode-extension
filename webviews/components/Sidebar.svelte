@@ -274,7 +274,7 @@
           "X-SYNVERT-TOKEN": token,
           "X-SYNVERT-PLATFORM": platform,
         },
-        body: JSON.stringify({ inputs, outputs: outputsOrEmptyArray, nql_or_rules: nqlOrRules })
+        body: JSON.stringify({ language, inputs, outputs: outputsOrEmptyArray, nql_or_rules: nqlOrRules })
       })
       const data = await response.json();
       if (data.error) {
