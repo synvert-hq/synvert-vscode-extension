@@ -1,5 +1,15 @@
 # Change Log
 
+## [0.6.0] - 2023-01-03
+
+### Changed
+
+- Fetch all snippets remotely, filter and sort locally
+
+### Fixed
+
+- Send language option to generate snippet request
+
 ## [0.5.0] - 2022-12-20
 
 ### Addd
