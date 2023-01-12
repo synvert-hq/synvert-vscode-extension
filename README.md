@@ -14,19 +14,19 @@ It supports Typescript, Javascript and Ruby so far.
 
 - Search and replace. After adding a snippet, you can search the code, and replace all or any of the results.
 
-![Search and Replace](demos/search-and-replace-1.gif)
+![Search and Replace](assets/img/vscode-search-and-replace.gif)
 
 - Search a snippet. You can search a snippet by group, name or description.
 
-![Search snippet](demos/search-snippet-1.gif)
+![Search snippet](assets/img/vscode-search-snippet.gif)
 
 - Generate a snippet. You can generate a snippet by some input codes and output codes.
 
-![Generate snippet](demos/generate-snippet-1.gif)
+![Generate snippet](assets/img/vscode-generate-snippet.gif)
 
 - Adopt a short snippet. You can write a short snippet without `new Synvert.Rewriter`.
 
-![Short snippet](demos/short-snippet-1.png)
+![Short snippet](assets/img/vscode-short-snippet.png)
 
 ## Requirements
 
