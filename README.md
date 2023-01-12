@@ -30,7 +30,7 @@ It supports Typescript, Javascript and Ruby so far.
 
 ## Requirements
 
-Javascript and typescript are supported internally.
+Javascript and typescript are supported by `synvert` npm.
 
 Ruby is supported by `synvert` gem.
 
