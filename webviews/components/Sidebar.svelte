@@ -2,6 +2,7 @@
   import { onMount, afterUpdate } from "svelte";
   import Select from "svelte-select";
   import type { Snippet } from "synvert-ui-common";
+  import { composeRubyGeneratedSnippet, composeJavascriptGeneratedSnippet } from "synvert-ui-common";
   import type { SelectOption, TestResultExtExt } from "../../src/types";
 
   let showGenerateSnippet = false;
@@ -281,7 +282,11 @@
         errorMessage = data.error;
         snippet = "";
       } else {
-        snippet = language === "ruby" ? composeRubySnippet(data) : composeJavascriptSnippet(data);
+        if (language === "ruby") {
+          snippet = composeRubyGeneratedSnippet({ filePattern, rubyVersion, gemVersion, snippet: data.snippet });
+        } else {
+          snippet = composeJavascriptGeneratedSnippet({ filePattern, nodeVersion, npmVersion, snippet: data.snippet});
+        }
         snippetChanged();
       }
     } catch (error) {
@@ -379,52 +384,6 @@
     results[resultIndex].actions.splice(actionIndex, 1);
     // trigger dom update
     results = results
-  }
-
-  const composeRubySnippet = (data: { snippet: string }): string => {
-    let customSnippet = "Synvert::Rewriter.new 'group', 'name' do\n";
-    if (rubyVersion.length > 0) {
-      customSnippet += `  if_ruby '${rubyVersion}'\n`;
-    }
-    if (gemVersion.length > 0) {
-      const index = gemVersion.indexOf(" ");
-      const name = gemVersion.substring(0, index);
-      const version = gemVersion.substring(index + 1);
-      customSnippet += `  if_gem '${name}', '${version}'\n`;
-    }
-    customSnippet += `  within_files '${filePattern}' do\n`;
-    if (data.snippet) {
-      customSnippet += "    ";
-      customSnippet += data.snippet.replace(/\n/g, "\n    ");
-      customSnippet += "\n";
-    }
-    customSnippet += "  end\n";
-    customSnippet += "end";
-    return customSnippet;
-  };
-
-  const composeJavascriptSnippet = (data: { snippet: string}): string => {
-    let customSnippet = `const Synvert = require("synvert-core");\n`;
-    customSnippet += `new Synvert.Rewriter("group", "name", () => {\n`;
-    customSnippet += `  configure({ parser: "typescript" });\n`;
-    if (nodeVersion.length > 0) {
-      customSnippet += `  ifNode("${nodeVersion}");\n`
-    }
-    if (npmVersion.length > 0) {
-      const index = npmVersion.indexOf(" ");
-      const name = npmVersion.substring(0, index);
-      const version = npmVersion.substring(index + 1);
-      customSnippet += `  ifNpm('${name}', '${version}');\n`;
-    }
-    customSnippet += `  withinFiles("${filePattern}", () => {\n`;
-    if (data.snippet) {
-      customSnippet += "    ";
-      customSnippet += data.snippet.replace(/\n/g, "\n    ");
-      customSnippet += "\n";
-    }
-    customSnippet += `  });\n`;
-    customSnippet += `});`;
-    return customSnippet;
   }
 
   // const groupBy = (item: any) => item.group;
