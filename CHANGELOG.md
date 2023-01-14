@@ -1,5 +1,15 @@
 # Change Log
 
+## [0.6.1] - 2023-01-14
+
+### Added
+
+- Scroll to search results after searching
+
+### Changed
+
+- Update images path in README
+
 ## [0.6.0] - 2023-01-03
 
 ### Changed
