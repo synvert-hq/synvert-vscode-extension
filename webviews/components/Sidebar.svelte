@@ -125,6 +125,7 @@
           searchButtonDisabled = false;
           results = message.results;
           errorMessage = message.errorMessage;
+          document.getElementById("searchResults")!.scrollIntoView();
           break;
         }
         case "doneReplaceAll": {
@@ -465,7 +466,7 @@
 <input id="skipPaths" bind:value={skipPaths} />
 <button on:click={search} disabled={snippet.length === 0 || searchButtonDisabled || replaceAllButtonDisabled}>{searchButtonDisabled ? 'Searching...' : 'Search'}</button>
 <button on:click={replaceAll} disabled={snippet.length === 0 || replaceAllButtonDisabled || searchButtonDisabled}>{replaceAllButtonDisabled ? 'Replacing...' : 'Replace All'}</button>
-<div class="search-results">
+<div class="search-results" id="searchResults">
   {#each results as result, resultIndex}
     <div class="search-result">
       <button class="link-btn" on:click={() => toggleResult(result.filePath)}>
