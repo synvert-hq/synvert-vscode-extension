@@ -1,5 +1,15 @@
 # Change Log
 
+## [0.6.2] - 2023-02-04
+
+### Changed
+
+- Enable to log json object
+
+### Fixed
+
+- Fix typescript serach
+
 ## [0.6.1] - 2023-01-14
 
 ### Added
