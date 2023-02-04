@@ -3,12 +3,12 @@
 import * as vscode from 'vscode';
 import fetch from "node-fetch";
 import { compareVersions } from 'compare-versions';
-import { runShellCommand } from 'synvert-server-common';
 
 import { SidebarProvider } from './SidebarProvider';
 import { LocalStorageService } from './localStorageService';
 import { javascriptEnabled, rubyEnabled, typescriptEnabled } from './configuration';
 import { log } from './log';
+import { runCommand } from './utils';
 
 const VERSION_REGEXP = /(\d+\.\d+\.\d+) \(with synvert-core (\d+\.\d+\.\d+)/;
 
@@ -130,11 +130,11 @@ export function deactivate() {}
 
 function checkNpm(): Promise<string> {
   return new Promise((resolve, reject) => {
-    runShellCommand("synvert-javascript", ["-v"]).then(({ stdout, stderr }) => {
-      if (stderr.length === 0) {
-        return resolve(stdout);
+    runCommand("synvert-javascript", ["-v"]).then(({ output, error }) => {
+      if (error) {
+        return reject(error);
       } else {
-        return reject(stderr);
+        return resolve(output);
       }
     });
   });
@@ -149,11 +149,11 @@ function checkNpmRemoteVersions(): Promise<{ synvertVersion: string, synvertCore
 
 function installNpm(npmName: string): Promise<boolean> {
   return new Promise((resolve, reject) => {
-    runShellCommand("npm", ["install", "-g", npmName]).then(({ stderr }) => {
-      if (stderr.length === 0) {
-        return resolve(true);
-      } else {
+    runCommand("npm", ["install", "-g", npmName]).then(({ error }) => {
+      if (error) {
         return resolve(false);
+      } else {
+        return resolve(true);
       }
     });
   });
@@ -161,11 +161,11 @@ function installNpm(npmName: string): Promise<boolean> {
 
 function checkGem(): Promise<string> {
   return new Promise((resolve, reject) => {
-    runShellCommand("synvert-ruby", ["-v"]).then(({ stdout, stderr }) => {
-      if (stderr.length === 0) {
-        return resolve(stdout);
+    runCommand("synvert-ruby", ["-v"]).then(({ output, error }) => {
+      if (error) {
+        return reject(error);
       } else {
-        return reject(stderr);
+        return resolve(output);
       }
     });
   });
@@ -180,11 +180,11 @@ function checkGemRemoteVersions(): Promise<{ synvertVersion: string, synvertCore
 
 function installGem(gemName: string): Promise<boolean> {
   return new Promise((resolve, reject) => {
-    runShellCommand("gem", ["install", gemName]).then(({ stderr }) => {
-      if (stderr.length === 0) {
-        return resolve(true);
-      } else {
+    runCommand("gem", ["install", gemName]).then(({ error }) => {
+      if (error) {
         return resolve(false);
+      } else {
+        return resolve(true);
       }
     });
   });
