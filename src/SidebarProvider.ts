@@ -198,7 +198,7 @@ function testSnippet(language: string, snippet: string, onlyPaths: string, skipP
           return testRubySnippet(snippet, rootPath, onlyPaths, skipPaths);
         case "javascript":
           return testJavascriptSnippet(snippet, rootPath, onlyPaths, skipPaths);
-        case "typewscript":
+        case "typescript":
           return testTypescriptSnippet(snippet, rootPath, onlyPaths, skipPaths);
       }
     }
