@@ -3,11 +3,12 @@
 import * as vscode from 'vscode';
 import fetch from "node-fetch";
 import { compareVersions } from 'compare-versions';
+import { runShellCommand } from 'synvert-server-common';
+
 import { SidebarProvider } from './SidebarProvider';
 import { LocalStorageService } from './localStorageService';
 import { javascriptEnabled, rubyEnabled, typescriptEnabled } from './configuration';
 import { log } from './log';
-import { runRubyCommand } from './utils';
 
 const VERSION_REGEXP = /(\d+\.\d+\.\d+) \(with synvert-core (\d+\.\d+\.\d+)/;
 
@@ -129,7 +130,7 @@ export function deactivate() {}
 
 function checkNpm(): Promise<string> {
   return new Promise((resolve, reject) => {
-    runRubyCommand("synvert-javascript", ["-v"]).then(({ stdout, stderr }) => {
+    runShellCommand("synvert-javascript", ["-v"]).then(({ stdout, stderr }) => {
       if (stderr.length === 0) {
         return resolve(stdout);
       } else {
@@ -148,7 +149,7 @@ function checkNpmRemoteVersions(): Promise<{ synvertVersion: string, synvertCore
 
 function installNpm(npmName: string): Promise<boolean> {
   return new Promise((resolve, reject) => {
-    runRubyCommand("npm", ["install", "-g", npmName]).then(({ stderr }) => {
+    runShellCommand("npm", ["install", "-g", npmName]).then(({ stderr }) => {
       if (stderr.length === 0) {
         return resolve(true);
       } else {
@@ -160,7 +161,7 @@ function installNpm(npmName: string): Promise<boolean> {
 
 function checkGem(): Promise<string> {
   return new Promise((resolve, reject) => {
-    runRubyCommand("synvert-ruby", ["-v"]).then(({ stdout, stderr }) => {
+    runShellCommand("synvert-ruby", ["-v"]).then(({ stdout, stderr }) => {
       if (stderr.length === 0) {
         return resolve(stdout);
       } else {
@@ -179,7 +180,7 @@ function checkGemRemoteVersions(): Promise<{ synvertVersion: string, synvertCore
 
 function installGem(gemName: string): Promise<boolean> {
   return new Promise((resolve, reject) => {
-    runRubyCommand("gem", ["install", gemName]).then(({ stderr }) => {
+    runShellCommand("gem", ["install", gemName]).then(({ stderr }) => {
       if (stderr.length === 0) {
         return resolve(true);
       } else {

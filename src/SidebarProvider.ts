@@ -2,7 +2,8 @@ import fs from "fs";
 import path from "path";
 import { machineIdSync } from 'node-machine-id';
 import * as vscode from "vscode";
-import { parseJSON, runRubyCommand } from "./utils";
+import { runShellCommand } from "synvert-server-common";
+import { parseJSON} from "synvert-ui-common";
 import type { SearchResults, TestResultExtExt } from "./types";
 import { LocalStorageService } from "./localStorageService";
 import { typescriptEnabled, javascriptEnabled, rubyEnabled, rubyNumberOfWorkers, javascriptMaxFileSize, typescriptMaxFileSize } from "./configuration";
@@ -223,7 +224,7 @@ function testJavascriptSnippet(snippet: string, rootPath: string, onlyPaths: str
     commandArgs.push(String(javascriptMaxFileSize() * 1024));
     commandArgs.push("--rootPath");
     commandArgs.push(rootPath);
-    runRubyCommand("synvert-javascript", commandArgs, snippet).then(({ stdout, stderr }) => {
+    runShellCommand("synvert-javascript", commandArgs, snippet).then(({ stdout, stderr }) => {
       if (stderr.length === 0) {
         const snippets = parseJSON(stdout);
         addFileSourceToSnippets(snippets, rootPath);
@@ -253,7 +254,7 @@ function testTypescriptSnippet(snippet: string, rootPath: string, onlyPaths: str
     commandArgs.push(String(typescriptMaxFileSize() * 1024));
     commandArgs.push("--rootPath");
     commandArgs.push(rootPath);
-    runRubyCommand("synvert-javascript", commandArgs, snippet).then(({ stdout, stderr }) => {
+    runShellCommand("synvert-javascript", commandArgs, snippet).then(({ stdout, stderr }) => {
       if (stderr.length === 0) {
         const snippets = parseJSON(stdout);
         addFileSourceToSnippets(snippets, rootPath);
@@ -284,7 +285,7 @@ function testRubySnippet(snippet: string, rootPath: string, onlyPaths: string, s
       commandArgs.push(String(rubyNumberOfWorkers()));
     }
     commandArgs.push(rootPath);
-    runRubyCommand("synvert-ruby", commandArgs, snippet).then(({ stdout, stderr }) => {
+    runShellCommand("synvert-ruby", commandArgs, snippet).then(({ stdout, stderr }) => {
       if (stderr.length === 0) {
         const snippets = parseJSON(stdout);
         addFileSourceToSnippets(snippets, rootPath);
@@ -339,7 +340,7 @@ function processJavascriptSnippet(snippet: string, rootPath: string, onlyPaths: 
     commandArgs.push(String(javascriptMaxFileSize() * 1024));
     commandArgs.push("--rootPath");
     commandArgs.push(rootPath);
-    runRubyCommand('synvert-javascript', commandArgs, snippet).then(({ stdout, stderr }) => {
+    runShellCommand('synvert-javascript', commandArgs, snippet).then(({ stdout, stderr }) => {
       if (stderr.length === 0) {
         return resolve({ errorMessage: "" });
       } else {
@@ -367,7 +368,7 @@ function processTypescriptSnippet(snippet: string, rootPath: string, onlyPaths: 
     commandArgs.push(String(typescriptMaxFileSize() * 1024));
     commandArgs.push("--rootPath");
     commandArgs.push(rootPath);
-    runRubyCommand('synvert-javascript', commandArgs, snippet).then(({ stdout, stderr }) => {
+    runShellCommand('synvert-javascript', commandArgs, snippet).then(({ stdout, stderr }) => {
       if (stderr.length === 0) {
         return resolve({ errorMessage: "" });
       } else {
@@ -392,7 +393,7 @@ function processRubySnippet(snippet: string, rootPath: string, onlyPaths: string
       commandArgs.push(skipPaths);
     }
     commandArgs.push(rootPath);
-    runRubyCommand("synvert-ruby", commandArgs, snippet).then(({ stdout, stderr }) => {
+    runShellCommand("synvert-ruby", commandArgs, snippet).then(({ stdout, stderr }) => {
       if (stderr.length === 0) {
         return resolve({ errorMessage: "" });
       } else {
