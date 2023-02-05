@@ -1,5 +1,16 @@
 # Change Log
 
+## [0.7.0] - 2023-02-05
+
+### Changed
+
+- synvert-javascript command uses kebab case
+- Show no file affected message
+
+### Fixed
+
+- Reset snippet select after changing language
+
 ## [0.6.2] - 2023-02-04
 
 ### Changed
