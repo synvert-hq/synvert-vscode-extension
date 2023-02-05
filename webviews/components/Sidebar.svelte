@@ -22,6 +22,7 @@
   let nqlOrRules = "rules";
   let snippet = "";
   let errorMessage = "";
+  let infoMessage = "";
   let generateSnippetButtonDisabled = false;
   let searchButtonDisabled = false;
   let replaceAllButtonDisabled = false;
@@ -49,6 +50,7 @@
   async function fetchSnippets() {
     snippetsLoading = true;
     errorMessage = "";
+    infoMessage = "";
     const platform = "vscode";
     const url = language === "ruby" ? 'https://api-ruby.synvert.net/snippets' : 'https://api-javascript.synvert.net/snippets';
     // const url = language === "ruby" ? 'http://localhost:9200/snippets' : 'http://localhost:3000/snippets';
@@ -126,6 +128,9 @@
           searchButtonDisabled = false;
           results = message.results;
           errorMessage = message.errorMessage;
+          if (results.length === 0 && !errorMessage) {
+            infoMessage = "No file is affected by this snippet.";
+          }
           document.getElementById("searchResults")!.scrollIntoView();
           break;
         }
@@ -237,6 +242,7 @@
     snippet = "";
     snippetChanged();
     errorMessage = "";
+    infoMessage = "";
     results = [];
     switch (language) {
       case "ruby":
@@ -263,6 +269,7 @@
 
   async function generateSnippet() {
     errorMessage = "";
+    infoMessage = "";
     const platform = "vscode";
     const url = language === "ruby" ? 'https://api-ruby.synvert.net/generate-snippet' : 'https://api-javascript.synvert.net/generate-snippet';
     // const url = language === "ruby" ? 'http://localhost:9200/generate-snippet' : 'http://localhost:3000/generate-snippet';
@@ -306,6 +313,7 @@
 
   function search() {
     errorMessage = "";
+    infoMessage = "";
     searchButtonDisabled = true;
     // @ts-ignore
     tsvscode.postMessage({ type: 'onSearch', language, snippet, onlyPaths, skipPaths });
@@ -313,6 +321,7 @@
 
   function replaceAll() {
     errorMessage = "";
+    infoMessage = "";
     replaceAllButtonDisabled = true;
     if (results.length > 0) {
       // @ts-ignore
@@ -402,6 +411,9 @@
 
 {#if errorMessage.length > 0}
   <p class="error-message">{errorMessage}</p>
+{/if}
+{#if infoMessage.length > 0}
+  <p class="info-message">{infoMessage}</p>
 {/if}
 <select id="language" bind:value={language} on:change={languageChanged}>
   {#each languageOptions as option}
