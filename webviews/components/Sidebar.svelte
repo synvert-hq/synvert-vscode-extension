@@ -10,6 +10,7 @@
   let outputs = [""];
   let language = "typescript";
   let snippets: Snippet[] = [];
+  let selectedSnippet: Snippet | undefined;
   let snippetsLoading = false;
   let filePattern = "**/*.ts";
   let rubyVersion = "";
@@ -231,6 +232,7 @@
 
   async function languageChanged() {
     snippets = [];
+    selectedSnippet = undefined;
     resetFormInputs();
     snippet = "";
     snippetChanged();
@@ -407,7 +409,7 @@
   {/each}
 </select>
 <div class="query-snippets-select">
-  <Select items={snippets} loading={snippetsLoading} {optionIdentifier} {getSelectionLabel} {getOptionLabel} on:select={snippetSelected} placeholder="Search a snippet"></Select>
+  <Select items={snippets} loading={snippetsLoading} {optionIdentifier} {getSelectionLabel} {getOptionLabel} bind:value={selectedSnippet} on:select={snippetSelected} placeholder="Search a snippet"></Select>
 </div>
 <div class="generate-snippet">
   <button class="link-btn" on:click={toggleGenerateSnippet}>
