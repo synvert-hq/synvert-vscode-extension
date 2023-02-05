@@ -213,16 +213,16 @@ function testJavascriptSnippet(snippet: string, rootPath: string, onlyPaths: str
     }
     const commandArgs = ["--execute", "test"];
     if (onlyPaths.length > 0) {
-      commandArgs.push("--onlyPaths");
+      commandArgs.push("--only-paths");
       commandArgs.push(onlyPaths);
     }
     if (skipPaths.length > 0) {
-      commandArgs.push("--skipPaths");
+      commandArgs.push("--skip-paths");
       commandArgs.push(skipPaths);
     }
-    commandArgs.push("--maxFileSize");
+    commandArgs.push("--max-file-size");
     commandArgs.push(String(javascriptMaxFileSize() * 1024));
-    commandArgs.push("--rootPath");
+    commandArgs.push("--root-path");
     commandArgs.push(rootPath);
     runCommand("synvert-javascript", commandArgs, { input: snippet }).then(({ output, error }) => {
       if (error) {
@@ -243,16 +243,16 @@ function testTypescriptSnippet(snippet: string, rootPath: string, onlyPaths: str
     }
     const commandArgs = ["--execute", "test"];
     if (onlyPaths.length > 0) {
-      commandArgs.push("--onlyPaths");
+      commandArgs.push("--only-paths");
       commandArgs.push(onlyPaths);
     }
     if (skipPaths.length > 0) {
-      commandArgs.push("--skipPaths");
+      commandArgs.push("--skip-paths");
       commandArgs.push(skipPaths);
     }
-    commandArgs.push("--maxFileSize");
+    commandArgs.push("--max-file-size");
     commandArgs.push(String(typescriptMaxFileSize() * 1024));
-    commandArgs.push("--rootPath");
+    commandArgs.push("--root-path");
     commandArgs.push(rootPath);
     runCommand("synvert-javascript", commandArgs, { input: snippet }).then(({ output, error }) => {
       if (error) {
@@ -329,16 +329,16 @@ function processJavascriptSnippet(snippet: string, rootPath: string, onlyPaths: 
     }
     const commandArgs = ["--execute", "run"];
     if (onlyPaths.length > 0) {
-      commandArgs.push('--onlyPaths');
+      commandArgs.push('--only-paths');
       commandArgs.push(onlyPaths);
     }
     if (skipPaths.length > 0) {
-      commandArgs.push('--skipPaths');
+      commandArgs.push('--skip-paths');
       commandArgs.push(skipPaths);
     }
-    commandArgs.push("--maxFileSize");
+    commandArgs.push("--max-file-size");
     commandArgs.push(String(javascriptMaxFileSize() * 1024));
-    commandArgs.push("--rootPath");
+    commandArgs.push("--root-path");
     commandArgs.push(rootPath);
     runCommand('synvert-javascript', commandArgs, { input: snippet }).then(({ output, error }) => {
       if (error) {
@@ -357,16 +357,16 @@ function processTypescriptSnippet(snippet: string, rootPath: string, onlyPaths: 
     }
     const commandArgs = ["--execute", "run"];
     if (onlyPaths.length > 0) {
-      commandArgs.push('--onlyPaths');
+      commandArgs.push('--only-paths');
       commandArgs.push(onlyPaths);
     }
     if (skipPaths.length > 0) {
-      commandArgs.push('--skipPaths');
+      commandArgs.push('--skip-paths');
       commandArgs.push(skipPaths);
     }
-    commandArgs.push("--maxFileSize");
+    commandArgs.push("--max-file-size");
     commandArgs.push(String(typescriptMaxFileSize() * 1024));
-    commandArgs.push("--rootPath");
+    commandArgs.push("--root-path");
     commandArgs.push(rootPath);
     runCommand('synvert-javascript', commandArgs, { input: snippet }).then(({ output, error }) => {
       if (error) {
