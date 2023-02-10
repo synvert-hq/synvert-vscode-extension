@@ -8,6 +8,14 @@ export const rubyNumberOfWorkers = (): number => {
   return workspace.getConfiguration('synvert').get('ruby.number_of_workers') as number;
 };
 
+export const rubySingleQuote = (): boolean => {
+  return workspace.getConfiguration('synvert').get('ruby.single_quote') as boolean;
+};
+
+export const rubyTabWidth = (): number => {
+  return workspace.getConfiguration('synvert').get('ruby.tab_width') as number;
+};
+
 export const javascriptEnabled = (): boolean => {
   return workspace.getConfiguration('synvert').get('javascript.enabled') as boolean;
 };

@@ -61,6 +61,16 @@
           "default": 4,
           "description": "Number of workers to run in parallel."
         },
+        "synvert.ruby.single_quote": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use single quotes instead of double quotes."
+        },
+        "synvert.ruby.tab_width": {
+          "type": "number",
+          "default": 2,
+          "description": "Specify the number of spaces per indentation-level."
+        },
         "synvert.javascript.enabled": {
           "type": "boolean",
           "default": true,
