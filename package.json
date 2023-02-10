@@ -53,7 +53,7 @@
       "properties": {
         "synvert.ruby.enabled": {
           "type": "boolean",
-          "default": "true",
+          "default": true,
           "description": "Enable synvert ruby."
         },
         "synvert.ruby.number_of_workers": {
@@ -63,7 +63,7 @@
         },
         "synvert.javascript.enabled": {
           "type": "boolean",
-          "default": "true",
+          "default": true,
           "description": "Enable synvert javascript."
         },
         "synvert.javascript.max_file_size": {
@@ -73,7 +73,7 @@
         },
         "synvert.typescript.enabled": {
           "type": "boolean",
-          "default": "true",
+          "default": true,
           "description": "Enable synvert typescript."
         },
         "synvert.typescript.max_file_size": {
