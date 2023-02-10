@@ -1,5 +1,13 @@
 # Change Log
 
+## [0.8.0] - 2023-02-10
+
+### Added
+
+- Add `synvert.ruby.single_quote` and `synvert.ruby.tab_width` configurations
+- Add `synvert.javascript.single_quote`, `synvert.javascript.semi` and `synvert.javascript.tab_width` configurations
+- Add `synvert.typescript.single_quote`, `synvert.typescript.semi` and `synvert.typescript.tab_width` configurations
+
 ## [0.7.0] - 2023-02-05
 
 ### Changed
