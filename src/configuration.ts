@@ -22,7 +22,19 @@ export const javascriptEnabled = (): boolean => {
 
 export const javascriptMaxFileSize = (): number => {
   return workspace.getConfiguration('synvert').get('javascript.max_file_size') as number;
-}
+};
+
+export const javascriptSingleQuote = (): boolean => {
+  return workspace.getConfiguration('synvert').get('javascript.single_quote') as boolean;
+};
+
+export const javascriptSemi = (): boolean => {
+  return workspace.getConfiguration('synvert').get('javascript.semi') as boolean;
+};
+
+export const javascriptTabWidth = (): number => {
+  return workspace.getConfiguration('synvert').get('javascript.tab_width') as number;
+};
 
 export const typescriptEnabled = (): boolean => {
   return workspace.getConfiguration('synvert').get('typescript.enabled') as boolean;
