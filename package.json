@@ -25,6 +25,9 @@
     "rewrite",
     "refactor"
   ],
+  "activationEvents": [
+    "onView:synvert-sidebar"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "viewsContainers": {
