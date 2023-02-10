@@ -40,8 +40,18 @@ This extension contributes the following settings:
 
 * `synvert.ruby.enable`: enable/disable synvert ruby, default is true.
 * `synvert.ruby.number_of_workers`: number of workers to run synvert ruby, default is 4.
+* `synvert.ruby.single_quote`: use single quotes instead of double quotes, default is true.
+* `synvert.ruby.tab_width`: specify the number of spaces per indentation-level, default is 2.
 * `synvert.javascript.enable`: enable/disable synvert javascript, default is true.
+* `synvert.javascript.max_file_size`: skip file if its size is more than the size. (KB), default is 100.
+* `synvert.javascript.single_quote`: use single quotes instead of double quotes, default is false.
+* `synvert.javascript.semi`: print semicolons at the ends of statements, default is true.
+* `synvert.javascript.tab_width`: specify the number of spaces per indentation-level, default is 2.
 * `synvert.typescript.enable`: enable/disable synvert typescript, default is true.
+* `synvert.typescript.max_file_size`: skip file if its size is more than the size. (KB), default is 100.
+* `synvert.typescript.single_quote`: use single quotes instead of double quotes, default is false.
+* `synvert.typescript.semi`: print semicolons at the ends of statements, default is true.
+* `synvert.typescript.tab_width`: specify the number of spaces per indentation-level, default is 2.
 
 ## Key Bindings
 
