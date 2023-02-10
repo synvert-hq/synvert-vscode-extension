@@ -105,6 +105,21 @@
           "type": "number",
           "default": 100,
           "description": "Skip file if its size is more than the size. (KB)"
+        },
+        "synvert.typescript.single_quote": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use single quotes instead of double quotes."
+        },
+        "synvert.typescript.semi": {
+          "type": "boolean",
+          "default": true,
+          "description": "Print semicolons at the ends of statements."
+        },
+        "synvert.typescript.tab_width": {
+          "type": "number",
+          "default": 2,
+          "description": "Specify the number of spaces per indentation-level."
         }
       }
     },

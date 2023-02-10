@@ -42,4 +42,16 @@ export const typescriptEnabled = (): boolean => {
 
 export const typescriptMaxFileSize = (): number => {
   return workspace.getConfiguration('synvert').get('typescript.max_file_size') as number;
-}
+};
+
+export const typescriptSingleQuote = (): boolean => {
+  return workspace.getConfiguration('synvert').get('typescript.single_quote') as boolean;
+};
+
+export const typescriptSemi = (): boolean => {
+  return workspace.getConfiguration('synvert').get('typescript.semi') as boolean;
+};
+
+export const typescriptTabWidth = (): number => {
+  return workspace.getConfiguration('synvert').get('typescript.tab_width') as number;
+};
