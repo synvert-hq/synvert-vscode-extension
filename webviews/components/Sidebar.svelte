@@ -275,7 +275,6 @@
     // const url = language === "ruby" ? 'http://localhost:9200/generate-snippet' : 'http://localhost:3000/generate-snippet';
     try {
       generateSnippetButtonDisabled = true;
-      const outputsOrEmptyArray = outputs.every(output => output.length === 0) ? [] : outputs
       const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -285,7 +284,7 @@
           "X-SYNVERT-TOKEN": token,
           "X-SYNVERT-PLATFORM": platform,
         },
-        body: JSON.stringify({ language, inputs, outputs: outputsOrEmptyArray, nql_or_rules: nqlOrRules })
+        body: JSON.stringify({ language, inputs, outputs, nql_or_rules: nqlOrRules })
       })
       const data = await response.json();
       if (data.error) {
@@ -470,7 +469,7 @@
     <label for="rules">Rules</label>
     <input id="rules" type="radio" name="nql_or_rules" value="rules" bind:group={nqlOrRules}>
   </div>
-  <button on:click={generateSnippet} disabled={inputs[0].length === 0 || generateSnippetButtonDisabled}>{generateSnippetButtonDisabled ? 'Generating...' : 'Generate Snippet'}</button>
+  <button on:click={generateSnippet} disabled={generateSnippetButtonDisabled}>{generateSnippetButtonDisabled ? 'Generating...' : 'Generate Snippet'}</button>
 {/if}
 <label for="snippet"><b>Snippet</b></label>
 <textarea id="snippet" rows=10 bind:value={snippet} on:change={snippetChanged}></textarea>
