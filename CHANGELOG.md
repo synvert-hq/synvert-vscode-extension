@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.8.1] - 2023-02-11
+
+### Changed
+
+- Allow empty inputs and outputs
+
 ## [0.8.0] - 2023-02-10
 
 ### Added
