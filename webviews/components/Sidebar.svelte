@@ -128,10 +128,20 @@
           searchButtonDisabled = false;
           results = message.results;
           errorMessage = message.errorMessage;
-          if (results.length === 0 && !errorMessage) {
+          if (errorMessage.length > 0) {
+            setTimeout(() => {
+              document.getElementById("errorMessage")!.scrollIntoView();
+            }, 100);
+          } else if (results.length === 0) {
             infoMessage = "No file is affected by this snippet.";
+            setTimeout(() => {
+              document.getElementById("infoMessage")!.scrollIntoView();
+            }, 100);
+          } else {
+            setTimeout(() => {
+              document.getElementById("searchResults")!.scrollIntoView();
+            }, 100);
           }
-          document.getElementById("searchResults")!.scrollIntoView();
           break;
         }
         case "doneReplaceAll": {
@@ -409,10 +419,10 @@
 </script>
 
 {#if errorMessage.length > 0}
-  <p class="error-message">{errorMessage}</p>
+  <p class="error-message" id="errorMessage">{errorMessage}</p>
 {/if}
 {#if infoMessage.length > 0}
-  <p class="info-message">{infoMessage}</p>
+  <p class="info-message" id="infoMessage">{infoMessage}</p>
 {/if}
 <select id="language" bind:value={language} on:change={languageChanged}>
   {#each languageOptions as option}
