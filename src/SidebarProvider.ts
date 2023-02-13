@@ -228,13 +228,7 @@ function testJavascriptSnippet(snippet: string, rootPath: string, onlyPaths: str
     }
     const commandArgs = buildJavascriptCommandArgs("test", rootPath, onlyPaths, skipPaths);
     runCommand("synvert-javascript", commandArgs, { input: snippet }).then(({ output, error }) => {
-      if (error) {
-        return resolve({ results: [], errorMessage: error });
-      } else {
-        const snippets = parseJSON(output);
-        addFileSourceToSnippets(snippets, rootPath);
-        return resolve({ results: snippets, errorMessage: "" });
-      }
+      return handleTestResult(output, error, rootPath, resolve);
     });
   });
 }
@@ -246,13 +240,7 @@ function testTypescriptSnippet(snippet: string, rootPath: string, onlyPaths: str
     }
     const commandArgs = buildTypescriptCommandArgs("test", rootPath, onlyPaths, skipPaths);
     runCommand("synvert-javascript", commandArgs, { input: snippet }).then(({ output, error }) => {
-      if (error) {
-        return resolve({ results: [], errorMessage: error });
-      } else {
-        const snippets = parseJSON(output);
-        addFileSourceToSnippets(snippets, rootPath);
-        return resolve({ results: snippets, errorMessage: "" });
-      }
+      return handleTestResult(output, error, rootPath, resolve);
     });
   });
 }
@@ -264,13 +252,7 @@ function testRubySnippet(snippet: string, rootPath: string, onlyPaths: string, s
     }
     const commandArgs = buildRubyCommandArgs("test", rootPath, onlyPaths, skipPaths);
     runCommand("synvert-ruby", commandArgs, { input: snippet }).then(({ output, error }) => {
-      if (error) {
-        return resolve({ results: [], errorMessage: error });
-      } else {
-        const snippets = parseJSON(output);
-        addFileSourceToSnippets(snippets, rootPath);
-        return resolve({ results: snippets, errorMessage: "" });
-      }
+      return handleTestResult(output, error, rootPath, resolve);
     });
   });
 }
@@ -307,11 +289,7 @@ function processJavascriptSnippet(snippet: string, rootPath: string, onlyPaths: 
     }
     const commandArgs = buildJavascriptCommandArgs("run", rootPath, onlyPaths, skipPaths);
     runCommand('synvert-javascript', commandArgs, { input: snippet }).then(({ output, error }) => {
-      if (error) {
-        return resolve({ errorMessage: error });
-      } else {
-        return resolve({ errorMessage: "" });
-      }
+      return handleProcessResult(error, resolve);
     });
   });
 }
@@ -323,11 +301,7 @@ function processTypescriptSnippet(snippet: string, rootPath: string, onlyPaths: 
     }
     const commandArgs = buildTypescriptCommandArgs("run", rootPath, onlyPaths, skipPaths);
     runCommand('synvert-javascript', commandArgs, { input: snippet }).then(({ output, error }) => {
-      if (error) {
-        return resolve({ errorMessage: error });
-      } else {
-        return resolve({ errorMessage: "" });
-      }
+      return handleProcessResult(error, resolve);
     });
   });
 }
@@ -339,11 +313,7 @@ function processRubySnippet(snippet: string, rootPath: string, onlyPaths: string
     }
     const commandArgs = buildRubyCommandArgs("run", rootPath, onlyPaths, skipPaths);
     runCommand("synvert-ruby", commandArgs, { input: snippet }).then(({ output, error }) => {
-      if (error) {
-        return resolve({ errorMessage: error });
-      } else {
-        return resolve({ errorMessage: "" });
-      }
+      return handleProcessResult(error, resolve);
     });
   });
 }
@@ -419,4 +389,25 @@ function buildTypescriptCommandArgs(executeCommand: string, rootPath: string, on
   commandArgs.push("--root-path");
   commandArgs.push(rootPath);
   return commandArgs;
+}
+
+function handleTestResult(output: string, error: string | undefined, rootPath: string, resolve: any): void {
+  if (error) {
+    return resolve({ results: [], errorMessage: error });
+  } else {
+    const result = parseJSON(output);
+    if (result.error) {
+      return resolve({ results: [], errorMessage: result.error });
+    }
+    addFileSourceToSnippets(result, rootPath);
+    return resolve({ results: result, errorMessage: "" });
+  }
+}
+
+function handleProcessResult(error: string | undefined, resolve: any): void {
+  if (error) {
+    return resolve({ errorMessage: error });
+  } else {
+    return resolve({ errorMessage: "" });
+  }
 }
