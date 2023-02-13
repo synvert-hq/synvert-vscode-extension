@@ -1,5 +1,15 @@
 # Change Log
 
+## [0.8.2] - 2023-02-13
+
+### Fixed
+
+- Handle error message in stdout
+
+### Changed
+
+- Scroll to errorMessage if exists
+
 ## [0.8.1] - 2023-02-11
 
 ### Changed
