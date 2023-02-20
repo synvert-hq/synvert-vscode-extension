@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.8.3] - 2023-02-03
+
+### Changed
+
+- Generated javascript snippet does not require synvert-core anymore
+
 ## [0.8.2] - 2023-02-13
 
 ### Fixed
