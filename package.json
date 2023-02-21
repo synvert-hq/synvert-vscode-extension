@@ -180,7 +180,7 @@
     "node-machine-id": "^1.1.12",
     "svelte-select": "^4.4.7",
     "synvert-server-common": "^1.1.1",
-    "synvert-ui-common": "^1.5.1"
+    "synvert-ui-common": "^1.6.0"
   },
   "homepage": "https://synvert.net",
   "bugs": {
