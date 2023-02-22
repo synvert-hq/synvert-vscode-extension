@@ -262,6 +262,8 @@
     selectedSnippet = undefined;
     resetFormInputs();
     snippet = "";
+    generatedSnippets = [];
+    generatedSnippetIndex = 0;
     snippetChanged();
     errorMessage = "";
     infoMessage = "";
@@ -340,6 +342,9 @@
   }
 
   function snippetChanged() {
+    if (generatedSnippets[generatedSnippetIndex]) {
+      generatedSnippets[generatedSnippetIndex] = snippet;
+    }
     results = [];
   }
 
@@ -437,6 +442,8 @@
 
   function snippetSelected(event: any) {
     snippet = event.detail.source_code;
+    generatedSnippets = [];
+    generatedSnippetIndex = 0;
     snippetChanged();
   }
 </script>
