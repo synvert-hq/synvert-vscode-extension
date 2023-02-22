@@ -1,6 +1,16 @@
 # Change Log
 
-## [0.8.3] - 2023-02-03
+## [0.9.0] - 2023-02-22
+
+### Changed
+
+- Read multiple generated snippets
+
+### Added
+
+- Display prev and next snippet links
+
+## [0.8.3] - 2023-02-20
 
 ### Changed
 
