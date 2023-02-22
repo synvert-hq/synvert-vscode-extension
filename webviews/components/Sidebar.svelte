@@ -247,6 +247,16 @@
     outputs = outputs.slice(0, -1);
   }
 
+  function previousGeneratedSnippet() {
+    generatedSnippetIndex = generatedSnippetIndex - 1;
+    snippet = generatedSnippets[generatedSnippetIndex];
+  }
+
+  function nextGeneratedSnippet() {
+    generatedSnippetIndex = generatedSnippetIndex + 1;
+    snippet = generatedSnippets[generatedSnippetIndex];
+  }
+
   async function languageChanged() {
     snippets = [];
     selectedSnippet = undefined;
@@ -307,6 +317,7 @@
       } else if (data.snippets.length === 0) {
         generatedSnippets = [];
         generatedSnippetIndex = 0;
+        snippet = "";
         errorMessage = "Failed to generate snippet" ;
       } else {
         generatedSnippets = composeGeneratedSnippets(
@@ -485,7 +496,7 @@
   {#if inputs.length > 1}
     <p><a href={"#"} on:click={removeLastInputOutput}>Remove Last Input/Output</a></p>
   {/if}
-  <div class="flex row-reverse nql-or-rules-select">
+  <div class="nql-or-rules-select">
     <label for="nql">NQL</label>
     <input id="nql" type="radio" name="nql_or_rules" value="nql" bind:group={nqlOrRules}>
     <label for="rules">Rules</label>
@@ -493,7 +504,17 @@
   </div>
   <button on:click={generateSnippet} disabled={generateSnippetButtonDisabled}>{generateSnippetButtonDisabled ? 'Generating...' : 'Generate Snippet'}</button>
 {/if}
-<label for="snippet"><b>Snippet</b></label>
+<div class="generated-snippet-label">
+  <label for="snippet"><b>Snippet</b></label>
+  <span>
+    {#if generatedSnippets.length > 0 && generatedSnippetIndex > 0}
+      <a href={"#"} on:click={previousGeneratedSnippet}>&lt;&nbsp;Prev</a>
+    {/if}
+    {#if generatedSnippets.length > 0 && generatedSnippetIndex < generatedSnippets.length - 1}
+      <a href={"#"} on:click={nextGeneratedSnippet}>Next&nbsp;&gt;</a>
+    {/if}
+  </span>
+</div>
 <textarea id="snippet" rows=10 bind:value={snippet} on:change={snippetChanged}></textarea>
 <label for="onlyPaths"><b>Files to include</b></label>
 <input id="onlyPaths" bind:value={onlyPaths} placeholder="e.g. frontend/src" />

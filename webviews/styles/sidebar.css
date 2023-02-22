@@ -140,3 +140,7 @@ select {
 .nql-or-rules-select input, .nql-or-rules-select label {
   float: right;
 }
+.generated-snippet-label {
+  display: flex;
+  justify-content: space-between;
+}
