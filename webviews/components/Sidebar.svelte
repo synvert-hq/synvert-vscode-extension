@@ -2,13 +2,13 @@
   import { onMount, afterUpdate } from "svelte";
   import Select from "svelte-select";
   import type { Snippet } from "synvert-ui-common";
-  import { composeRubyGeneratedSnippet, composeJavascriptGeneratedSnippet } from "synvert-ui-common";
+  import { composeGeneratedSnippets } from "synvert-ui-common";
   import type { SelectOption, TestResultExtExt } from "../../src/types";
 
   let showGenerateSnippet = false;
   let inputs = [""];
   let outputs = [""];
-  let language = "typescript";
+  let language: "ruby" | "javascript" | "typescript" = "typescript";
   let snippets: Snippet[] = [];
   let selectedSnippet: Snippet | undefined;
   let snippetsLoading = false;
@@ -20,6 +20,8 @@
   let onlyPaths = "";
   let skipPaths = "**/node_modules/**,**/dist/**";
   let nqlOrRules = "rules";
+  let generatedSnippets: string[] = [];
+  let generatedSnippetIndex: number = 0;
   let snippet = "";
   let errorMessage = "";
   let infoMessage = "";
@@ -299,17 +301,27 @@
       const data = await response.json();
       if (data.error) {
         errorMessage = data.error;
+        generatedSnippets = [];
+        generatedSnippetIndex = 0;
         snippet = "";
+      } else if (data.snippets.length === 0) {
+        generatedSnippets = [];
+        generatedSnippetIndex = 0;
+        errorMessage = "Failed to generate snippet" ;
       } else {
-        if (language === "ruby") {
-          snippet = composeRubyGeneratedSnippet({ filePattern, rubyVersion, gemVersion, snippet: data.snippet });
-        } else {
-          snippet = composeJavascriptGeneratedSnippet({ filePattern, nodeVersion, npmVersion, snippet: data.snippet});
-        }
+        generatedSnippets = composeGeneratedSnippets(
+          language === "ruby" ?
+          { language, filePattern, rubyVersion, gemVersion, snippets: data.snippets } :
+          { language, filePattern, nodeVersion, npmVersion, snippets: data.snippets }
+        );
+        generatedSnippetIndex = 0;
+        snippet = generatedSnippets[generatedSnippetIndex];
         snippetChanged();
       }
     } catch (error) {
       errorMessage = (error as Error).message;
+      generatedSnippets = [];
+      generatedSnippetIndex = 0;
       snippet = "";
     } finally {
       generateSnippetButtonDisabled = false;
