@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.9.2] - 2023-02-23
+
+### Fixed
+
+- Display properly for noop action
+
 ## [0.9.1] - 2023-02-23
 
 ### Changed
