@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.9.1] - 2023-02-23
+
+### Changed
+
+- Polish result items style
+
 ## [0.9.0] - 2023-02-22
 
 ### Changed
