@@ -39,7 +39,6 @@
 .search-results ul li {
   position: relative;
   overflow: hidden;
-  height: 20px;
   line-height: 20px;
   margin: 5px 0;
 }
@@ -71,6 +70,8 @@
 }
 .search-results .item {
   padding: 2px 5px 2px 25px;
+  display: flex;
+  flex-wrap: wrap;
 }
 .search-results .item.selected {
   background-color: #082a4b;
