@@ -571,8 +571,14 @@
             {/if}
             {#if result.fileSource}
               <button class="link-btn item {resultIndex === selectedResultIndex && actionIndex === selectedActionIndex ? 'selected' : ''}" on:click={() => actionClicked(resultIndex, actionIndex, result.rootPath, result.filePath)}>
-                <span class="old-code">{result.fileSource.substring(action.start, action.end)}</span>
-                <span class="new-code">{action.newCode}</span>
+                {#if (typeof action.newCode !== "undefined")}
+                  <span class="old-code">{result.fileSource.substring(action.start, action.end)}</span>
+                {:else}
+                  <span>{result.fileSource.substring(action.start, action.end)}</span>
+                {/if}
+                {#if (typeof action.newCode !== "undefined")}
+                  <span class="new-code">{action.newCode}</span>
+                {/if}
               </button>
             {/if}
           </li>
