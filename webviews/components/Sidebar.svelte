@@ -294,6 +294,9 @@
   async function generateSnippet() {
     errorMessage = "";
     infoMessage = "";
+    generatedSnippets = [];
+    generatedSnippetIndex = 0;
+    snippet = "";
     const platform = "vscode";
     const url = language === "ruby" ? 'https://api-ruby.synvert.net/generate-snippet' : 'https://api-javascript.synvert.net/generate-snippet';
     // const url = language === "ruby" ? 'http://localhost:9200/generate-snippet' : 'http://localhost:3000/generate-snippet';
@@ -313,13 +316,7 @@
       const data = await response.json();
       if (data.error) {
         errorMessage = data.error;
-        generatedSnippets = [];
-        generatedSnippetIndex = 0;
-        snippet = "";
       } else if (data.snippets.length === 0) {
-        generatedSnippets = [];
-        generatedSnippetIndex = 0;
-        snippet = "";
         errorMessage = "Failed to generate snippet" ;
       } else {
         generatedSnippets = composeGeneratedSnippets(
@@ -333,9 +330,6 @@
       }
     } catch (error) {
       errorMessage = (error as Error).message;
-      generatedSnippets = [];
-      generatedSnippetIndex = 0;
-      snippet = "";
     } finally {
       generateSnippetButtonDisabled = false;
     }
