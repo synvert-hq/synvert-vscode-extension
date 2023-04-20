@@ -55,7 +55,7 @@
     infoMessage = "";
     const platform = "vscode";
     const url = language === "ruby" ? 'https://api-ruby.synvert.net/snippets' : 'https://api-javascript.synvert.net/snippets';
-    // const url = language === "ruby" ? 'http://localhost:9200/snippets' : 'http://localhost:3000/snippets';
+    // const url = language === "ruby" ? 'http://localhost:9292/snippets' : 'http://localhost:4000/snippets';
     try {
       const response = await fetch(url, {
         headers: {
@@ -164,15 +164,20 @@
           const { resultIndex, actionIndex, offset, source } = message;
           updateSelectedAction(resultIndex, actionIndex);
           const actions = results[resultIndex].actions;
-          actions.splice(actionIndex, 1);
-          if (actions.length > 0) {
-            actions.slice(actionIndex).forEach(action => {
-              action.start = action.start + offset;
-              action.end = action.end + offset;
-            });
-            results[resultIndex].fileSource = source;
-          } else {
+          const resultAction = actions[actionIndex];
+          if (["add_file", "remove_file"].includes(resultAction.type)) {
             results.splice(resultIndex, 1);
+          } else {
+            actions.splice(actionIndex, 1);
+            if (actions.length > 0) {
+              actions.slice(actionIndex).forEach(action => {
+                action.start = action.start + offset;
+                action.end = action.end + offset;
+              });
+              results[resultIndex].fileSource = source;
+            } else {
+              results.splice(resultIndex, 1);
+            }
           }
           // trigger dom update
           results = results;
@@ -299,7 +304,7 @@
     snippet = "";
     const platform = "vscode";
     const url = language === "ruby" ? 'https://api-ruby.synvert.net/generate-snippet' : 'https://api-javascript.synvert.net/generate-snippet';
-    // const url = language === "ruby" ? 'http://localhost:9200/generate-snippet' : 'http://localhost:3000/generate-snippet';
+    // const url = language === "ruby" ? 'http://localhost:9292/generate-snippet' : 'http://localhost:4000/generate-snippet';
     try {
       generateSnippetButtonDisabled = true;
       const response = await fetch(url, {
@@ -563,8 +568,16 @@
                 </button>
               </div>
             {/if}
-            {#if result.fileSource}
-              <button class="link-btn item {resultIndex === selectedResultIndex && actionIndex === selectedActionIndex ? 'selected' : ''}" on:click={() => actionClicked(resultIndex, actionIndex, result.rootPath, result.filePath)}>
+            <button class="link-btn item {resultIndex === selectedResultIndex && actionIndex === selectedActionIndex ? 'selected' : ''}" on:click={() => actionClicked(resultIndex, actionIndex, result.rootPath, result.filePath)}>
+              {#if (action.type === "add_file")}
+                <span class="old-code"></span>
+                <span class="new-code">{action.newCode}</span>
+              {/if}
+              {#if (action.type === "remove_file")}
+                <span class="old-code">{result.fileSource}</span>
+                <span class="new-code"></span>
+              {/if}
+              {#if (!["add_file", "remove_file"].includes(action.type)) && result.fileSource}
                 {#if (typeof action.newCode !== "undefined")}
                   <span class="old-code">{result.fileSource.substring(action.start, action.end)}</span>
                 {:else}
@@ -573,8 +586,8 @@
                 {#if (typeof action.newCode !== "undefined")}
                   <span class="new-code">{action.newCode}</span>
                 {/if}
-              </button>
-            {/if}
+              {/if}
+            </button>
           </li>
         {/each}
       </ul>

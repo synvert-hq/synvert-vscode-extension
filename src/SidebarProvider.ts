@@ -75,11 +75,18 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         case "onReplaceAll": {
           data.results.forEach((result: TestResultExtExt) => {
             const absolutePath = path.join(result.rootPath!, result.filePath);
-            let source = result.fileSource!;
-            result.actions.reverse().forEach(action => {
-              source = source.slice(0, action.start) + action.newCode + source.slice(action.end);
-            });
-            fs.writeFileSync(absolutePath, source);
+            if (result.actions.length === 1 && result.actions[0].type === "add_file") {
+              fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+              fs.writeFileSync(absolutePath, result.actions[0].newCode!);
+            } else if (result.actions.length === 1 && result.actions[0].type === "remove_file") {
+              fs.unlinkSync(absolutePath);
+            } else {
+              let source = result.fileSource!;
+              result.actions.reverse().forEach(action => {
+                source = source.slice(0, action.start) + action.newCode + source.slice(action.end);
+              });
+              fs.writeFileSync(absolutePath, source);
+            }
           });
           webviewView.webview.postMessage({ type: 'doneReplaceAll', errorMessage: "" });
           break;
@@ -97,7 +104,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
               let startRange = activeEditor.document.lineAt(startLineToGo - 1).range;
               const endLineToGo = doc.getText().substring(0, data.action.end).trimEnd().split("\n").length;
               let endRange = activeEditor.document.lineAt(endLineToGo - 1).range;
-              activeEditor.selection =  new vscode.Selection(startRange.start, endRange.end);
+              activeEditor.selection = new vscode.Selection(startRange.start, endRange.end);
               activeEditor.revealRange(startRange);
             });
           });
@@ -106,22 +113,39 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         case "onReplaceResult": {
           const { resultIndex, result, rootPath, filePath } = data;
           const absolutePath = path.join(rootPath!, filePath);
-          let source = fs.readFileSync(absolutePath, "utf-8");
-          (result as TestResultExtExt).actions.reverse().forEach(action => {
-            source = source.slice(0, action.start) + action.newCode + source.slice(action.end);
-          });
-          fs.writeFileSync(absolutePath, source);
+          if (result.actions.length === 1 && result.actions[0].type === "add_file") {
+            fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+            fs.writeFileSync(absolutePath, result.actions[0].newCode!);
+          } else if (result.actions.length === 1 && result.actions[0].type === "remove_file") {
+            fs.unlinkSync(absolutePath);
+          } else {
+            let source = fs.readFileSync(absolutePath, "utf-8");
+            (result as TestResultExtExt).actions.reverse().forEach(action => {
+              source = source.slice(0, action.start) + action.newCode + source.slice(action.end);
+            });
+            fs.writeFileSync(absolutePath, source);
+          }
           webviewView.webview.postMessage({ type: 'doneReplaceResult', resultIndex });
           break;
         }
         case "onReplaceAction": {
           const { resultIndex, actionIndex, action, rootPath, filePath } = data;
           const absolutePath = path.join(rootPath!, filePath);
-          let source = fs.readFileSync(absolutePath, "utf-8");
-          source = source.slice(0, action.start) + action.newCode + source.slice(action.end);
-          fs.writeFileSync(absolutePath, source);
-          const offset = action.newCode.length - (action.end - action.start);
-          webviewView.webview.postMessage({ type: 'doneReplaceAction', resultIndex, actionIndex, offset, source });
+          if (action.type === "add_file") {
+            const dirPath = path.dirname(absolutePath);
+            fs.mkdirSync(dirPath, { recursive: true });
+            fs.writeFileSync(absolutePath, action.newCode);
+            webviewView.webview.postMessage({ type: 'doneReplaceAction', resultIndex, actionIndex });
+          } else if (action.type === "remove_file") {
+            fs.unlinkSync(absolutePath);
+            webviewView.webview.postMessage({ type: 'doneReplaceAction', resultIndex, actionIndex });
+          } else {
+            let source = fs.readFileSync(absolutePath, "utf-8");
+            source = source.slice(0, action.start) + action.newCode + source.slice(action.end);
+            fs.writeFileSync(absolutePath, source);
+            const offset = action.newCode.length - (action.end - action.start);
+            webviewView.webview.postMessage({ type: 'doneReplaceAction', resultIndex, actionIndex, offset, source });
+          }
           break;
         }
         case "onInfo": {
@@ -259,8 +283,11 @@ function testRubySnippet(snippet: string, rootPath: string, onlyPaths: string, s
 
 function addFileSourceToSnippets(snippets: TestResultExtExt[], rootPath: string): void {
   snippets.forEach((snippet) => {
-    const fileSource = fs.readFileSync(path.join(rootPath, snippet.filePath), "utf-8");
-    snippet.fileSource = fileSource;
+    const absolutePath = path.join(rootPath, snippet.filePath);
+    if (fs.existsSync(absolutePath)) {
+      const fileSource = fs.readFileSync(absolutePath, "utf-8");
+      snippet.fileSource = fileSource;
+    }
     snippet.rootPath = rootPath;
   });
 }
