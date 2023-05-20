@@ -1,5 +1,15 @@
 # Change Log
 
+## [0.10.0] - 2023-04-20
+
+### Fixed
+
+- Reset generatedSnippets when generating snippet
+
+### Changed
+
+- Work for `add_file` and `remove_file` actions
+
 ## [0.9.2] - 2023-02-23
 
 ### Fixed
