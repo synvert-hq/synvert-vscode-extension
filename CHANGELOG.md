@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.10.1] - 2023-05-20
+
+### Fixed
+
+- Try catch test results handling
+
 ## [0.10.0] - 2023-04-20
 
 ### Fixed
