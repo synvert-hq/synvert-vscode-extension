@@ -421,13 +421,16 @@ function buildTypescriptCommandArgs(executeCommand: string, rootPath: string, on
 function handleTestResult(output: string, error: string | undefined, rootPath: string, resolve: any): void {
   if (error) {
     return resolve({ results: [], errorMessage: error });
-  } else {
+  }
+  try {
     const result = parseJSON(output);
     if (result.error) {
       return resolve({ results: [], errorMessage: result.error });
     }
     addFileSourceToSnippets(result, rootPath);
     return resolve({ results: result, errorMessage: "" });
+  } catch (e) {
+    return resolve({ results: [], errorMessage: (e as Error).message });
   }
 }
 
