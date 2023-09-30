@@ -41,6 +41,7 @@ export function activate(context: vscode.ExtensionContext) {
         checkGemRemoteVersions().then((data) => {
           const remoteSynvertVersion = data.synvertVersion;
           const remoteSynvertCoreVersion = data.synvertCoreVersion;
+          log({ ruby: { remoteSynvertVersion, remoteSynvertCoreVersion } });
           if (compareVersions(remoteSynvertVersion, localSynvertVersion) === 1) {
             vscode.window.showErrorMessage(`synvert gem version ${remoteSynvertVersion} is available. (Current version: ${localSynvertVersion})`, 'Update Now').then((item) => {
               if (item === 'Update Now') {
@@ -87,6 +88,7 @@ export function activate(context: vscode.ExtensionContext) {
         checkNpmRemoteVersions().then((data) => {
           const remoteSynvertVersion = data.synvertVersion;
           // const remoteSynvertCoreVersion = data.synvertCoreVersion;
+          log({ javascript: { remoteSynvertVersion } });
           if (compareVersions(remoteSynvertVersion, localSynvertVersion) === 1) {
             vscode.window.showErrorMessage(`synvert npm version ${remoteSynvertVersion} is available. (Current version: ${localSynvertVersion})`, 'Update Now').then((item) => {
               if (item === 'Update Now') {
