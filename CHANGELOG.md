@@ -1,5 +1,16 @@
 # Change Log
 
+## [0.11.0] - 2023-10-03
+
+### Added
+
+- Display and replace `group` action
+- Log remote versions
+
+### Changed
+
+- Update `synvert-core` to 2.17.0
+
 ## [0.10.1] - 2023-05-20
 
 ### Fixed
