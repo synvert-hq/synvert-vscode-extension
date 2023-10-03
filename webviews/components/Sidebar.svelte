@@ -171,6 +171,12 @@
             actions.splice(actionIndex, 1);
             if (actions.length > 0) {
               actions.slice(actionIndex).forEach(action => {
+                if (action.type === "group") {
+                  action.actions!.forEach(childAction => {
+                    childAction.start = childAction.start + offset;
+                    childAction.end = childAction.end + offset;
+                  });
+                }
                 action.start = action.start + offset;
                 action.end = action.end + offset;
               });
@@ -572,12 +578,21 @@
               {#if (action.type === "add_file")}
                 <span class="old-code"></span>
                 <span class="new-code">{action.newCode}</span>
-              {/if}
-              {#if (action.type === "remove_file")}
+              {:else if (action.type === "remove_file")}
                 <span class="old-code">{result.fileSource}</span>
                 <span class="new-code"></span>
-              {/if}
-              {#if (!["add_file", "remove_file"].includes(action.type)) && result.fileSource}
+              {:else if (action.type === "group" && action.actions && result.fileSource)}
+                {#each action.actions as childAction}
+                  {#if (typeof childAction.newCode !== "undefined")}
+                    <span class="old-code">{result.fileSource.substring(childAction.start, childAction.end)}</span>
+                  {:else}
+                    <span>{result.fileSource.substring(childAction.start, childAction.end)}</span>
+                  {/if}
+                  {#if (typeof childAction.newCode !== "undefined")}
+                    <span class="new-code">{childAction.newCode}</span>
+                  {/if}
+                {/each}
+              {:else if (result.fileSource)}
                 {#if (typeof action.newCode !== "undefined")}
                   <span class="old-code">{result.fileSource.substring(action.start, action.end)}</span>
                 {:else}

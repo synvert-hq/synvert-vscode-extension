@@ -72,25 +72,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           });
           break;
         }
-        case "onReplaceAll": {
-          data.results.forEach((result: TestResultExtExt) => {
-            const absolutePath = path.join(result.rootPath!, result.filePath);
-            if (result.actions.length === 1 && result.actions[0].type === "add_file") {
-              fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
-              fs.writeFileSync(absolutePath, result.actions[0].newCode!);
-            } else if (result.actions.length === 1 && result.actions[0].type === "remove_file") {
-              fs.unlinkSync(absolutePath);
-            } else {
-              let source = result.fileSource!;
-              result.actions.reverse().forEach(action => {
-                source = source.slice(0, action.start) + action.newCode + source.slice(action.end);
-              });
-              fs.writeFileSync(absolutePath, source);
-            }
-          });
-          webviewView.webview.postMessage({ type: 'doneReplaceAll', errorMessage: "" });
-          break;
-        }
         case "onOpenFile": {
           var openPath = vscode.Uri.parse(path.join(data.rootPath, data.filePath));
           vscode.workspace.openTextDocument(openPath).then(doc => {
@@ -110,6 +91,31 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           });
           break;
         }
+        case "onReplaceAll": {
+          data.results.forEach((result: TestResultExtExt) => {
+            const absolutePath = path.join(result.rootPath!, result.filePath);
+            if (result.actions.length === 1 && result.actions[0].type === "add_file") {
+              fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+              fs.writeFileSync(absolutePath, result.actions[0].newCode!);
+            } else if (result.actions.length === 1 && result.actions[0].type === "remove_file") {
+              fs.unlinkSync(absolutePath);
+            } else {
+              let source = result.fileSource!;
+              result.actions.reverse().forEach(action => {
+                if (action.type === 'group') {
+                  (action.actions!).reverse().forEach(childAction => {
+                    source = source.slice(0, childAction.start) + childAction.newCode + source.slice(childAction.end);
+                  });
+                } else {
+                  source = source.slice(0, action.start) + action.newCode + source.slice(action.end);
+                }
+              });
+              fs.writeFileSync(absolutePath, source);
+            }
+          });
+          webviewView.webview.postMessage({ type: 'doneReplaceAll', errorMessage: "" });
+          break;
+        }
         case "onReplaceResult": {
           const { resultIndex, result, rootPath, filePath } = data;
           const absolutePath = path.join(rootPath!, filePath);
@@ -121,7 +127,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           } else {
             let source = fs.readFileSync(absolutePath, "utf-8");
             (result as TestResultExtExt).actions.reverse().forEach(action => {
-              source = source.slice(0, action.start) + action.newCode + source.slice(action.end);
+              if (action.type === 'group') {
+                (action.actions!).reverse().forEach(childAction => {
+                  source = source.slice(0, childAction.start) + childAction.newCode + source.slice(childAction.end);
+                });
+              } else {
+                source = source.slice(0, action.start) + action.newCode + source.slice(action.end);
+              }
             });
             fs.writeFileSync(absolutePath, source);
           }
@@ -141,9 +153,17 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             webviewView.webview.postMessage({ type: 'doneReplaceAction', resultIndex, actionIndex });
           } else {
             let source = fs.readFileSync(absolutePath, "utf-8");
-            source = source.slice(0, action.start) + action.newCode + source.slice(action.end);
+            let offset = 0;
+            if (action.type === 'group') {
+              action.actions.reverse().forEach((childAction: any) => {
+                source = source.slice(0, childAction.start) + childAction.newCode + source.slice(childAction.end);
+                offset += childAction.newCode.length - (childAction.end - childAction.start);
+              });
+            } else {
+              source = source.slice(0, action.start) + action.newCode + source.slice(action.end);
+              offset = action.newCode.length - (action.end - action.start);
+            }
             fs.writeFileSync(absolutePath, source);
-            const offset = action.newCode.length - (action.end - action.start);
             webviewView.webview.postMessage({ type: 'doneReplaceAction', resultIndex, actionIndex, offset, source });
           }
           break;
