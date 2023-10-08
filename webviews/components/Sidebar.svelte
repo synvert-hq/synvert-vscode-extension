@@ -6,6 +6,7 @@
   import type { SelectOption, TestResultExtExt } from "../../src/types";
 
   let updateDependenciesButtonDisabled = false;
+  let showAdvancedOptions = false;
   let showGenerateSnippet = false;
   let inputs = [""];
   let outputs = [""];
@@ -84,6 +85,7 @@
       const message = event.data; // The json data that the extension sent
       switch (message.type) {
         case "loadData": {
+          showAdvancedOptions = message.showAdvancedOptions;
           showGenerateSnippet = message.showGenerateSnippet;
           language = message.language || "typescript";
           parserOptions = fetchOptionsByLanguage(language);
@@ -207,7 +209,7 @@
 
   afterUpdate(() => {
     // @ts-ignore
-    tsvscode.postMessage({ type: "afterUpdate", showGenerateSnippet, language, parser, filePattern, nodeVersion, npmVersion, inputs, outputs, nqlOrRules, onlyPaths, skipPaths, snippet, results });
+    tsvscode.postMessage({ type: "afterUpdate", showAdvancedOptions, showGenerateSnippet, language, parser, filePattern, nodeVersion, npmVersion, inputs, outputs, nqlOrRules, onlyPaths, skipPaths, snippet, results });
   });
 
   const PLACEHODERS: { [language: string]: { [name: string]: string } } = {
@@ -258,6 +260,10 @@
     updateDependenciesButtonDisabled = true;
     // @ts-ignore
     tsvscode.postMessage({ type: "updateDependencies", language });
+  }
+
+  function toggleShowAdvancedOptions() {
+    showAdvancedOptions = !showAdvancedOptions;
   }
 
   function toggleGenerateSnippet() {
@@ -501,22 +507,34 @@
 {#if infoMessage.length > 0}
   <p class="info-message" id="infoMessage">{infoMessage}</p>
 {/if}
-<div class="header">
-  <select id="language" bind:value={language} on:change={languageChanged}>
-    {#each languageOptions as option}
-      <option value={option.value}>{option.label}</option>
-    {/each}
-  </select>
+<select id="language" bind:value={language} on:change={languageChanged}>
+  {#each languageOptions as option}
+    <option value={option.value}>{option.label}</option>
+  {/each}
+</select>
+<div class="query-snippets-select">
+  <Select items={snippets} loading={snippetsLoading} {optionIdentifier} {getSelectionLabel} {getOptionLabel} bind:value={selectedSnippet} on:select={snippetSelected} placeholder="Search a snippet"></Select>
+</div>
+<div class="advanced-options">
+  <button class="link-btn" on:click={toggleShowAdvancedOptions}>
+    {#if showAdvancedOptions}
+      <i class="icon chevron-down-icon"></i>
+      <span>Hide Advanced Options</span>
+    {:else}
+      <i class="icon chevron-right-icon"></i>
+      <span>Show Advanced Options</span>
+    {/if}
+  </button>
+</div>
+{#if showAdvancedOptions}
+  <label for="parser"><b>Parser</b></label>
   <select id="parser" bind:value={parser}>
     {#each parserOptions as option}
       <option value={option.value}>{option.label}</option>
     {/each}
   </select>
-  <button on:click={updateDependencies} disabled={updateDependenciesButtonDisabled}>{updateDependenciesButtonDisabled ? "Updating..." : "Update Dependencies"}</button>
-</div>
-<div class="query-snippets-select">
-  <Select items={snippets} loading={snippetsLoading} {optionIdentifier} {getSelectionLabel} {getOptionLabel} bind:value={selectedSnippet} on:select={snippetSelected} placeholder="Search a snippet"></Select>
-</div>
+  <button on:click={updateDependencies} disabled={updateDependenciesButtonDisabled} title={language === "ruby" ? "Update synvert ruby dependencies and sync synvert ruby snippets" : "Update synvert javascript dependencies and sync synvert javascript snippets"}>{updateDependenciesButtonDisabled ? "Updating..." : "Update Dependencies"}</button>
+{/if}
 <div class="generate-snippet">
   <button class="link-btn" on:click={toggleGenerateSnippet}>
     {#if showGenerateSnippet}

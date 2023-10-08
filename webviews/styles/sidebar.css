@@ -1,10 +1,4 @@
 /* https://github.com/rob-balfre/svelte-select/blob/master/docs/theming_variables.md */
-.header {
-  display: flex;
-}
-.header button {
-  flex-basis: fit-content;
-}
 .query-snippets-select {
   --background: #464646;
   --border: none;
@@ -34,7 +28,7 @@
   background-color: #d1ecf1;
   border-color: #bee5eb;
 }
-.generate-snippet button:first-child {
+.advanced-options button:first-child, .generate-snippet button:first-child {
   display: flex;
 }
 .search-results ul {
