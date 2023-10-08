@@ -1,4 +1,10 @@
 /* https://github.com/rob-balfre/svelte-select/blob/master/docs/theming_variables.md */
+.header {
+  display: flex;
+}
+.header button {
+  flex-basis: fit-content;
+}
 .query-snippets-select {
   --background: #464646;
   --border: none;

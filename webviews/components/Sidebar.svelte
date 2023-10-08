@@ -5,6 +5,7 @@
   import { composeGeneratedSnippets } from "synvert-ui-common";
   import type { SelectOption, TestResultExtExt } from "../../src/types";
 
+  let updateDependenciesButtonDisabled = false;
   let showGenerateSnippet = false;
   let inputs = [""];
   let outputs = [""];
@@ -127,6 +128,10 @@
           }
           break;
         }
+        case "doneUpdateDependencies": {
+          updateDependenciesButtonDisabled = false;
+          break;
+        }
         case "selectedCode": {
           inputs[0] = message.value;
           break;
@@ -247,6 +252,12 @@
     if (selectedResultIndex && selectedResultIndex > resultIndex && results[resultIndex].actions.length == 1) {
       selectedResultIndex = selectedResultIndex - 1;
     }
+  }
+
+  function updateDependencies() {
+    updateDependenciesButtonDisabled = true;
+    // @ts-ignore
+    tsvscode.postMessage({ type: "updateDependencies", language });
   }
 
   function toggleGenerateSnippet() {
@@ -501,6 +512,7 @@
       <option value={option.value}>{option.label}</option>
     {/each}
   </select>
+  <button on:click={updateDependencies} disabled={updateDependenciesButtonDisabled}>{updateDependenciesButtonDisabled ? "Updating..." : "Update Dependencies"}</button>
 </div>
 <div class="query-snippets-select">
   <Select items={snippets} loading={snippetsLoading} {optionIdentifier} {getSelectionLabel} {getOptionLabel} bind:value={selectedSnippet} on:select={snippetSelected} placeholder="Search a snippet"></Select>

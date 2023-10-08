@@ -4,7 +4,7 @@ import { machineIdSync } from 'node-machine-id';
 import * as vscode from "vscode";
 import { parseJSON} from "synvert-ui-common";
 import type { SearchResults, TestResultExtExt } from "./types";
-import { runCommand } from "./utils";
+import { installNpm, installGem, syncJavascriptSnippets, syncRubySnippets, runCommand, showInformationMessage, showErrorMessage } from "./utils";
 import { LocalStorageService } from "./localStorageService";
 import {
   rubyEnabled,
@@ -52,6 +52,17 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         }
         case "afterUpdate": {
           this._storageService.setValue("data", data);
+          break;
+        }
+        case "updateDependencies": {
+          updateDependencies(data.language).then(({ errorMessage }) => {
+            if (errorMessage.length === 0) {
+              showInformationMessage(`Successfully updated ${data.language} dependencies.`);
+            } else {
+              vscode.window.showErrorMessage(errorMessage);
+            }
+            webviewView.webview.postMessage({ type: 'doneUpdateDependencies' });
+          });
           break;
         }
         case "onSearch": {
@@ -172,7 +183,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           if (!data.value) {
             return;
           }
-          vscode.window.showInformationMessage(data.value);
+          showInformationMessage(data.value);
           break;
         }
         case "onError": {
@@ -361,6 +372,42 @@ function processRubySnippet(snippet: string, rootPath: string, onlyPaths: string
     const commandArgs = buildRubyCommandArgs("run", rootPath, onlyPaths, skipPaths);
     runCommand("synvert-ruby", commandArgs, { input: snippet }).then(({ output, error }) => {
       return handleProcessResult(error, resolve);
+    });
+  });
+}
+
+function updateDependencies(language: string): Promise<{ errorMessage: string }> {
+  if (language === "ruby") {
+    return updateRubyDependencies();
+  } else {
+    return updateJavascriptDependencies();
+  }
+}
+
+function updateJavascriptDependencies(): Promise<{ errorMessage: string }> {
+  return new Promise((resolve, reject) => {
+    installNpm("synvert").then(() => {
+      syncJavascriptSnippets().then(() => {
+        return resolve({ errorMessage: "" });
+      }).catch((error) => {
+        return resolve({ errorMessage: error });
+      });
+    }).catch((error) => {
+      return resolve({ errorMessage: error });
+    });
+  });
+}
+
+function updateRubyDependencies(): Promise<{ errorMessage: string }> {
+  return new Promise((resolve, reject) => {
+    installGem(["synvert", "synvert-core", "node_query", "node_mutation", "parser_node_ext", "syntax_tree_ext"]).then(() => {
+      syncRubySnippets().then(() => {
+        return resolve({ errorMessage: "" });
+      }).catch((error) => {
+        return resolve({ errorMessage: error });
+      });
+    }).catch((error) => {
+      return resolve({ errorMessage: error });
     });
   });
 }

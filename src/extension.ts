@@ -8,7 +8,7 @@ import { SidebarProvider } from './SidebarProvider';
 import { LocalStorageService } from './localStorageService';
 import { javascriptEnabled, rubyEnabled, typescriptEnabled } from './configuration';
 import { log } from './log';
-import { runCommand } from './utils';
+import { runCommand, installGem, installNpm, showErrorMessage, showInformationMessage } from './utils';
 
 const VERSION_REGEXP = /(\d+\.\d+\.\d+) \(with synvert-core (\d+\.\d+\.\d+)/;
 
@@ -43,23 +43,23 @@ export function activate(context: vscode.ExtensionContext) {
           const remoteSynvertCoreVersion = data.synvertCoreVersion;
           log({ ruby: { remoteSynvertVersion, remoteSynvertCoreVersion } });
           if (compareVersions(remoteSynvertVersion, localSynvertVersion) === 1) {
-            vscode.window.showErrorMessage(`synvert gem version ${remoteSynvertVersion} is available. (Current version: ${localSynvertVersion})`, 'Update Now').then((item) => {
+            showErrorMessage(`synvert gem version ${remoteSynvertVersion} is available. (Current version: ${localSynvertVersion})`, 'Update Now').then((item) => {
               if (item === 'Update Now') {
                 installGem('synvert').then(() => {
-                  vscode.window.showInformationMessage('Successfully updated the synvert gem.');
-                }).catch(() => {
-                  vscode.window.showErrorMessage('Failed to update the synvert gem.');
+                  showInformationMessage('Successfully updated the synvert gem.');
+                }).catch((error) => {
+                  showErrorMessage('Failed to update the synvert gem. ' + error);
                 });
               }
             });
           }
           if (compareVersions(remoteSynvertCoreVersion, localSynvertCoreVersion) === 1) {
-            vscode.window.showErrorMessage(`synvert-core gem version ${remoteSynvertCoreVersion} is available. (Current version: ${localSynvertCoreVersion})`, 'Update Now').then((item) => {
+            showErrorMessage(`synvert-core gem version ${remoteSynvertCoreVersion} is available. (Current version: ${localSynvertCoreVersion})`, 'Update Now').then((item) => {
               if (item === 'Update Now') {
                 installGem('synvert-core').then(() => {
-                  vscode.window.showInformationMessage('Successfully updated the synvert-core gem.');
-                }).catch(() => {
-                  vscode.window.showErrorMessage('Failed to update the synvert gem.');
+                  showInformationMessage('Successfully updated the synvert-core gem.');
+                }).catch((error) => {
+                  showErrorMessage('Failed to update the synvert gem. ' + error);
                 });
               }
             });
@@ -67,12 +67,12 @@ export function activate(context: vscode.ExtensionContext) {
         });
       }
     }).catch(() => {
-      vscode.window.showErrorMessage('synvert gem not found. Run `gem install synvert` or update your Gemfile.', 'Install Now').then((item) => {
+      showErrorMessage('synvert gem not found. Run `gem install synvert` or update your Gemfile.', 'Install Now').then((item) => {
         if (item === 'Install Now') {
           installGem('synvert').then(() => {
-            vscode.window.showInformationMessage('Successfully installed the synvert gem.');
-          }).catch(() => {
-            vscode.window.showErrorMessage('Failed to install the synvert gem.');
+            showInformationMessage('Successfully installed the synvert gem.');
+          }).catch((error) => {
+            showErrorMessage('Failed to install the synvert gem. ' + error);
           });
         }
       });
@@ -90,23 +90,23 @@ export function activate(context: vscode.ExtensionContext) {
           // const remoteSynvertCoreVersion = data.synvertCoreVersion;
           log({ javascript: { remoteSynvertVersion } });
           if (compareVersions(remoteSynvertVersion, localSynvertVersion) === 1) {
-            vscode.window.showErrorMessage(`synvert npm version ${remoteSynvertVersion} is available. (Current version: ${localSynvertVersion})`, 'Update Now').then((item) => {
+            showErrorMessage(`synvert npm version ${remoteSynvertVersion} is available. (Current version: ${localSynvertVersion})`, 'Update Now').then((item) => {
               if (item === 'Update Now') {
                 installNpm('synvert').then(() => {
-                  vscode.window.showInformationMessage('Successfully updated the synvert npm.');
-                }).catch(() => {
-                  vscode.window.showErrorMessage('Failed to update the synvert npm.');
+                  showInformationMessage('Successfully updated the synvert npm.');
+                }).catch((error) => {
+                  showErrorMessage('Failed to update the synvert npm. ' + error);
                 });
               }
             });
           }
           // if (compareVersions(remoteSynvertCoreVersion, localSynvertCoreVersion) === 1) {
-          //   vscode.window.showErrorMessage(`synvert-core npm version ${remoteSynvertCoreVersion} is available. (Current version: ${localSynvertCoreVersion})`, 'Update Now').then((item) => {
+          //   showErrorMessage(`synvert-core npm version ${remoteSynvertCoreVersion} is available. (Current version: ${localSynvertCoreVersion})`, 'Update Now').then((item) => {
           //     if (item === 'Update Now') {
           //       installNpm('synvert-core').then(() => {
-          //         vscode.window.showInformationMessage('Successfully updated the synvert-core npm.');
+          //         showInformationMessage('Successfully updated the synvert-core npm.');
           //       }).catch(() => {
-          //         vscode.window.showErrorMessage('Failed to update the synvert npm.');
+          //         showErrorMessage('Failed to update the synvert npm.');
           //       });
           //     }
           //   });
@@ -114,12 +114,12 @@ export function activate(context: vscode.ExtensionContext) {
         });
       }
     }).catch(() => {
-      vscode.window.showErrorMessage('synvert npm not found. Run `npm install -g synvert`.', 'Install Now').then((item) => {
+      showErrorMessage('synvert npm not found. Run `npm install -g synvert`.', 'Install Now').then((item) => {
         if (item === 'Install Now') {
           installNpm('synvert').then(() => {
-            vscode.window.showInformationMessage('Successfully installed the synvert npm.');
-          }).catch(() => {
-            vscode.window.showErrorMessage('Failed to install the synvert npm.');
+            showInformationMessage('Successfully installed the synvert npm.');
+          }).catch((error) => {
+            showErrorMessage('Failed to install the synvert npm. ' + error);
           });
         }
       });
@@ -149,18 +149,6 @@ function checkNpmRemoteVersions(): Promise<{ synvertVersion: string, synvertCore
   }));
 }
 
-function installNpm(npmName: string): Promise<boolean> {
-  return new Promise((resolve, reject) => {
-    runCommand("npm", ["install", "-g", npmName]).then(({ error }) => {
-      if (error) {
-        return resolve(false);
-      } else {
-        return resolve(true);
-      }
-    });
-  });
-}
-
 function checkGem(): Promise<string> {
   return new Promise((resolve, reject) => {
     runCommand("synvert-ruby", ["-v"]).then(({ output, error }) => {
@@ -178,16 +166,4 @@ function checkGemRemoteVersions(): Promise<{ synvertVersion: string, synvertCore
   return fetch(url).then(response => response.json()).then((data: any) => ({
     synvertVersion: data.synvert_version, synvertCoreVersion: data.synvert_core_version
   }));
-}
-
-function installGem(gemName: string): Promise<boolean> {
-  return new Promise((resolve, reject) => {
-    runCommand("gem", ["install", gemName]).then(({ error }) => {
-      if (error) {
-        return resolve(false);
-      } else {
-        return resolve(true);
-      }
-    });
-  });
 }
