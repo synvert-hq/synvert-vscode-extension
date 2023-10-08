@@ -12,7 +12,6 @@
   let snippets: Snippet[] = [];
   let selectedSnippet: Snippet | undefined;
   let snippetsLoading = false;
-  let filePattern = "**/*.ts";
   let rubyVersion = "";
   let gemVersion = "";
   let nodeVersion = "";
@@ -49,6 +48,10 @@
     languageOptions.push({ value: "typescript", label: "Typescript" });
   }
 
+  let filePattern = fetchFilePatternByLanguage(language);
+  let parserOptions = fetchOptionsByLanguage(language);
+  let parser = parserOptions[0].value;
+
   async function fetchSnippets() {
     snippetsLoading = true;
     errorMessage = "";
@@ -82,7 +85,9 @@
         case "loadData": {
           showGenerateSnippet = message.showGenerateSnippet;
           language = message.language || "typescript";
-          filePattern = message.filePattern || "**/*.ts";
+          parserOptions = fetchOptionsByLanguage(language);
+          parser = message.parser || parserOptions[0].value;
+          filePattern = message.filePattern || fetchFilePatternByLanguage(language);
           nodeVersion = message.nodeVersion || "";
           npmVersion = message.npmVersion || "";
           inputs = message.inputs;
@@ -197,7 +202,7 @@
 
   afterUpdate(() => {
     // @ts-ignore
-    tsvscode.postMessage({ type: "afterUpdate", showGenerateSnippet, language, filePattern, nodeVersion, npmVersion, inputs, outputs, nqlOrRules, onlyPaths, skipPaths, snippet, results });
+    tsvscode.postMessage({ type: "afterUpdate", showGenerateSnippet, language, parser, filePattern, nodeVersion, npmVersion, inputs, outputs, nqlOrRules, onlyPaths, skipPaths, snippet, results });
   });
 
   const PLACEHODERS: { [language: string]: { [name: string]: string } } = {
@@ -279,18 +284,44 @@
     errorMessage = "";
     infoMessage = "";
     results = [];
+    filePattern = fetchFilePatternByLanguage(language);
+    parserOptions = fetchOptionsByLanguage(language);
+    parser = parserOptions[0].value;
+    snippets = await fetchSnippets();
+  }
+
+  function fetchFilePatternByLanguage(language: string): string {
+      switch (language) {
+        case "ruby":
+          return "**/*.rb";
+        case "javascript":
+          return "**/*.js";
+        case "typescript":
+          return "**/*.ts";
+        default:
+          return "";
+      }
+  }
+
+  function fetchOptionsByLanguage(language: string): SelectOption[] {
     switch (language) {
       case "ruby":
-        filePattern = "**/*.rb";
-        break;
+        return [
+          { value: "parser", label: "Parser" },
+          { value: "syntax_tree", label: "SyntaxTree" },
+        ];
       case "javascript":
-        filePattern = "**/*.js";
-        break;
+        return [
+          { value: "typescript", label: "Typescript" },
+          { value: "espree", label: "Espree" },
+        ];
       case "typescript":
-        filePattern = "**/*.ts";
-        break;
+        return [
+          { value: "typescript", label: "Typescript" },
+        ];
+      default:
+        return [];
     }
-    snippets = await fetchSnippets();
   }
 
   function resetFormInputs() {
@@ -332,8 +363,8 @@
       } else {
         generatedSnippets = composeGeneratedSnippets(
           language === "ruby" ?
-          { language, filePattern, rubyVersion, gemVersion, snippets: data.snippets } :
-          { language, filePattern, nodeVersion, npmVersion, snippets: data.snippets }
+          { language, parser, filePattern, rubyVersion, gemVersion, snippets: data.snippets } :
+          { language, parser, filePattern, nodeVersion, npmVersion, snippets: data.snippets }
         );
         generatedSnippetIndex = 0;
         snippet = generatedSnippets[generatedSnippetIndex];
@@ -459,11 +490,18 @@
 {#if infoMessage.length > 0}
   <p class="info-message" id="infoMessage">{infoMessage}</p>
 {/if}
-<select id="language" bind:value={language} on:change={languageChanged}>
-  {#each languageOptions as option}
-    <option value={option.value}>{option.label}</option>
-  {/each}
-</select>
+<div class="header">
+  <select id="language" bind:value={language} on:change={languageChanged}>
+    {#each languageOptions as option}
+      <option value={option.value}>{option.label}</option>
+    {/each}
+  </select>
+  <select id="parser" bind:value={parser}>
+    {#each parserOptions as option}
+      <option value={option.value}>{option.label}</option>
+    {/each}
+  </select>
+</div>
 <div class="query-snippets-select">
   <Select items={snippets} loading={snippetsLoading} {optionIdentifier} {getSelectionLabel} {getOptionLabel} bind:value={selectedSnippet} on:select={snippetSelected} placeholder="Search a snippet"></Select>
 </div>
