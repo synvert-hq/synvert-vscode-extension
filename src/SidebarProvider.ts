@@ -59,7 +59,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             if (errorMessage.length === 0) {
               showInformationMessage(`Successfully updated ${data.language} dependencies.`);
             } else {
-              vscode.window.showErrorMessage(errorMessage);
+              showErrorMessage(`Failed to update ${data.language} dependencies: ${errorMessage}`);
             }
             webviewView.webview.postMessage({ type: 'doneUpdateDependencies' });
           });
@@ -190,7 +190,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           if (!data.value) {
             return;
           }
-          vscode.window.showErrorMessage(data.value);
+          showErrorMessage(data.value);
           break;
         }
       }
