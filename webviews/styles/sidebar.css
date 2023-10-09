@@ -28,7 +28,14 @@
   background-color: #d1ecf1;
   border-color: #bee5eb;
 }
-.advanced-options button:first-child, .generate-snippet button:first-child {
+.header {
+  display: flex;
+}
+.header button {
+  flex-basis: fit-content;
+  margin-left: 10px;
+}
+.generate-snippet button:first-child {
   display: flex;
 }
 .search-results ul {
