@@ -527,12 +527,6 @@
   </button>
 </div>
 {#if showAdvancedOptions}
-  <label for="parser"><b>Parser</b></label>
-  <select id="parser" bind:value={parser}>
-    {#each parserOptions as option}
-      <option value={option.value}>{option.label}</option>
-    {/each}
-  </select>
   <button on:click={updateDependencies} disabled={updateDependenciesButtonDisabled} title={language === "ruby" ? "Update synvert ruby dependencies and sync synvert ruby snippets" : "Update synvert javascript dependencies and sync synvert javascript snippets"}>{updateDependenciesButtonDisabled ? "Updating..." : "Update Dependencies"}</button>
 {/if}
 <div class="generate-snippet">
@@ -547,6 +541,12 @@
   </button>
 </div>
 {#if showGenerateSnippet}
+  <label for="parser"><b>Parser</b></label>
+  <select id="parser" bind:value={parser}>
+    {#each parserOptions as option}
+      <option value={option.value}>{option.label}</option>
+    {/each}
+  </select>
   <label for="filePattern"><b>File Pattern</b></label>
   <input id="filePattern" bind:value={filePattern} />
   {#if language === "ruby"}
