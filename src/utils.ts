@@ -28,57 +28,44 @@ export async function runCommand(command: string, args: string[], { input }: { i
     }
   }
 }
-
 export async function installNpm(npmName: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    runCommand("npm", ["install", "-g", npmName]).then(({ output, error }) => {
-      if (error) {
-        return reject(error);
-      } else {
-        return resolve(output);
-      }
-    });
-  });
+  const { output, error } = await runCommand("npm", ["install", "-g", npmName]);
+  if (error) {
+    throw error;
+  } else {
+    return output;
+  }
 }
 
 export async function installGem(gemName: string | string[]): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const options = ["install"];
-    if (Array.isArray(gemName)) {
-      options.push(...gemName);
-    } else {
-      options.push(gemName);
-    }
-    runCommand("gem", options).then(({ output, error }) => {
-      if (error) {
-        return reject(error);
-      } else {
-        return resolve(output);
-      }
-    });
-  });
+  const options = ["install"];
+  if (Array.isArray(gemName)) {
+    options.push(...gemName);
+  } else {
+    options.push(gemName);
+  }
+  const { output, error } = await runCommand("gem", options);
+  if (error) {
+    throw error;
+  } else {
+    return output;
+  }
 }
 
 export async function syncJavascriptSnippets(): Promise<string> {
-  return new Promise((resolve, reject) => {
-    runCommand("synvert-javascript", ["--sync"]).then(({ output, error }) => {
-      if (error) {
-        return reject(error);
-      } else {
-        return resolve(output);
-      }
-    });
-  });
+  const { output, error } = await runCommand("synvert-javascript", ["--sync"]);
+  if (error) {
+    throw error;
+  } else {
+    return output;
+  }
 }
 
 export async function syncRubySnippets(): Promise<string> {
-  return new Promise((resolve, reject) => {
-    runCommand("synvert-ruby", ["--sync"]).then(({ output, error }) => {
-      if (error) {
-        return reject(error);
-      } else {
-        return resolve(output);
-      }
-    });
-  });
+  const { output, error } = await runCommand("synvert-ruby", ["--sync"]);
+  if (error) {
+    throw error;
+  } else {
+    return output;
+  }
 }

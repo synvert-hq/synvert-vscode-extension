@@ -106,40 +106,36 @@ export async function activate(context: vscode.ExtensionContext) {
 // this method is called when your extension is deactivated
 export function deactivate() {}
 
-function checkNpm(): Promise<string> {
-  return new Promise((resolve, reject) => {
-    runCommand("synvert-javascript", ["-v"]).then(({ output, error }) => {
-      if (error) {
-        return reject(error);
-      } else {
-        return resolve(output);
-      }
-    });
-  });
+async function checkNpm(): Promise<string> {
+  const { output, error } = await runCommand("synvert-javascript", ["-v"]);
+  if (error) {
+    throw error;
+  } else {
+    return output;
+  }
 }
 
-function checkNpmRemoteVersions(): Promise<{ synvertVersion: string, synvertCoreVersion: string }> {
+async function checkNpmRemoteVersions(): Promise<{ synvertVersion: string, synvertCoreVersion: string }> {
   const url = "https://api-javascript.synvert.net/check-versions";
-  return fetch(url).then(response => response.json()).then((data: any) => ({
-    synvertVersion: data.synvert_version, synvertCoreVersion: data.synvert_core_version
-  }));
+  const response = await fetch(url);
+  const data = await response.json();
+  const { synvert_version, synvert_core_version } = data as { synvert_version: string, synvert_core_version: string };
+  return { synvertVersion: synvert_version, synvertCoreVersion: synvert_core_version };
 }
 
-function checkGem(): Promise<string> {
-  return new Promise((resolve, reject) => {
-    runCommand("synvert-ruby", ["-v"]).then(({ output, error }) => {
-      if (error) {
-        return reject(error);
-      } else {
-        return resolve(output);
-      }
-    });
-  });
+async function checkGem(): Promise<string> {
+  const { output, error } = await runCommand("synvert-ruby", ["-v"]);
+  if (error) {
+    throw error;
+  } else {
+    return output;
+  }
 }
 
-function checkGemRemoteVersions(): Promise<{ synvertVersion: string, synvertCoreVersion: string }> {
+async function checkGemRemoteVersions(): Promise<{ synvertVersion: string, synvertCoreVersion: string }> {
   const url = "https://api-ruby.synvert.net/check-versions";
-  return fetch(url).then(response => response.json()).then((data: any) => ({
-    synvertVersion: data.synvert_version, synvertCoreVersion: data.synvert_core_version
-  }));
+  const response = await fetch(url);
+  const data = await response.json();
+  const { synvert_version, synvert_core_version } = data as { synvert_version: string, synvert_core_version: string };
+  return { synvertVersion: synvert_version, synvertCoreVersion: synvert_core_version };
 }
