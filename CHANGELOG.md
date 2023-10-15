@@ -1,5 +1,17 @@
 # Change Log
 
+## [0.12.0] - 2023-10-15
+
+### Added
+
+- Add parser select
+- Add "Update" button to update dependencies
+
+### Changed
+
+- Update `synvert-core` to 2.17.2
+- Make `activate` function async
+
 ## [0.11.0] - 2023-10-03
 
 ### Added
