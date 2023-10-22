@@ -44,26 +44,19 @@ export async function activate(context: vscode.ExtensionContext) {
         const remoteSynvertCoreVersion = data.synvertCoreVersion;
         log({ ruby: { remoteSynvertVersion, remoteSynvertCoreVersion } });
         if (compareVersions(remoteSynvertVersion, localSynvertVersion) === 1) {
-          const item = await showErrorMessage(`synvert gem version ${remoteSynvertVersion} is available. (Current version: ${localSynvertVersion})`, 'Update Now');
-          if (item === 'Update Now') {
-            await installGem('synvert');
-            showInformationMessage('Successfully updated the synvert gem.');
-          }
+          await showUpdateSynvertRubyErrorMessage(remoteSynvertVersion, localSynvertVersion);
         }
         if (compareVersions(remoteSynvertCoreVersion, localSynvertCoreVersion) === 1) {
-          const item = await showErrorMessage(`synvert-core gem version ${remoteSynvertCoreVersion} is available. (Current version: ${localSynvertCoreVersion})`, 'Update Now');
-          if (item === 'Update Now') {
-            await installGem('synvert-core');
-            showInformationMessage('Successfully updated the synvert-core gem.');
-          }
+          await showUpdateSynvertCoreRubyErrorMessage(remoteSynvertCoreVersion, localSynvertCoreVersion);
         }
+      } else {
+        await showInstallSynvertRubyErrorMessage();
       }
     } catch (error) {
-      const item = await showErrorMessage('synvert gem not found. Run `gem install synvert` or update your Gemfile.', 'Install Now');
-      if (item === 'Install Now') {
-        await installGem('synvert');
-        showInformationMessage('Successfully installed the synvert gem.');
+      if (error instanceof Error) {
+        log("Error when checking synvert-ruby environment: " + error.message);
       }
+      log("Error when checking synvert-ruby environment: " + String(error));
     }
   }
 
@@ -79,26 +72,16 @@ export async function activate(context: vscode.ExtensionContext) {
         // const remoteSynvertCoreVersion = data.synvertCoreVersion;
         log({ javascript: { remoteSynvertVersion } });
         if (compareVersions(remoteSynvertVersion, localSynvertVersion) === 1) {
-          const item = await showErrorMessage(`synvert npm version ${remoteSynvertVersion} is available. (Current version: ${localSynvertVersion})`, 'Update Now');
-          if (item === 'Update Now') {
-            await installNpm('synvert');
-            showInformationMessage('Successfully updated the synvert npm.');
-          }
+          await showUpdateSynvertJavascriptErrorMessage(remoteSynvertVersion, localSynvertVersion);
         }
-        // if (compareVersions(remoteSynvertCoreVersion, localSynvertCoreVersion) === 1) {
-        //   const item = await showErrorMessage(`synvert-core npm version ${remoteSynvertCoreVersion} is available. (Current version: ${localSynvertCoreVersion})`, 'Update Now');
-        //   if (item === 'Update Now') {
-        //     await installNpm('synvert-core');
-        //     showInformationMessage('Successfully updated the synvert-core npm.');
-        //   }
-        // }
+      } else {
+        await showInstallSynvertJavascriptErrorMessage();
       }
     } catch (error) {
-      const item = await showErrorMessage('synvert npm not found. Run `npm install -g synvert`.', 'Install Now');
-      if (item === 'Install Now') {
-        await installNpm('synvert');
-        showInformationMessage('Successfully installed the synvert npm.');
+      if (error instanceof Error) {
+        log("Error when checking synvert-javascript environment: " + error.message);
       }
+      log("Error when checking synvert-javascript environment: " + String(error));
     }
   }
 }
@@ -108,11 +91,7 @@ export function deactivate() {}
 
 async function checkNpm(): Promise<string> {
   const { output, error } = await runCommand("synvert-javascript", ["-v"]);
-  if (error) {
-    throw error;
-  } else {
-    return output;
-  }
+  return output;
 }
 
 async function checkNpmRemoteVersions(): Promise<{ synvertVersion: string, synvertCoreVersion: string }> {
@@ -123,13 +102,25 @@ async function checkNpmRemoteVersions(): Promise<{ synvertVersion: string, synve
   return { synvertVersion: synvert_version, synvertCoreVersion: synvert_core_version };
 }
 
-async function checkGem(): Promise<string> {
-  const { output, error } = await runCommand("synvert-ruby", ["-v"]);
-  if (error) {
-    throw error;
-  } else {
-    return output;
+async function showInstallSynvertJavascriptErrorMessage() {
+  const item = await showErrorMessage('synvert npm not found. Run `npm install -g synvert`.', 'Install Now');
+  if (item === 'Install Now') {
+    await installNpm('synvert');
+    await showInformationMessage('Successfully installed the synvert npm.');
   }
+}
+
+async function showUpdateSynvertJavascriptErrorMessage(remoteSynvertVersion: string, localSynvertVersion: string) {
+  const item = await showErrorMessage(`synvert npm version ${remoteSynvertVersion} is available. (Current version: ${localSynvertVersion})`, 'Update Now');
+  if (item === 'Update Now') {
+    await installNpm('synvert');
+    showInformationMessage('Successfully updated the synvert npm.');
+  }
+}
+
+async function checkGem(): Promise<string> {
+  const { output } = await runCommand("synvert-ruby", ["-v"]);
+  return output;
 }
 
 async function checkGemRemoteVersions(): Promise<{ synvertVersion: string, synvertCoreVersion: string }> {
@@ -138,4 +129,28 @@ async function checkGemRemoteVersions(): Promise<{ synvertVersion: string, synve
   const data = await response.json();
   const { synvert_version, synvert_core_version } = data as { synvert_version: string, synvert_core_version: string };
   return { synvertVersion: synvert_version, synvertCoreVersion: synvert_core_version };
+}
+
+async function showInstallSynvertRubyErrorMessage() {
+  const item = await showErrorMessage('synvert gem not found. Run `gem install synvert` or update your Gemfile.', 'Install Now');
+  if (item === 'Install Now') {
+    await installGem('synvert');
+    await showInformationMessage('Successfully installed the synvert gem.');
+  }
+}
+
+async function showUpdateSynvertRubyErrorMessage(remoteSynvertVersion: string, localSynvertVersion: string) {
+  const item = await showErrorMessage(`synvert gem version ${remoteSynvertVersion} is available. (Current version: ${localSynvertVersion})`, 'Update Now');
+  if (item === 'Update Now') {
+    await installGem('synvert');
+    await showInformationMessage('Successfully updated the synvert gem.');
+  }
+}
+
+async function showUpdateSynvertCoreRubyErrorMessage(remoteSynvertCoreVersion: string, localSynvertCoreVersion: string) {
+  const item = await showErrorMessage(`synvert-core gem version ${remoteSynvertCoreVersion} is available. (Current version: ${localSynvertCoreVersion})`, 'Update Now');
+  if (item === 'Update Now') {
+    await installGem('synvert-core');
+    await showInformationMessage('Successfully updated the synvert-core gem.');
+  }
 }
