@@ -1,5 +1,18 @@
 # Change Log
 
+## [1.0.0] - 2023-10-22
+
+### Added
+
+- Add MIT License
+
+### Changed
+
+- Use `async`/`await` in `SidebarProvider`
+- Log error when checking synvert-ruby and synvert-javascript environments
+- Update `bugs.url` in `package.json`
+- Set `repository` in `package.json`
+
 ## [0.12.0] - 2023-10-15
 
 ### Added
