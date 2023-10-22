@@ -106,7 +106,7 @@ async function showInstallSynvertJavascriptErrorMessage() {
   const item = await showErrorMessage('synvert npm not found. Run `npm install -g synvert`.', 'Install Now');
   if (item === 'Install Now') {
     await installNpm('synvert');
-    await showInformationMessage('Successfully installed the synvert npm.');
+    showInformationMessage('Successfully installed the synvert npm.');
   }
 }
 
@@ -135,7 +135,7 @@ async function showInstallSynvertRubyErrorMessage() {
   const item = await showErrorMessage('synvert gem not found. Run `gem install synvert` or update your Gemfile.', 'Install Now');
   if (item === 'Install Now') {
     await installGem('synvert');
-    await showInformationMessage('Successfully installed the synvert gem.');
+    showInformationMessage('Successfully installed the synvert gem.');
   }
 }
 
@@ -143,7 +143,7 @@ async function showUpdateSynvertRubyErrorMessage(remoteSynvertVersion: string, l
   const item = await showErrorMessage(`synvert gem version ${remoteSynvertVersion} is available. (Current version: ${localSynvertVersion})`, 'Update Now');
   if (item === 'Update Now') {
     await installGem('synvert');
-    await showInformationMessage('Successfully updated the synvert gem.');
+    showInformationMessage('Successfully updated the synvert gem.');
   }
 }
 
@@ -151,6 +151,6 @@ async function showUpdateSynvertCoreRubyErrorMessage(remoteSynvertCoreVersion: s
   const item = await showErrorMessage(`synvert-core gem version ${remoteSynvertCoreVersion} is available. (Current version: ${localSynvertCoreVersion})`, 'Update Now');
   if (item === 'Update Now') {
     await installGem('synvert-core');
-    await showInformationMessage('Successfully updated the synvert-core gem.');
+    showInformationMessage('Successfully updated the synvert-core gem.');
   }
 }
