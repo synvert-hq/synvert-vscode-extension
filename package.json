@@ -12,6 +12,7 @@
     "vscode": "^1.69.0"
   },
   "publisher": "xinminlabs",
+  "license": "MIT",
   "categories": [
     "Programming Languages",
     "Linters",
