@@ -185,7 +185,7 @@
   },
   "homepage": "https://synvert.net",
   "bugs": {
-    "url": "https://github.com/xinminlabs/synvert/issues",
+    "url": "https://github.com/xinminlabs/synvert-vscode-extension/issues",
     "email": "flyerhzm@gmail.com"
   }
 }
