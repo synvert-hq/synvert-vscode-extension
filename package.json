@@ -187,5 +187,9 @@
   "bugs": {
     "url": "https://github.com/xinminlabs/synvert-vscode-extension/issues",
     "email": "flyerhzm@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xinminlabs/synvert-vscode-extension.git"
   }
 }
