@@ -1,5 +1,15 @@
 # Change Log
 
+## [1.0.1] - 2023-10-29
+
+### Added
+
+- Add assets img
+
+### Fixed
+
+- Fix `optionIdentifier` for snippet Select
+
 ## [1.0.0] - 2023-10-22
 
 ### Added
