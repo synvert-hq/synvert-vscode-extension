@@ -71,7 +71,12 @@
       })
       const data = await response.json();
       snippetsLoading = false;
-      return data.snippets;
+      return data.snippets.map((snippet: Snippet) => {
+        return {
+          ...snippet,
+          id: `${snippet.group}/${snippet.name}`,
+        }
+      });
     } catch (error) {
       errorMessage = (error as Error).message;
       snippetsLoading = false;
@@ -484,7 +489,7 @@
 
   // const groupBy = (item: any) => item.group;
   const optionIdentifier = 'id';
-  const getOptionLabel = (snippet: any) => `${snippet.group}/${snippet.name}`;
+  const getOptionLabel = (snippet: Snippet) => `${snippet.group}/${snippet.name}`;
   const getSelectionLabel = (snippet: Snippet) => `${snippet.group}/${snippet.name}`;
 
   function snippetSelected(event: any) {
