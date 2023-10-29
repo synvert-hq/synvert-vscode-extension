@@ -1,5 +1,11 @@
 # Change Log
 
+## [1.0.2] - 2023-10-29
+
+### Changed
+
+- Use `Promise.all` to check ruby and javascript version simutaneously
+
 ## [1.0.1] - 2023-10-29
 
 ### Added
