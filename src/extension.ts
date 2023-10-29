@@ -27,11 +27,22 @@ export async function activate(context: vscode.ExtensionContext) {
     )
   );
 
-    const currentlyOpenTabfilePath = vscode.window.activeTextEditor?.document.fileName;
-    if (currentlyOpenTabfilePath) {
-        sidebarProvider._view?.webview.postMessage({ type: "currentFileExtensionName", value: currentlyOpenTabfilePath.split('.').pop() });
-    }
+  const currentlyOpenTabfilePath = vscode.window.activeTextEditor?.document.fileName;
+  if (currentlyOpenTabfilePath) {
+    sidebarProvider._view?.webview.postMessage({ type: "currentFileExtensionName", value: currentlyOpenTabfilePath.split('.').pop() });
+  }
 
+  Promise.all(
+    [checkRuby, checkJavascript].map(async (fn) => {
+      await fn();
+    })
+  );
+}
+
+// this method is called when your extension is deactivated
+export function deactivate() {}
+
+async function checkRuby() {
   if (rubyEnabled()) {
     try {
       const output = await checkGem();
@@ -44,13 +55,13 @@ export async function activate(context: vscode.ExtensionContext) {
         const remoteSynvertCoreVersion = data.synvertCoreVersion;
         log({ ruby: { remoteSynvertVersion, remoteSynvertCoreVersion } });
         if (compareVersions(remoteSynvertVersion, localSynvertVersion) === 1) {
-          await showUpdateSynvertRubyErrorMessage(remoteSynvertVersion, localSynvertVersion);
+          showUpdateSynvertRubyErrorMessage(remoteSynvertVersion, localSynvertVersion);
         }
         if (compareVersions(remoteSynvertCoreVersion, localSynvertCoreVersion) === 1) {
-          await showUpdateSynvertCoreRubyErrorMessage(remoteSynvertCoreVersion, localSynvertCoreVersion);
+          showUpdateSynvertCoreRubyErrorMessage(remoteSynvertCoreVersion, localSynvertCoreVersion);
         }
       } else {
-        await showInstallSynvertRubyErrorMessage();
+        showInstallSynvertRubyErrorMessage();
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -59,7 +70,9 @@ export async function activate(context: vscode.ExtensionContext) {
       log("Error when checking synvert-ruby environment: " + String(error));
     }
   }
+}
 
+async function checkJavascript() {
   if (javascriptEnabled() || typescriptEnabled()) {
     try {
       const output = await checkNpm();
@@ -72,10 +85,10 @@ export async function activate(context: vscode.ExtensionContext) {
         // const remoteSynvertCoreVersion = data.synvertCoreVersion;
         log({ javascript: { remoteSynvertVersion } });
         if (compareVersions(remoteSynvertVersion, localSynvertVersion) === 1) {
-          await showUpdateSynvertJavascriptErrorMessage(remoteSynvertVersion, localSynvertVersion);
+          showUpdateSynvertJavascriptErrorMessage(remoteSynvertVersion, localSynvertVersion);
         }
       } else {
-        await showInstallSynvertJavascriptErrorMessage();
+        showInstallSynvertJavascriptErrorMessage();
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -85,9 +98,6 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   }
 }
-
-// this method is called when your extension is deactivated
-export function deactivate() {}
 
 async function checkNpm(): Promise<string> {
   const { output, error } = await runCommand("synvert-javascript", ["-v"]);
