@@ -66,8 +66,9 @@ async function checkRuby() {
     } catch (error) {
       if (error instanceof Error) {
         log("Error when checking synvert-ruby environment: " + error.message);
+      } else {
+        log("Error when checking synvert-ruby environment: " + String(error));
       }
-      log("Error when checking synvert-ruby environment: " + String(error));
     }
   }
 }
@@ -93,8 +94,9 @@ async function checkJavascript() {
     } catch (error) {
       if (error instanceof Error) {
         log("Error when checking synvert-javascript environment: " + error.message);
+      } else {
+        log("Error when checking synvert-javascript environment: " + String(error));
       }
-      log("Error when checking synvert-javascript environment: " + String(error));
     }
   }
 }
