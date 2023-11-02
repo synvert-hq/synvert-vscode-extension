@@ -20,8 +20,8 @@ export async function runCommand(command: string, args: string[], { input }: { i
     log({ type: "runCommand", stdout, stderr });
     return formatCommandResult({ stdout, stderr });
   } catch (error) {
+    log({ type: "runCommand error", error });
     if (error instanceof Error) {
-      log({ type: "runCommand error", error });
       return { output: "", error: error.message };
     } else {
       return { output: "", error: "unknonw error" };
