@@ -1,5 +1,13 @@
 # Change Log
 
+## [1.0.3] - 2023-11-03
+
+### Fixed
+
+- Do not display replace icon only when action type is `noop`
+- Always log `runCommand` error
+- Avoid duplicated logs
+
 ## [1.0.2] - 2023-10-29
 
 ### Changed
