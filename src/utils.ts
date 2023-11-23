@@ -24,7 +24,7 @@ export async function runCommand(command: string, args: string[], { input }: { i
     if (error instanceof Error) {
       return { output: "", error: error.message };
     } else {
-      return { output: "", error: "unknonw error" };
+      return { output: "", error: "unknown error" };
     }
   }
 }

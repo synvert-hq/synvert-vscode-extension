@@ -27,9 +27,9 @@ export async function activate(context: vscode.ExtensionContext) {
     )
   );
 
-  const currentlyOpenTabfilePath = vscode.window.activeTextEditor?.document.fileName;
-  if (currentlyOpenTabfilePath) {
-    sidebarProvider._view?.webview.postMessage({ type: "currentFileExtensionName", value: currentlyOpenTabfilePath.split('.').pop() });
+  const currentlyOpenTabFilePath = vscode.window.activeTextEditor?.document.fileName;
+  if (currentlyOpenTabFilePath) {
+    sidebarProvider._view?.webview.postMessage({ type: "currentFileExtensionName", value: currentlyOpenTabFilePath.split('.').pop() });
   }
 
   Promise.all(

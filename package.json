@@ -4,7 +4,7 @@
   "description": "A find / replace alternative based on AST nodes, makes it easier to rewrite (refactor) code",
   "version": "1.0.3",
   "author": {
-    "name": "Ricahrd Huang"
+    "name": "Richard Huang"
   },
   "icon": "media/logo.png",
   "engines": {
