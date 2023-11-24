@@ -3,17 +3,18 @@
   --background: #464646;
   --border: none;
   --borderRadius: 0;
-  --clearSelectColor: #C1C1C1;
-  --clearSelectFocusColor: #C1C1C1;
-  --clearSelectHoverColor: #C1C1C1;
-  --inputColor: #C1C1C1;
-  --itemActiveBackground: #A9A9A9;
+  --clearSelectColor: #c1c1c1;
+  --clearSelectFocusColor: #c1c1c1;
+  --clearSelectHoverColor: #c1c1c1;
+  --inputColor: #c1c1c1;
+  --itemActiveBackground: #a9a9a9;
   --itemHoverColor: #000000;
   --listBackground: #464646;
-  --placeholderColor: #A9A9A9;
-  --spinnerColor: #C1C1C1;
+  --placeholderColor: #a9a9a9;
+  --spinnerColor: #c1c1c1;
 }
-.error-message, .info-message {
+.error-message,
+.info-message {
   border-radius: 6px;
   padding: 8px;
   margin: 8px 0;
@@ -104,7 +105,9 @@
   margin: 0;
   text-align: left;
 }
-.link-btn:hover, .link-btn:focus, .link-btn:active {
+.link-btn:hover,
+.link-btn:focus,
+.link-btn:active {
   background-color: transparent;
   color: inherit;
 }
@@ -130,14 +133,14 @@
 }
 
 select {
-	display: block;
-	width: 100%;
-	border: none;
-	font-family: var(--vscode-font-family);
-	padding: var(--input-padding-vertical) var(--input-padding-horizontal);
-	color: var(--vscode-input-foreground);
-	outline-color: var(--vscode-input-border);
-	background-color: var(--vscode-input-background);
+  display: block;
+  width: 100%;
+  border: none;
+  font-family: var(--vscode-font-family);
+  padding: var(--input-padding-vertical) var(--input-padding-horizontal);
+  color: var(--vscode-input-foreground);
+  outline-color: var(--vscode-input-border);
+  background-color: var(--vscode-input-background);
 }
 .nql-or-rules-select {
   overflow: hidden;
@@ -145,7 +148,8 @@ select {
 .nql-or-rules-select input {
   width: 16px;
 }
-.nql-or-rules-select input, .nql-or-rules-select label {
+.nql-or-rules-select input,
+.nql-or-rules-select label {
   float: right;
 }
 .generated-snippet-label {
