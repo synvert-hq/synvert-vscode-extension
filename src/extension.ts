@@ -31,11 +31,19 @@ export async function activate(context: vscode.ExtensionContext) {
     sidebarProvider._view?.webview.postMessage({ type: "currentFileExtensionName", value: currentlyOpenTabFilePath.split('.').pop() });
   }
 
-  Promise.all(
-    [checkRuby, checkJavascript].map(async (fn) => {
-      await fn();
-    })
-  );
+  try {
+    Promise.all(
+      [checkRuby, checkJavascript].map(async (fn) => {
+        await fn();
+      })
+    );
+  } catch (error) {
+    if (error instanceof Error) {
+      log(error.message);
+    } else {
+      log(String(error));
+    }
+  }
 }
 
 // this method is called when your extension is deactivated
@@ -71,7 +79,7 @@ async function checkJavascript() {
       case DependencyResponse.ERROR:
         showErrorMessage(`Error when checking synvert-javascript environment: ${response.error}`);
         break;
-      case DependencyResponse.RUBY_NOT_AVAILABLE:
+      case DependencyResponse.JAVASCRIPT_NOT_AVAILABLE:
         showErrorMessage('javascript (node) is not available');
         break;
       case DependencyResponse.SYNVERT_NOT_AVAILABLE:
