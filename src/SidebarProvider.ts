@@ -83,7 +83,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         case "onOpenFile": {
           var openPath = vscode.Uri.parse(path.join(data.rootPath, data.filePath));
           const doc = await vscode.workspace.openTextDocument(openPath);
-          const activeEditor = await vscode.window.showTextDocument(doc)
+          const activeEditor = await vscode.window.showTextDocument(doc);
           const startLineToGo = doc.getText().substring(0, data.action.start).split("\n").length;
           let startRange = activeEditor.document.lineAt(startLineToGo - 1).range;
           const endLineToGo = doc.getText().substring(0, data.action.end).trimEnd().split("\n").length;

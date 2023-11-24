@@ -1,14 +1,13 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import fetch from "node-fetch";
-import { compareVersions } from 'compare-versions';
 
 import { SidebarProvider } from './SidebarProvider';
 import { LocalStorageService } from './localStorageService';
 import { javascriptEnabled, rubyEnabled, typescriptEnabled } from './configuration';
 import { log } from './log';
 import { runCommand, installGem, installNpm, showErrorMessage, showInformationMessage } from './utils';
+import { DependencyResponse, checkRubyDependencies, checkJavascriptDependencies } from 'synvert-ui-common';
 
 const VERSION_REGEXP = /(\d+\.\d+\.\d+) \(with synvert-core (\d+\.\d+\.\d+)/;
 
@@ -44,74 +43,45 @@ export function deactivate() {}
 
 async function checkRuby() {
   if (rubyEnabled()) {
-    try {
-      const output = await checkGem();
-      const result = output.match(VERSION_REGEXP);
-      if (result) {
-        const localSynvertVersion = result[1];
-        const localSynvertCoreVersion = result[2];
-        const data = await checkGemRemoteVersions();
-        const remoteSynvertVersion = data.synvertVersion;
-        const remoteSynvertCoreVersion = data.synvertCoreVersion;
-        log({ ruby: { remoteSynvertVersion, remoteSynvertCoreVersion } });
-        if (compareVersions(remoteSynvertVersion, localSynvertVersion) === 1) {
-          showUpdateSynvertRubyErrorMessage(remoteSynvertVersion, localSynvertVersion);
-        }
-        if (compareVersions(remoteSynvertCoreVersion, localSynvertCoreVersion) === 1) {
-          showUpdateSynvertCoreRubyErrorMessage(remoteSynvertCoreVersion, localSynvertCoreVersion);
-        }
-      } else {
+    const response = await checkRubyDependencies(runCommand);
+    switch (response.code) {
+      case DependencyResponse.ERROR:
+        showErrorMessage(`Error when checking synvert-ruby environment: ${response.error}`);
+        break;
+      case DependencyResponse.RUBY_NOT_AVAILABLE:
+        showErrorMessage('ruby is not available');
+        break;
+      case DependencyResponse.SYNVERT_NOT_AVAILABLE:
         showInstallSynvertRubyErrorMessage();
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        log("Error when checking synvert-ruby environment: " + error.message);
-      } else {
-        log("Error when checking synvert-ruby environment: " + String(error));
-      }
+        break;
+      case DependencyResponse.SYNVERT_OUTDATED:
+        showUpdateSynvertRubyErrorMessage(response.remoteSynvertVersion!, response.localSynvertVersion!);
+        break;
+      case DependencyResponse.SYNVERT_CORE_OUTDATED:
+        showUpdateSynvertCoreRubyErrorMessage(response.remoteSynvertCoreVersion!, response.localSynvertCoreVersion!);
+        break;
     }
   }
 }
 
 async function checkJavascript() {
   if (javascriptEnabled() || typescriptEnabled()) {
-    try {
-      const output = await checkNpm();
-      const result = output.match(VERSION_REGEXP);
-      if (result) {
-        const localSynvertVersion = result[1];
-        // const localSynvertCoreVersion = result[2];
-        const data = await checkNpmRemoteVersions();
-        const remoteSynvertVersion = data.synvertVersion;
-        // const remoteSynvertCoreVersion = data.synvertCoreVersion;
-        log({ javascript: { remoteSynvertVersion } });
-        if (compareVersions(remoteSynvertVersion, localSynvertVersion) === 1) {
-          showUpdateSynvertJavascriptErrorMessage(remoteSynvertVersion, localSynvertVersion);
-        }
-      } else {
+    const response = await checkJavascriptDependencies(runCommand);
+    switch (response.code) {
+      case DependencyResponse.ERROR:
+        showErrorMessage(`Error when checking synvert-javascript environment: ${response.error}`);
+        break;
+      case DependencyResponse.RUBY_NOT_AVAILABLE:
+        showErrorMessage('javascript (node) is not available');
+        break;
+      case DependencyResponse.SYNVERT_NOT_AVAILABLE:
         showInstallSynvertJavascriptErrorMessage();
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        log("Error when checking synvert-javascript environment: " + error.message);
-      } else {
-        log("Error when checking synvert-javascript environment: " + String(error));
-      }
+        break;
+      case DependencyResponse.SYNVERT_OUTDATED:
+        showUpdateSynvertJavascriptErrorMessage(response.remoteSynvertVersion!, response.localSynvertVersion!);
+        break;
     }
   }
-}
-
-async function checkNpm(): Promise<string> {
-  const { output, error } = await runCommand("synvert-javascript", ["-v"]);
-  return output;
-}
-
-async function checkNpmRemoteVersions(): Promise<{ synvertVersion: string, synvertCoreVersion: string }> {
-  const url = "https://api-javascript.synvert.net/check-versions";
-  const response = await fetch(url);
-  const data = await response.json();
-  const { synvert_version, synvert_core_version } = data as { synvert_version: string, synvert_core_version: string };
-  return { synvertVersion: synvert_version, synvertCoreVersion: synvert_core_version };
 }
 
 async function showInstallSynvertJavascriptErrorMessage() {
@@ -128,19 +98,6 @@ async function showUpdateSynvertJavascriptErrorMessage(remoteSynvertVersion: str
     await installNpm('synvert');
     showInformationMessage('Successfully updated the synvert npm.');
   }
-}
-
-async function checkGem(): Promise<string> {
-  const { output } = await runCommand("synvert-ruby", ["-v"]);
-  return output;
-}
-
-async function checkGemRemoteVersions(): Promise<{ synvertVersion: string, synvertCoreVersion: string }> {
-  const url = "https://api-ruby.synvert.net/check-versions";
-  const response = await fetch(url);
-  const data = await response.json();
-  const { synvert_version, synvert_core_version } = data as { synvert_version: string, synvert_core_version: string };
-  return { synvertVersion: synvert_version, synvertCoreVersion: synvert_core_version };
 }
 
 async function showInstallSynvertRubyErrorMessage() {
