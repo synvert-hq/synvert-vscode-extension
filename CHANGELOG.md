@@ -1,5 +1,12 @@
 # Change Log
 
+## [1.0.4] - 2023-11-24
+
+### Changed
+
+- Use `runSynvertRuby` and `runSynvertJavascript` from synvert-ui-common
+- Use `checkRubyDependencies` and `checkJavascriptDependencies` from synvert-ui-common
+
 ## [1.0.3] - 2023-11-03
 
 ### Fixed
@@ -12,7 +19,7 @@
 
 ### Changed
 
-- Use `Promise.all` to check ruby and javascript version simutaneously
+- Use `Promise.all` to check ruby and javascript version simultaneously
 
 ## [1.0.1] - 2023-10-29
 
@@ -147,7 +154,7 @@
 
 ### Fixed
 
-- Fix typescript serach
+- Fix typescript search
 
 ## [0.6.1] - 2023-01-14
 
@@ -171,7 +178,7 @@
 
 ## [0.5.0] - 2022-12-20
 
-### Addd
+### Added
 
 - Add "How to write inputs / outputs" link
 - Add `javascript.enabled` and `typescript.enabled` configurations
@@ -237,7 +244,7 @@
 ### Added
 
 - Add `ruby.number_of_workers` configuration
-- Test ruby snippet in parallel if `ruby.number_of_workers` is greather than 1
+- Test ruby snippet in parallel if `ruby.number_of_workers` is greater than 1
 
 ### Changed
 
@@ -271,7 +278,7 @@
 - Show both old code and new code in search results
 
 ### Fixed
-- Do not install synvert gem globaly
+- Do not install synvert gem globally
 
 ## [0.1.1] - 2022-09-30
 
