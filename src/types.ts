@@ -1,4 +1,20 @@
-import type { TestResultExt } from "synvert-core";
+// Copy from @xinminlabs/node-mutation
+type Action = {
+  type: string;
+  start: number;
+  end: number;
+  newCode?: string;
+  conflictPosition?: number;
+  actions?: Action[];
+};
+type TestResult = {
+  affected: boolean;
+  conflicted: boolean;
+  actions: Action[];
+};
+
+// Copy from synvert-core
+type TestResultExt = TestResult & { filePath: string };
 
 export type TestResultExtExt = TestResultExt & { rootPath?: string, fileSource?: string };
 
