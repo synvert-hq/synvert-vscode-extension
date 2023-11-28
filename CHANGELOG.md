@@ -1,5 +1,11 @@
 # Change Log
 
+## [1.0.5] - 2023-11-29
+
+### Changed
+
+- Drop `synvert-core` dependency
+
 ## [1.0.4] - 2023-11-24
 
 ### Changed
