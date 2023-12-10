@@ -2,7 +2,7 @@
   import { onMount, afterUpdate } from "svelte";
   import Select from "svelte-select";
   import type { Snippet } from "synvert-ui-common";
-  import { composeGeneratedSnippets } from "synvert-ui-common";
+  import { fetchSnippets, generateSnippets } from "synvert-ui-common";
   import type { SelectOption, TestResultExtExt } from "../../src/types";
 
   let updateDependenciesButtonDisabled = false;
@@ -53,34 +53,24 @@
   let parserOptions = fetchOptionsByLanguage(language);
   let parser = parserOptions[0].value;
 
-  async function fetchSnippets() {
+  async function getSnippets() {
     snippetsLoading = true;
     errorMessage = "";
     infoMessage = "";
     const platform = "vscode";
-    const url = language === "ruby" ? 'https://api-ruby.synvert.net/snippets' : 'https://api-javascript.synvert.net/snippets';
-    // const url = language === "ruby" ? 'http://localhost:9292/snippets' : 'http://localhost:4000/snippets';
-    try {
-      const response = await fetch(url, {
-        headers: {
-          "Content-Type": "application/json",
-          // @ts-ignore
-          "X-SYNVERT-TOKEN": token,
-          "X-SYNVERT-PLATFORM": platform,
-        }
-      })
-      const data = await response.json();
-      snippetsLoading = false;
-      return data.snippets.map((snippet: Snippet) => {
+    // @ts-ignore
+    const result = await fetchSnippets(language, token, platform);
+    snippetsLoading = false;
+    if (result.errorMessage) {
+      errorMessage = result.errorMessage;
+      return [];
+    } else {
+      return result.snippets.map((snippet: Snippet) => {
         return {
           ...snippet,
           id: `${snippet.group}/${snippet.name}`,
         }
       });
-    } catch (error) {
-      errorMessage = (error as Error).message;
-      snippetsLoading = false;
-      return [];
     }
   }
 
@@ -104,7 +94,7 @@
           snippet = message.snippet;
           results = message.results;
 
-          snippets = await fetchSnippets();
+          snippets = await getSnippets();
           break;
         }
         case "currentFileExtensionName": {
@@ -276,7 +266,7 @@
     filePattern = fetchFilePatternByLanguage(language);
     parserOptions = fetchOptionsByLanguage(language);
     parser = parserOptions[0].value;
-    snippets = await fetchSnippets();
+    snippets = await getSnippets();
   }
 
   function fetchFilePatternByLanguage(language: string): string {
@@ -322,48 +312,33 @@
     outputs = [""];
   }
 
-  async function generateSnippet() {
+  async function generate() {
     errorMessage = "";
     infoMessage = "";
     generatedSnippets = [];
     generatedSnippetIndex = 0;
+    generateSnippetButtonDisabled = true;
     snippet = "";
     const platform = "vscode";
-    const url = language === "ruby" ? 'https://api-ruby.synvert.net/generate-snippet' : 'https://api-javascript.synvert.net/generate-snippet';
-    // const url = language === "ruby" ? 'http://localhost:9292/generate-snippet' : 'http://localhost:4000/generate-snippet';
-    try {
-      generateSnippetButtonDisabled = true;
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          // @ts-ignore
-          "X-SYNVERT-TOKEN": token,
-          "X-SYNVERT-PLATFORM": platform,
-        },
-        body: JSON.stringify({ language, inputs, outputs, nql_or_rules: nqlOrRules })
-      })
-      const data = await response.json();
-      if (data.error) {
-        errorMessage = data.error;
-      } else if (data.snippets.length === 0) {
-        errorMessage = "Failed to generate snippet" ;
-      } else {
-        generatedSnippets = composeGeneratedSnippets(
-          language === "ruby" ?
-          { language, parser, filePattern, rubyVersion, gemVersion, snippets: data.snippets } :
-          { language, parser, filePattern, nodeVersion, npmVersion, snippets: data.snippets }
-        );
-        generatedSnippetIndex = 0;
-        snippet = generatedSnippets[generatedSnippetIndex];
-        snippetChanged();
-      }
-    } catch (error) {
-      errorMessage = (error as Error).message;
-    } finally {
-      generateSnippetButtonDisabled = false;
+    const params: { [key: string]: string | string[] } = { language, parser, filePattern, inputs, outputs, nqlOrRules };
+    if (language === "ruby") {
+      params.rubyVersion = rubyVersion;
+      params.gemVersion = gemVersion;
+    } else {
+      params.nodeVersion = nodeVersion;
+      params.npmVersion = npmVersion;
     }
+    // @ts-ignore
+    const result = await generateSnippets(token, platform, params);
+    if (result.errorMessage) {
+      errorMessage = result.errorMessage;
+    } else {
+      generatedSnippets = result.generatedSnippets!;
+      generatedSnippetIndex = 0;
+      snippet = generatedSnippets[generatedSnippetIndex];
+      snippetChanged();
+    }
+    generateSnippetButtonDisabled = false;
   }
 
   function snippetChanged() {
@@ -536,7 +511,7 @@
     <label for="rules">Rules</label>
     <input id="rules" type="radio" name="nql_or_rules" value="rules" bind:group={nqlOrRules}>
   </div>
-  <button on:click={generateSnippet} disabled={generateSnippetButtonDisabled}>{generateSnippetButtonDisabled ? 'Generating...' : 'Generate Snippet'}</button>
+  <button on:click={generate} disabled={generateSnippetButtonDisabled}>{generateSnippetButtonDisabled ? 'Generating...' : 'Generate Snippet'}</button>
 {/if}
 <div class="generated-snippet-label">
   <label for="snippet"><b>Snippet</b></label>
