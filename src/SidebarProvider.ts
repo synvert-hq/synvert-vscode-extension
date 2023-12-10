@@ -2,7 +2,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import { machineIdSync } from 'node-machine-id';
 import * as vscode from "vscode";
-import { parseJSON, runSynvertRuby, runSynvertJavascript } from "synvert-ui-common";
+import { parseJSON, runSynvertRuby, runSynvertJavascript, replaceTestResult, replaceTestAction } from "synvert-ui-common";
 import type { SearchResults, TestResultExtExt } from "./types";
 import { installNpm, installGem, syncJavascriptSnippets, syncRubySnippets, runCommand, showInformationMessage, showErrorMessage } from "./utils";
 import { LocalStorageService } from "./localStorageService";
@@ -101,71 +101,56 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             } else if (result.actions.length === 1 && result.actions[0].type === "remove_file") {
               await fs.unlink(absolutePath);
             } else {
-              let source = result.fileSource!;
-              for (const action of result.actions.reverse()) {
-                if (action.type === 'group') {
-                  for (const childAction of action.actions!.reverse()) {
-                    source = source.slice(0, childAction.start) + childAction.newCode + source.slice(childAction.end);
-                  }
-                } else {
-                  source = source.slice(0, action.start) + action.newCode + source.slice(action.end);
-                }
-              }
-              await fs.writeFile(absolutePath, source);
+              const source = result.fileSource!;
+              const newSource = replaceTestResult(result, source);
+              await fs.writeFile(absolutePath, newSource);
             }
           }
           webviewView.webview.postMessage({ type: 'doneReplaceAll', errorMessage: "" });
           break;
         }
         case "onReplaceResult": {
-          const { resultIndex, result, rootPath, filePath } = data;
-          const absolutePath = path.join(rootPath!, filePath);
+          const { results, resultIndex } = data;
+          const result = results[resultIndex];
+          const absolutePath = path.join(result.rootPath!, result.filePath);
           if (result.actions.length === 1 && result.actions[0].type === "add_file") {
             await fs.mkdir(path.dirname(absolutePath), { recursive: true });
             await fs.writeFile(absolutePath, result.actions[0].newCode!);
           } else if (result.actions.length === 1 && result.actions[0].type === "remove_file") {
             await fs.unlink(absolutePath);
           } else {
-            let source = await fs.readFile(absolutePath, "utf-8");
-            (result as TestResultExtExt).actions.reverse().forEach(action => {
-              if (action.type === 'group') {
-                (action.actions!).reverse().forEach(childAction => {
-                  source = source.slice(0, childAction.start) + childAction.newCode + source.slice(childAction.end);
-                });
-              } else {
-                source = source.slice(0, action.start) + action.newCode + source.slice(action.end);
-              }
-            });
-            await fs.writeFile(absolutePath, source);
+            const source = await fs.readFile(absolutePath, "utf-8");
+            const newSource = replaceTestResult(result, source);
+            await fs.writeFile(absolutePath, newSource);
           }
-          webviewView.webview.postMessage({ type: 'doneReplaceResult', resultIndex });
+          results.splice(resultIndex, 1);
+          webviewView.webview.postMessage({ type: 'doneReplaceResult', results });
           break;
         }
         case "onReplaceAction": {
-          const { resultIndex, actionIndex, action, rootPath, filePath } = data;
-          const absolutePath = path.join(rootPath!, filePath);
+          const { results, resultIndex, actionIndex } = data;
+          const result = results[resultIndex];
+          const action = result.actions[actionIndex];
+          const absolutePath = path.join(result.rootPath!, result.filePath);
           if (action.type === "add_file") {
             const dirPath = path.dirname(absolutePath);
             await fs.mkdir(dirPath, { recursive: true });
             await fs.writeFile(absolutePath, action.newCode);
+            results.splice(resultIndex, 1);
             webviewView.webview.postMessage({ type: 'doneReplaceAction', resultIndex, actionIndex });
           } else if (action.type === "remove_file") {
             await fs.unlink(absolutePath);
+            results.splice(resultIndex, 1);
             webviewView.webview.postMessage({ type: 'doneReplaceAction', resultIndex, actionIndex });
           } else {
-            let source = await fs.readFile(absolutePath, "utf-8");
-            let offset = 0;
-            if (action.type === 'group') {
-              action.actions.reverse().forEach((childAction: any) => {
-                source = source.slice(0, childAction.start) + childAction.newCode + source.slice(childAction.end);
-                offset += childAction.newCode.length - (childAction.end - childAction.start);
-              });
-            } else {
-              source = source.slice(0, action.start) + action.newCode + source.slice(action.end);
-              offset = action.newCode.length - (action.end - action.start);
+            const source = await fs.readFile(absolutePath, "utf-8");
+            const newSource = replaceTestAction(result, action, source);
+            await fs.writeFile(absolutePath, newSource);
+            result.actions.splice(actionIndex, 1);
+            if (result.actions.length === 0) {
+              results.splice(resultIndex, 1);
             }
-            await fs.writeFile(absolutePath, source);
-            webviewView.webview.postMessage({ type: 'doneReplaceAction', resultIndex, actionIndex, offset, source });
+            webviewView.webview.postMessage({ type: 'doneReplaceAction', results, resultIndex, actionIndex });
           }
           break;
         }

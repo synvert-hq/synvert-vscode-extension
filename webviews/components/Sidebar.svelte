@@ -168,40 +168,13 @@
           break;
         }
         case "doneReplaceResult": {
-          const { resultIndex } = message;
-          updateSelectedResult(resultIndex);
-          results.splice(resultIndex, 1);
-          // trigger dom update
-          results = results;
+          updateSelectedResult(message.resultIndex);
+          results = message.results;
           break;
         }
         case "doneReplaceAction": {
-          const { resultIndex, actionIndex, offset, source } = message;
-          updateSelectedAction(resultIndex, actionIndex);
-          const actions = results[resultIndex].actions;
-          const resultAction = actions[actionIndex];
-          if (["add_file", "remove_file"].includes(resultAction.type)) {
-            results.splice(resultIndex, 1);
-          } else {
-            actions.splice(actionIndex, 1);
-            if (actions.length > 0) {
-              actions.slice(actionIndex).forEach(action => {
-                if (action.type === "group") {
-                  action.actions!.forEach(childAction => {
-                    childAction.start = childAction.start + offset;
-                    childAction.end = childAction.end + offset;
-                  });
-                }
-                action.start = action.start + offset;
-                action.end = action.end + offset;
-              });
-              results[resultIndex].fileSource = source;
-            } else {
-              results.splice(resultIndex, 1);
-            }
-          }
-          // trigger dom update
-          results = results;
+          updateSelectedAction(message.resultIndex, message.actionIndex);
+          results = message.results;
           break;
         }
       }
@@ -448,14 +421,11 @@
   }
 
   function replaceResult(resultIndex: number) {
-    const result = results[resultIndex];
     // @ts-ignore
     tsvscode.postMessage({
       type: 'onReplaceResult',
+      results,
       resultIndex,
-      result: result,
-      rootPath: result.rootPath,
-      filePath: result.filePath,
     });
   }
 
@@ -467,16 +437,12 @@
   }
 
   function replaceAction(resultIndex: number, actionIndex: number) {
-    const result = results[resultIndex];
-    const action = result.actions[actionIndex];
     // @ts-ignore
     tsvscode.postMessage({
       type: 'onReplaceAction',
+      results,
       resultIndex,
       actionIndex,
-      action,
-      rootPath: result.rootPath,
-      filePath: result.filePath,
     });
   }
 
