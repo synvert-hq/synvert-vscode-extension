@@ -75,6 +75,46 @@
           "default": 2,
           "description": "Specify the number of spaces per indentation-level."
         },
+        "synvert.css.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable synvert css."
+        },
+        "synvert.css.max_file_size": {
+          "type": "number",
+          "default": 100,
+          "description": "Skip file if its size is more than the size. (KB)"
+        },
+        "synvert.less.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable synvert less."
+        },
+        "synvert.less.max_file_size": {
+          "type": "number",
+          "default": 100,
+          "description": "Skip file if its size is more than the size. (KB)"
+        },
+        "synvert.sass.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable synvert sass."
+        },
+        "synvert.sass.max_file_size": {
+          "type": "number",
+          "default": 100,
+          "description": "Skip file if its size is more than the size. (KB)"
+        },
+        "synvert.scss.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable synvert scss."
+        },
+        "synvert.scss.max_file_size": {
+          "type": "number",
+          "default": 100,
+          "description": "Skip file if its size is more than the size. (KB)"
+        },
         "synvert.javascript.enabled": {
           "type": "boolean",
           "default": true,
@@ -178,7 +218,7 @@
     "node-machine-id": "^1.1.12",
     "svelte-select": "^4.4.7",
     "synvert-server-common": "^1.1.1",
-    "synvert-ui-common": "^1.12.0"
+    "synvert-ui-common": "^1.12.1"
   },
   "homepage": "https://synvert.net",
   "bugs": {
