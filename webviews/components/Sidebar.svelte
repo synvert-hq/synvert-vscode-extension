@@ -2,7 +2,7 @@
   import { onMount, afterUpdate } from "svelte";
   import Select from "svelte-select";
   import type { Snippet } from "synvert-ui-common";
-  import { fetchSnippets, generateSnippets } from "synvert-ui-common";
+  import { fetchSnippets, generateSnippets, filePatternByLanguage, placeholderByLanguage, parsersByLanguage } from "synvert-ui-common";
   import type { SelectOption, TestResultExtExt } from "../../src/types";
 
   let updateDependenciesButtonDisabled = false;
@@ -49,9 +49,9 @@
     languageOptions.push({ value: "typescript", label: "Typescript" });
   }
 
-  let filePattern = fetchFilePatternByLanguage(language);
-  let parserOptions = fetchOptionsByLanguage(language);
-  let parser = parserOptions[0].value;
+  let filePattern = filePatternByLanguage(language);
+  let parsers = parsersByLanguage(language);
+  let parser = parsers[0];
 
   async function getSnippets() {
     snippetsLoading = true;
@@ -81,9 +81,9 @@
         case "loadData": {
           showGenerateSnippet = message.showGenerateSnippet;
           language = message.language || "typescript";
-          parserOptions = fetchOptionsByLanguage(language);
-          parser = message.parser || parserOptions[0].value;
-          filePattern = message.filePattern || fetchFilePatternByLanguage(language);
+          parsers = parsersByLanguage(language);
+          parser = message.parser || parsers[0];
+          filePattern = message.filePattern || filePatternByLanguage(language);
           nodeVersion = message.nodeVersion || "";
           npmVersion = message.npmVersion || "";
           inputs = message.inputs;
@@ -178,25 +178,6 @@
     tsvscode.postMessage({ type: "afterUpdate", showGenerateSnippet, language, parser, filePattern, nodeVersion, npmVersion, inputs, outputs, nqlOrRules, onlyPaths, skipPaths, snippet, results });
   });
 
-  const PLACEHODERS: { [language: string]: { [name: string]: string } } = {
-    ruby: {
-      input: "FactoryBot.create(:user)",
-      output: "create(:user)",
-    },
-    javascript: {
-      input: "foo.substring(indexStart, indexEnd)",
-      output: "foo.slice(indexStart, indexEnd)",
-    },
-    typescript: {
-      input: "const x: Array<string> = ['a', 'b']",
-      output: "const x: string[] = ['a', 'b']",
-    }
-  }
-
-  function placeholderByLanguage(language: string): { [name: string]: string } {
-    return PLACEHODERS[language];
-  }
-
   function updateSelectedResult(resultIndex: number) {
     if (selectedResultIndex === resultIndex) {
       selectedResultIndex = undefined;
@@ -263,44 +244,10 @@
     errorMessage = "";
     infoMessage = "";
     results = [];
-    filePattern = fetchFilePatternByLanguage(language);
-    parserOptions = fetchOptionsByLanguage(language);
-    parser = parserOptions[0].value;
+    filePattern = filePatternByLanguage(language);
+    parsers = parsersByLanguage(language);
+    parser = parsers[0];
     snippets = await getSnippets();
-  }
-
-  function fetchFilePatternByLanguage(language: string): string {
-      switch (language) {
-        case "ruby":
-          return "**/*.rb";
-        case "javascript":
-          return "**/*.js";
-        case "typescript":
-          return "**/*.ts";
-        default:
-          return "";
-      }
-  }
-
-  function fetchOptionsByLanguage(language: string): SelectOption[] {
-    switch (language) {
-      case "ruby":
-        return [
-          { value: "parser", label: "Parser" },
-          { value: "syntax_tree", label: "SyntaxTree" },
-        ];
-      case "javascript":
-        return [
-          { value: "typescript", label: "Typescript" },
-          { value: "espree", label: "Espree" },
-        ];
-      case "typescript":
-        return [
-          { value: "typescript", label: "Typescript" },
-        ];
-      default:
-        return [];
-    }
   }
 
   function resetFormInputs() {
@@ -472,8 +419,8 @@
 {#if showGenerateSnippet}
   <label for="parser"><b>Parser</b></label>
   <select id="parser" bind:value={parser}>
-    {#each parserOptions as option}
-      <option value={option.value}>{option.label}</option>
+    {#each parsers as parser}
+      <option value={parser}>{parser}</option>
     {/each}
   </select>
   <label for="filePattern"><b>File Pattern</b></label>
