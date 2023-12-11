@@ -55,3 +55,39 @@ export const typescriptSemi = (): boolean => {
 export const typescriptTabWidth = (): number => {
   return workspace.getConfiguration('synvert').get('typescript.tab_width') as number;
 };
+
+export const cssEnabled = (): boolean => {
+  return workspace.getConfiguration('synvert').get('css.enabled') as boolean;
+};
+
+export const cssMaxFileSize = (): number => {
+  return workspace.getConfiguration('synvert').get('css.max_file_size') as number;
+};
+
+export const lessEnabled = (): boolean => {
+  return workspace.getConfiguration('synvert').get('less.enabled') as boolean;
+};
+
+export const lessMaxFileSize = (): number => {
+  return workspace.getConfiguration('synvert').get('less.max_file_size') as number;
+};
+
+export const sassEnabled = (): boolean => {
+  return workspace.getConfiguration('synvert').get('sass.enabled') as boolean;
+};
+
+export const sassMaxFileSize = (): number => {
+  return workspace.getConfiguration('synvert').get('sass.max_file_size') as number;
+};
+
+export const scssEnabled = (): boolean => {
+  return workspace.getConfiguration('synvert').get('scss.enabled') as boolean;
+};
+
+export const scssMaxFileSize = (): number => {
+  return workspace.getConfiguration('synvert').get('scss.max_file_size') as number;
+};
+
+export const languageEnabled = (language: string): boolean => {
+  return workspace.getConfiguration('synvert').get(`${language}.enabled`) as boolean;
+};

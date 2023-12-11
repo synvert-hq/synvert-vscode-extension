@@ -9,7 +9,7 @@
   let showGenerateSnippet = false;
   let inputs = [""];
   let outputs = [""];
-  let language: "ruby" | "javascript" | "typescript" = "typescript";
+  let language: "ruby" | "javascript" | "typescript" | "css" | "less" | "sass" | "scss" = "typescript";
   let snippets: Snippet[] = [];
   let selectedSnippet: Snippet | undefined;
   let snippetsLoading = false;
@@ -47,6 +47,22 @@
   // @ts-ignore
   if (typescriptEnabled) {
     languageOptions.push({ value: "typescript", label: "Typescript" });
+  }
+  // @ts-ignore
+  if (cssEnabled) {
+    languageOptions.push({ value: "css", label: "Css" });
+  }
+  // @ts-ignore
+  if (lessEnabled) {
+    languageOptions.push({ value: "less", label: "Less" });
+  }
+  // @ts-ignore
+  if (sassEnabled) {
+    languageOptions.push({ value: "sass", label: "Sass" });
+  }
+  // @ts-ignore
+  if (scssEnabled) {
+    languageOptions.push({ value: "scss", label: "Scss" });
   }
 
   let filePattern = filePatternByLanguage(language);

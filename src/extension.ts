@@ -4,12 +4,10 @@ import * as vscode from 'vscode';
 
 import { SidebarProvider } from './SidebarProvider';
 import { LocalStorageService } from './localStorageService';
-import { javascriptEnabled, rubyEnabled, typescriptEnabled } from './configuration';
+import { javascriptEnabled, rubyEnabled, typescriptEnabled, cssEnabled, lessEnabled, sassEnabled, scssEnabled } from './configuration';
 import { log } from './log';
 import { runCommand, installGem, installNpm, showErrorMessage, showInformationMessage } from './utils';
 import { DependencyResponse, checkRubyDependencies, checkJavascriptDependencies } from 'synvert-ui-common';
-
-const VERSION_REGEXP = /(\d+\.\d+\.\d+) \(with synvert-core (\d+\.\d+\.\d+)/;
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -50,45 +48,49 @@ export async function activate(context: vscode.ExtensionContext) {
 export function deactivate() {}
 
 async function checkRuby() {
-  if (rubyEnabled()) {
-    const response = await checkRubyDependencies(runCommand);
-    switch (response.code) {
-      case DependencyResponse.ERROR:
-        showErrorMessage(`Error when checking synvert-ruby environment: ${response.error}`);
-        break;
-      case DependencyResponse.RUBY_NOT_AVAILABLE:
-        showErrorMessage('ruby is not available');
-        break;
-      case DependencyResponse.SYNVERT_NOT_AVAILABLE:
-        showInstallSynvertRubyErrorMessage();
-        break;
-      case DependencyResponse.SYNVERT_OUTDATED:
-        showUpdateSynvertRubyErrorMessage(response.remoteSynvertVersion!, response.localSynvertVersion!);
-        break;
-      case DependencyResponse.SYNVERT_CORE_OUTDATED:
-        showUpdateSynvertCoreRubyErrorMessage(response.remoteSynvertCoreVersion!, response.localSynvertCoreVersion!);
-        break;
-    }
+  if (!rubyEnabled()) {
+    return;
+  }
+
+  const response = await checkRubyDependencies(runCommand);
+  switch (response.code) {
+    case DependencyResponse.ERROR:
+      showErrorMessage(`Error when checking synvert-ruby environment: ${response.error}`);
+      break;
+    case DependencyResponse.RUBY_NOT_AVAILABLE:
+      showErrorMessage('ruby is not available');
+      break;
+    case DependencyResponse.SYNVERT_NOT_AVAILABLE:
+      showInstallSynvertRubyErrorMessage();
+      break;
+    case DependencyResponse.SYNVERT_OUTDATED:
+      showUpdateSynvertRubyErrorMessage(response.remoteSynvertVersion!, response.localSynvertVersion!);
+      break;
+    case DependencyResponse.SYNVERT_CORE_OUTDATED:
+      showUpdateSynvertCoreRubyErrorMessage(response.remoteSynvertCoreVersion!, response.localSynvertCoreVersion!);
+      break;
   }
 }
 
 async function checkJavascript() {
-  if (javascriptEnabled() || typescriptEnabled()) {
-    const response = await checkJavascriptDependencies(runCommand);
-    switch (response.code) {
-      case DependencyResponse.ERROR:
-        showErrorMessage(`Error when checking synvert-javascript environment: ${response.error}`);
-        break;
-      case DependencyResponse.JAVASCRIPT_NOT_AVAILABLE:
-        showErrorMessage('javascript (node) is not available');
-        break;
-      case DependencyResponse.SYNVERT_NOT_AVAILABLE:
-        showInstallSynvertJavascriptErrorMessage();
-        break;
-      case DependencyResponse.SYNVERT_OUTDATED:
-        showUpdateSynvertJavascriptErrorMessage(response.remoteSynvertVersion!, response.localSynvertVersion!);
-        break;
-    }
+  if (!javascriptEnabled() && !typescriptEnabled() && !cssEnabled() && !lessEnabled() && !sassEnabled() && !scssEnabled()) {
+    return;
+  }
+
+  const response = await checkJavascriptDependencies(runCommand);
+  switch (response.code) {
+    case DependencyResponse.ERROR:
+      showErrorMessage(`Error when checking synvert-javascript environment: ${response.error}`);
+      break;
+    case DependencyResponse.JAVASCRIPT_NOT_AVAILABLE:
+      showErrorMessage('javascript (node) is not available');
+      break;
+    case DependencyResponse.SYNVERT_NOT_AVAILABLE:
+      showInstallSynvertJavascriptErrorMessage();
+      break;
+    case DependencyResponse.SYNVERT_OUTDATED:
+      showUpdateSynvertJavascriptErrorMessage(response.remoteSynvertVersion!, response.localSynvertVersion!);
+      break;
   }
 }
 

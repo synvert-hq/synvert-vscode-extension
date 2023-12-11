@@ -21,6 +21,15 @@ import {
   typescriptSingleQuote,
   typescriptSemi,
   typescriptTabWidth,
+  cssEnabled,
+  cssMaxFileSize,
+  lessEnabled,
+  lessMaxFileSize,
+  sassEnabled,
+  sassMaxFileSize,
+  scssEnabled,
+  scssMaxFileSize,
+  languageEnabled,
 } from "./configuration";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
@@ -214,6 +223,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
               const rubyEnabled = ${rubyEnabled()};
               const javascriptEnabled = ${javascriptEnabled()};
               const typescriptEnabled = ${typescriptEnabled()};
+              const cssEnabled = ${cssEnabled()};
+              const lessEnabled = ${lessEnabled()};
+              const sassEnabled = ${sassEnabled()};
+              const scssEnabled = ${scssEnabled()};
           </script>
 
         </head>
@@ -238,99 +251,32 @@ async function testSnippet(language: string, snippet: string, onlyPaths: string,
   if (vscode.workspace.workspaceFolders) {
     for (const folder of vscode.workspace.workspaceFolders) {
       const rootPath = folder.uri.path;
-      switch (language) {
-        case "ruby":
-          return await testRubySnippet(snippet, rootPath, onlyPaths, skipPaths);
-        case "javascript":
-          return await testJavascriptSnippet(snippet, rootPath, onlyPaths, skipPaths);
-        case "typescript":
-          return await testTypescriptSnippet(snippet, rootPath, onlyPaths, skipPaths);
+      if (!languageEnabled(language)) {
+        return { results: [], errorMessage: `Synvert ${language} is not enabled!` };
       }
+      const additionalCommandArgs = buildAdditionalCommandArgs(language);
+      const synvertCommand = language === "ruby" ? runSynvertRuby : runSynvertJavascript;
+      const { output, error } = await synvertCommand(runCommand, "test", rootPath, onlyPaths, skipPaths, additionalCommandArgs, snippet);
+      return await handleTestResult(output, error, rootPath);
     }
   }
   return { results: [], errorMessage: "" };
-}
-
-async function testJavascriptSnippet(snippet: string, rootPath: string, onlyPaths: string, skipPaths: string): Promise<SearchResults> {
-  if (!javascriptEnabled()) {
-    return { results: [], errorMessage: "Synvert javascript is not enabled!" };
-  }
-  const additionalCommandArgs = buildJavascriptAdditionalCommandArgs();
-  const { output, error } = await runSynvertJavascript(runCommand, "test", rootPath, onlyPaths, skipPaths, additionalCommandArgs, snippet);
-  return await handleTestResult(output, error, rootPath);
-}
-
-async function testTypescriptSnippet(snippet: string, rootPath: string, onlyPaths: string, skipPaths: string): Promise<SearchResults> {
-  if (!typescriptEnabled()) {
-    return { results: [], errorMessage: "Synvert typescript is not enabled!" };
-  }
-  const additionalCommandArgs = buildTypescriptAdditionalCommandArgs();
-  const { output, error } = await runSynvertJavascript(runCommand, "test", rootPath, onlyPaths, skipPaths, additionalCommandArgs, snippet);
-  return await handleTestResult(output, error, rootPath);
-}
-
-async function testRubySnippet(snippet: string, rootPath: string, onlyPaths: string, skipPaths: string): Promise<SearchResults> {
-  if (!rubyEnabled()) {
-    return { results: [], errorMessage: "Synvert ruby is not enabled!" };
-  }
-  const additionalCommandArgs = buildRubyAdditionalCommandArgs();
-  const { output, error } = await runSynvertRuby(runCommand, "test", rootPath, onlyPaths, skipPaths, additionalCommandArgs, snippet);
-  return await handleTestResult(output, error, rootPath);
-}
-
-async function addFileSourceToSnippets(snippets: TestResultExtExt[], rootPath: string) {
-  for (const snippet of snippets) {
-    const absolutePath = path.join(rootPath, snippet.filePath);
-    if (!!(await fs.stat(absolutePath).catch(e => false))) {
-      const fileSource = await fs.readFile(absolutePath, "utf-8");
-      snippet.fileSource = fileSource;
-    }
-    snippet.rootPath = rootPath;
-  }
 }
 
 async function processSnippet(language: string, snippet: string, onlyPaths: string, skipPaths: string): Promise<{ errorMessage: string }> {
   if (vscode.workspace.workspaceFolders) {
     for (const folder of vscode.workspace.workspaceFolders) {
       const rootPath = folder.uri.path;
-      switch (language) {
-        case "ruby":
-          return await processRubySnippet(snippet, rootPath, onlyPaths, skipPaths);
-        case "javascript":
-          return await processJavascriptSnippet(snippet, rootPath, onlyPaths, skipPaths);
-        case "typescript":
-          return await processTypescriptSnippet(snippet, rootPath, onlyPaths, skipPaths);
+      if (!languageEnabled(language)) {
+        return { errorMessage: `Synvert ${language} is not enabled!` };
       }
+      const additionalCommandArgs = buildAdditionalCommandArgs(language);
+      const synvertCommand = language === "ruby" ? runSynvertRuby : runSynvertJavascript;
+      const { error } = await synvertCommand(runCommand, "run", rootPath, onlyPaths, skipPaths, additionalCommandArgs, snippet);
+      return { errorMessage: error || "" };
     }
   }
   return { errorMessage: "" };
-}
-
-async function processJavascriptSnippet(snippet: string, rootPath: string, onlyPaths: string, skipPaths: string): Promise<{ errorMessage: string }> {
-  if (!javascriptEnabled()) {
-    return { errorMessage: "Synvert javascript is not enabled!" };
-  }
-  const additionalCommandArgs = buildJavascriptAdditionalCommandArgs();
-  const { error } = await runSynvertJavascript(runCommand, "run", rootPath, onlyPaths, skipPaths, additionalCommandArgs, snippet);
-  return { errorMessage: error || "" };
-}
-
-async function processTypescriptSnippet(snippet: string, rootPath: string, onlyPaths: string, skipPaths: string): Promise<{ errorMessage: string }> {
-  if (!javascriptEnabled()) {
-    return { errorMessage: "Synvert typescript is not enabled!" };
-  }
-  const additionalCommandArgs = buildTypescriptAdditionalCommandArgs();
-  const { error } = await runSynvertJavascript(runCommand, "run", rootPath, onlyPaths, skipPaths, additionalCommandArgs, snippet);
-  return { errorMessage: error || "" };
-}
-
-async function processRubySnippet(snippet: string, rootPath: string, onlyPaths: string, skipPaths: string): Promise<{ errorMessage: string }> {
-  if (!rubyEnabled()) {
-    return { errorMessage: "Synvert ruby is not enabled!" };
-  }
-  const additionalCommandArgs = buildRubyAdditionalCommandArgs();
-  const { error } = await runSynvertRuby(runCommand, "run", rootPath, onlyPaths, skipPaths, additionalCommandArgs, snippet);
-  return { errorMessage: error || "" };
 }
 
 async function updateDependencies(language: string): Promise<{ errorMessage: string }> {
@@ -367,32 +313,45 @@ async function updateRubyDependencies(): Promise<{ errorMessage: string }> {
   }
 }
 
-function buildRubyAdditionalCommandArgs(): string[] {
-  const additionalCommandArgs: string[] = ["--number-of-workers", String(rubyNumberOfWorkers()), "--tab-width", String(rubyTabWidth())];
-  if (!rubySingleQuote()) {
-    additionalCommandArgs.push("--double-quote");
-  }
-  return additionalCommandArgs;
-}
-
-function buildJavascriptAdditionalCommandArgs(): string[] {
-  const additionalCommandArgs: string[] = ["--max-file-size", String(javascriptMaxFileSize() * 1024), "--tab-width", String(javascriptTabWidth())];
-  if (javascriptSingleQuote()) {
-    additionalCommandArgs.push("--single-quote");
-  }
-  if (!javascriptSemi()) {
-    additionalCommandArgs.push("--no-semi");
-  }
-  return additionalCommandArgs;
-}
-
-function buildTypescriptAdditionalCommandArgs(): string[] {
-  const additionalCommandArgs: string[] = ["--max-file-size", String(typescriptMaxFileSize() * 1024), "--tab-width", String(typescriptTabWidth())];
-  if (typescriptSingleQuote()) {
-    additionalCommandArgs.push("--single-quote");
-  }
-  if (!typescriptSemi()) {
-    additionalCommandArgs.push("--no-semi");
+function buildAdditionalCommandArgs(language: string): string[] {
+  const additionalCommandArgs: string[] = [];
+  switch (language) {
+    case "ruby":
+      additionalCommandArgs.push("--number-of-workers", String(rubyNumberOfWorkers()), "--tab-width", String(rubyTabWidth()));
+      if (!rubySingleQuote()) {
+        additionalCommandArgs.push("--double-quote");
+      }
+      break;
+    case "javascript":
+      additionalCommandArgs.push("--max-file-size", String(javascriptMaxFileSize() * 1024), "--tab-width", String(javascriptTabWidth()));
+      if (javascriptSingleQuote()) {
+        additionalCommandArgs.push("--single-quote");
+      }
+      if (!javascriptSemi()) {
+        additionalCommandArgs.push("--no-semi");
+      }
+      break;
+    case "typescript":
+      additionalCommandArgs.push("--max-file-size", String(typescriptMaxFileSize() * 1024), "--tab-width", String(typescriptTabWidth()));
+      if (typescriptSingleQuote()) {
+        additionalCommandArgs.push("--single-quote");
+      }
+      if (!typescriptSemi()) {
+        additionalCommandArgs.push("--no-semi");
+      }
+      break;
+    case "css":
+      additionalCommandArgs.push("--max-file-size", String(cssMaxFileSize() * 1024));
+      break;
+    case "less":
+      additionalCommandArgs.push("--max-file-size", String(lessMaxFileSize() * 1024));
+      break;
+    case "sass":
+      additionalCommandArgs.push("--max-file-size", String(sassMaxFileSize() * 1024));
+      break;
+    case "scss":
+      additionalCommandArgs.push("--max-file-size", String(scssMaxFileSize() * 1024));
+      break;
   }
   return additionalCommandArgs;
 }
@@ -410,5 +369,16 @@ async function handleTestResult(output: string, error: string | undefined, rootP
     return { results, errorMessage: "" };
   } catch (e) {
     return { results: [], errorMessage: (e as Error).message };
+  }
+}
+
+async function addFileSourceToSnippets(snippets: TestResultExtExt[], rootPath: string) {
+  for (const snippet of snippets) {
+    const absolutePath = path.join(rootPath, snippet.filePath);
+    if (!!(await fs.stat(absolutePath).catch(e => false))) {
+      const fileSource = await fs.readFile(absolutePath, "utf-8");
+      snippet.fileSource = fileSource;
+    }
+    snippet.rootPath = rootPath;
   }
 }
