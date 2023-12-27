@@ -1,5 +1,11 @@
 # Change Log
 
+## [1.1.1] - 2023-12-27
+
+### Changed
+
+- Polish `add_file`, `remove_file` and `rename_file` UI
+
 ## [1.1.0] - 2023-12-13
 
 ### Added
