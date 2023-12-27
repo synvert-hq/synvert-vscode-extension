@@ -14,7 +14,7 @@ type TestResult = {
 };
 
 // Copy from synvert-core
-type TestResultExt = TestResult & { filePath: string };
+type TestResultExt = TestResult & { filePath: string, newFilePath?: string };
 
 export type TestResultExtExt = TestResultExt & { rootPath?: string, fileSource?: string };
 

@@ -85,6 +85,19 @@
   background-color: #082a4b;
 }
 
+.search-results .old-file {
+  text-decoration: line-through;
+  background-color: #691719;
+}
+
+.search-results .new-file {
+  background-color: #2f381f;
+}
+
+.search-results .item .child-action {
+  width: 100%;
+}
+
 .search-results .item .old-code {
   text-decoration: line-through;
   background-color: #691719;

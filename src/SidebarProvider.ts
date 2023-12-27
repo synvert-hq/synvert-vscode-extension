@@ -2,8 +2,8 @@ import { promises as fs } from "fs";
 import path from "path";
 import { machineIdSync } from 'node-machine-id';
 import * as vscode from "vscode";
-import { parseJSON, runSynvertRuby, runSynvertJavascript, replaceTestResult, replaceTestAction } from "synvert-ui-common";
-import type { SearchResults, TestResultExtExt } from "./types";
+import { runSynvertRuby, runSynvertJavascript, replaceAllTestResults, replaceTestResult, replaceTestAction, removeTestResult, removeTestAction, handleTestResults } from "synvert-ui-common";
+import type { SearchResults } from "./types";
 import { installNpm, installGem, syncJavascriptSnippets, syncRubySnippets, runCommand, showInformationMessage, showErrorMessage } from "./utils";
 import { LocalStorageService } from "./localStorageService";
 import {
@@ -102,65 +102,33 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           break;
         }
         case "onReplaceAll": {
-          for (const result of data.results) {
-            const absolutePath = path.join(result.rootPath!, result.filePath);
-            if (result.actions.length === 1 && result.actions[0].type === "add_file") {
-              await fs.mkdir(path.dirname(absolutePath), { recursive: true });
-              await fs.writeFile(absolutePath, result.actions[0].newCode!);
-            } else if (result.actions.length === 1 && result.actions[0].type === "remove_file") {
-              await fs.unlink(absolutePath);
-            } else {
-              const source = result.fileSource!;
-              const newSource = replaceTestResult(result, source);
-              await fs.writeFile(absolutePath, newSource);
-            }
-          }
+          const { results } = data;
+          const newResults = await replaceAllTestResults(results, path, fs);
           webviewView.webview.postMessage({ type: 'doneReplaceAll', errorMessage: "" });
           break;
         }
         case "onReplaceResult": {
           const { results, resultIndex } = data;
-          const result = results[resultIndex];
-          const absolutePath = path.join(result.rootPath!, result.filePath);
-          if (result.actions.length === 1 && result.actions[0].type === "add_file") {
-            await fs.mkdir(path.dirname(absolutePath), { recursive: true });
-            await fs.writeFile(absolutePath, result.actions[0].newCode!);
-          } else if (result.actions.length === 1 && result.actions[0].type === "remove_file") {
-            await fs.unlink(absolutePath);
-          } else {
-            const source = await fs.readFile(absolutePath, "utf-8");
-            const newSource = replaceTestResult(result, source);
-            await fs.writeFile(absolutePath, newSource);
-          }
-          results.splice(resultIndex, 1);
-          webviewView.webview.postMessage({ type: 'doneReplaceResult', results });
+          const newResults = await replaceTestResult(results, resultIndex, path, fs);
+          webviewView.webview.postMessage({ type: 'doneReplaceResult', results: newResults, resultIndex });
           break;
         }
         case "onReplaceAction": {
           const { results, resultIndex, actionIndex } = data;
-          const result = results[resultIndex];
-          const action = result.actions[actionIndex];
-          const absolutePath = path.join(result.rootPath!, result.filePath);
-          if (action.type === "add_file") {
-            const dirPath = path.dirname(absolutePath);
-            await fs.mkdir(dirPath, { recursive: true });
-            await fs.writeFile(absolutePath, action.newCode);
-            results.splice(resultIndex, 1);
-            webviewView.webview.postMessage({ type: 'doneReplaceAction', resultIndex, actionIndex });
-          } else if (action.type === "remove_file") {
-            await fs.unlink(absolutePath);
-            results.splice(resultIndex, 1);
-            webviewView.webview.postMessage({ type: 'doneReplaceAction', resultIndex, actionIndex });
-          } else {
-            const source = await fs.readFile(absolutePath, "utf-8");
-            const newSource = replaceTestAction(result, action, source);
-            await fs.writeFile(absolutePath, newSource);
-            result.actions.splice(actionIndex, 1);
-            if (result.actions.length === 0) {
-              results.splice(resultIndex, 1);
-            }
-            webviewView.webview.postMessage({ type: 'doneReplaceAction', results, resultIndex, actionIndex });
-          }
+          const newResults = await replaceTestAction(results, resultIndex, actionIndex, path, fs);
+          webviewView.webview.postMessage({ type: 'doneReplaceAction', results: newResults, resultIndex, actionIndex });
+          break;
+        }
+        case "onRemoveResult": {
+          const { results, resultIndex } = data;
+          const newResults = await removeTestResult(results, resultIndex);
+          webviewView.webview.postMessage({ type: 'doneRemoveResult', results: newResults, resultIndex });
+          break;
+        }
+        case "onRemoveAction": {
+          const { results, resultIndex, actionIndex } = data;
+          const newResults = await removeTestAction(results, resultIndex, actionIndex);
+          webviewView.webview.postMessage({ type: 'doneRemoveAction', results: newResults, resultIndex, actionIndex });
           break;
         }
         case "onInfo": {
@@ -257,7 +225,7 @@ async function testSnippet(language: string, snippet: string, onlyPaths: string,
       const additionalCommandArgs = buildAdditionalCommandArgs(language);
       const synvertCommand = language === "ruby" ? runSynvertRuby : runSynvertJavascript;
       const { output, error } = await synvertCommand(runCommand, "test", rootPath, onlyPaths, skipPaths, additionalCommandArgs, snippet);
-      return await handleTestResult(output, error, rootPath);
+      return await handleTestResults(output, error, rootPath, path, fs);
     }
   }
   return { results: [], errorMessage: "" };
@@ -354,31 +322,4 @@ function buildAdditionalCommandArgs(language: string): string[] {
       break;
   }
   return additionalCommandArgs;
-}
-
-async function handleTestResult(output: string, error: string | undefined, rootPath: string): Promise<SearchResults> {
-  if (error) {
-    return { results: [], errorMessage: error };
-  }
-  try {
-    const results = parseJSON(output);
-    if (results.error) {
-      return { results: [], errorMessage: results.error };
-    }
-    await addFileSourceToSnippets(results, rootPath);
-    return { results, errorMessage: "" };
-  } catch (e) {
-    return { results: [], errorMessage: (e as Error).message };
-  }
-}
-
-async function addFileSourceToSnippets(snippets: TestResultExtExt[], rootPath: string) {
-  for (const snippet of snippets) {
-    const absolutePath = path.join(rootPath, snippet.filePath);
-    if (!!(await fs.stat(absolutePath).catch(e => false))) {
-      const fileSource = await fs.readFile(absolutePath, "utf-8");
-      snippet.fileSource = fileSource;
-    }
-    snippet.rootPath = rootPath;
-  }
 }

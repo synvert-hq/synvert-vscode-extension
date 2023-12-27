@@ -183,6 +183,16 @@
           results = message.results;
           break;
         }
+        case "doneRemoveResult": {
+          updateSelectedResult(message.resultIndex);
+          results = message.results;
+          break;
+        }
+        case "doneRemoveAction": {
+          updateSelectedAction(message.resultIndex, message.actionIndex);
+          results = message.results;
+          break;
+        }
       }
     });
     // @ts-ignore
@@ -332,12 +342,23 @@
     }
   }
 
-  function actionClicked(resultIndex: number, actionIndex: number, rootPath: string | undefined, filePath: string | undefined) {
+  function actionClicked(resultIndex: number, actionIndex: number) {
     selectedResultIndex = resultIndex;
     selectedActionIndex = actionIndex;
-    const action = results[resultIndex].actions[actionIndex];
+    const result = results[resultIndex];
+    const action = result.actions[actionIndex];
+    const rootPath = result.rootPath;
+    const filePath = result.filePath
     // @ts-ignore
     tsvscode.postMessage({ type: 'onOpenFile', action, rootPath, filePath });
+  }
+
+  function resultClicked(resultIndex: number) {
+    selectedResultIndex = resultIndex;
+    const result = results[resultIndex];
+    const filePath = result.filePath;
+    toggleResult(filePath);
+    actionClicked(resultIndex, 0);
   }
 
   function toggleResult(filePath: string) {
@@ -368,10 +389,12 @@
   }
 
   function removeResult(resultIndex: number) {
-    updateSelectedResult(resultIndex);
-    results.splice(resultIndex, 1);
-    // trigger dom update
-    results = results
+    // @ts-ignore
+    tsvscode.postMessage({
+      type: 'onRemoveResult',
+      results,
+      resultIndex,
+    });
   }
 
   function replaceAction(resultIndex: number, actionIndex: number) {
@@ -385,10 +408,13 @@
   }
 
   function removeAction(resultIndex: number, actionIndex: number) {
-    updateSelectedAction(resultIndex, actionIndex);
-    results[resultIndex].actions.splice(actionIndex, 1);
-    // trigger dom update
-    results = results
+    // @ts-ignore
+    tsvscode.postMessage({
+      type: 'onRemoveAction',
+      results,
+      resultIndex,
+      actionIndex,
+    });
   }
 
   // const groupBy = (item: any) => item.group;
@@ -504,7 +530,19 @@
           <i class="icon chevron-down-icon"></i>
         {/if}
       </button>
-      <button class="link-btn file-path" on:click={() => toggleResult(result.filePath)} on:mouseover={() => mouseOverResult(resultIndex)} on:focus={() => mouseOverResult(resultIndex)} title={result.filePath}>{result.filePath}</button>
+      <button class="link-btn file-path" on:click={() => resultClicked(resultIndex)} on:mouseover={() => mouseOverResult(resultIndex)} on:focus={() => mouseOverResult(resultIndex)} title={result.filePath}>
+        {#if result.actions[0].type === "add_file"}
+          <span class="new-file" title={`Add ${result.filePath}`}>+ {result.filePath}</span>
+        {:else if result.actions[0].type === "remove_file"}
+          <span class="old-file" title={`Remove ${result.filePath}`}>- {result.filePath}</span>
+        {:else if result.actions[0].type === "rename_file"}
+          <span class="old-file" title={`Rename ${result.filePath} to ${result.newFilePath}`}>- {result.filePath}</span>
+          <br/>
+          <span class="new-file" title={`Rename ${result.filePath} to ${result.newFilePath}`}>+ {result.newFilePath}</span>
+        {:else}
+          <span title={result.filePath}>{result.filePath}</span>
+        {/if}
+      </button>
       {#if resultIndex === hoverResultIndex && typeof hoverActionIndex === "undefined"}
         <div class="toolkit">
           {#if result.actions.every(action => action.type !== "noop")}
@@ -520,51 +558,57 @@
     </div>
     {#if !filesCollapse[result.filePath]}
       <ul>
-        {#each result.actions as action, actionIndex}
-          <li on:mouseover={() => mouseOverAction(resultIndex, actionIndex)} on:focus={() => mouseOverAction(resultIndex, actionIndex)}>
-            {#if resultIndex === hoverResultIndex && actionIndex === hoverActionIndex}
-              <div class="toolkit">
-                {#if (action.type !== "noop")}
-                  <button class="link-btn" on:click={() => replaceAction(resultIndex, actionIndex)}>
-                    <i class="icon replace-icon" />
-                  </button>
+        {#if !["add_file", "remove_file"].includes(result.actions[0].type)}
+          {#each result.actions as action, actionIndex}
+            {#if action.type !== "rename_file"}
+              <li on:mouseover={() => mouseOverAction(resultIndex, actionIndex)} on:focus={() => mouseOverAction(resultIndex, actionIndex)}>
+                {#if resultIndex === hoverResultIndex && actionIndex === hoverActionIndex && result.actions[0].type !== "rename_file"}
+                  <div class="toolkit">
+                    {#if (action.type !== "noop")}
+                      <button class="link-btn" on:click={() => replaceAction(resultIndex, actionIndex)}>
+                        <i class="icon replace-icon" />
+                      </button>
+                    {/if}
+                    <button class="link-btn" on:click={() => removeAction(resultIndex, actionIndex)}>
+                      <i class="icon close-icon" />
+                    </button>
+                  </div>
                 {/if}
-                <button class="link-btn" on:click={() => removeAction(resultIndex, actionIndex)}>
-                  <i class="icon close-icon" />
+                <button class="link-btn item {resultIndex === selectedResultIndex && actionIndex === selectedActionIndex ? 'selected' : ''}" on:click={() => actionClicked(resultIndex, actionIndex)}>
+                  {#if (action.type === "add_file")}
+                    <span class="old-code"></span>
+                    <span class="new-code">{action.newCode}</span>
+                  {:else if (action.type === "remove_file")}
+                    <span class="old-code">{result.fileSource}</span>
+                    <span class="new-code"></span>
+                  {:else if (action.type === "group" && action.actions && result.fileSource)}
+                    {#each action.actions as childAction}
+                      <div class="child-action">
+                        {#if (typeof childAction.newCode !== "undefined")}
+                          <span class="old-code">{result.fileSource.substring(childAction.start, childAction.end)}</span>
+                        {:else}
+                          <span>{result.fileSource.substring(childAction.start, childAction.end)}</span>
+                        {/if}
+                        {#if (typeof childAction.newCode !== "undefined")}
+                          <span class="new-code">{childAction.newCode}</span>
+                        {/if}
+                      </div>
+                    {/each}
+                  {:else if (result.fileSource)}
+                    {#if (typeof action.newCode !== "undefined")}
+                      <span class="old-code">{result.fileSource.substring(action.start, action.end)}</span>
+                    {:else}
+                      <span>{result.fileSource.substring(action.start, action.end)}</span>
+                    {/if}
+                    {#if (typeof action.newCode !== "undefined")}
+                      <span class="new-code">{action.newCode}</span>
+                    {/if}
+                  {/if}
                 </button>
-              </div>
+              </li>
             {/if}
-            <button class="link-btn item {resultIndex === selectedResultIndex && actionIndex === selectedActionIndex ? 'selected' : ''}" on:click={() => actionClicked(resultIndex, actionIndex, result.rootPath, result.filePath)}>
-              {#if (action.type === "add_file")}
-                <span class="old-code"></span>
-                <span class="new-code">{action.newCode}</span>
-              {:else if (action.type === "remove_file")}
-                <span class="old-code">{result.fileSource}</span>
-                <span class="new-code"></span>
-              {:else if (action.type === "group" && action.actions && result.fileSource)}
-                {#each action.actions as childAction}
-                  {#if (typeof childAction.newCode !== "undefined")}
-                    <span class="old-code">{result.fileSource.substring(childAction.start, childAction.end)}</span>
-                  {:else}
-                    <span>{result.fileSource.substring(childAction.start, childAction.end)}</span>
-                  {/if}
-                  {#if (typeof childAction.newCode !== "undefined")}
-                    <span class="new-code">{childAction.newCode}</span>
-                  {/if}
-                {/each}
-              {:else if (result.fileSource)}
-                {#if (typeof action.newCode !== "undefined")}
-                  <span class="old-code">{result.fileSource.substring(action.start, action.end)}</span>
-                {:else}
-                  <span>{result.fileSource.substring(action.start, action.end)}</span>
-                {/if}
-                {#if (typeof action.newCode !== "undefined")}
-                  <span class="new-code">{action.newCode}</span>
-                {/if}
-              {/if}
-            </button>
-          </li>
-        {/each}
+          {/each}
+        {/if}
       </ul>
     {/if}
   {/each}
