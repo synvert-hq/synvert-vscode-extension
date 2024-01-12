@@ -431,7 +431,12 @@
 </script>
 
 {#if errorMessage.length > 0}
-  <p class="error-message" id="errorMessage">{errorMessage}</p>
+  <p class="error-message" id="errorMessage">
+    {errorMessage}
+    <br/>
+    <br/>
+    If it is our fault, we will see the error and try to fix it ASAP.
+  </p>
 {/if}
 {#if infoMessage.length > 0}
   <p class="info-message" id="infoMessage">{infoMessage}</p>
