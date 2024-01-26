@@ -1,5 +1,11 @@
 # Change Log
 
+## [1.1.3] - 2024-01-26
+
+### Changed
+
+- Update `synvert-ui-common` to 1.14.2
+
 ## [1.1.2] - 2024-01-12
 
 ### Changed
