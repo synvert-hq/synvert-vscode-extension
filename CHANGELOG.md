@@ -1,5 +1,11 @@
 # Change Log
 
+## [1.2.0] - 2024-02-17
+
+### Added
+
+- Update `synvert-ui-common` to 1.15.2 to support `prism` parser
+
 ## [1.1.3] - 2024-01-26
 
 ### Changed
