@@ -1,5 +1,5 @@
 # PUBLISH
 
 ```
-$ vsce publish --baseImagesUrl https://raw.githubusercontent.com/xinminlabs/synvert-vscode-extension/main
+$ vsce publish --baseImagesUrl https://raw.githubusercontent.com/synvert-hq/synvert-vscode-extension/main
 ```

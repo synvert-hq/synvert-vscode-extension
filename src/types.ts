@@ -1,4 +1,4 @@
-// Copy from @xinminlabs/node-mutation
+// Copy from @synvert-hq/node-mutation
 type Action = {
   type: string;
   start: number;
