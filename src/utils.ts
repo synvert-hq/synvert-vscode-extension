@@ -1,6 +1,6 @@
 
-import { runShellCommand } from 'synvert-server-common';
-import { formatCommandResult } from 'synvert-ui-common';
+import { runShellCommand } from '@synvert-hq/synvert-server-common';
+import { formatCommandResult } from '@synvert-hq/synvert-ui-common';
 import * as vscode from "vscode";
 
 import { log } from './log';

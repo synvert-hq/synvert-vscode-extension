@@ -215,10 +215,10 @@
     "webpack-cli": "^4.10.0"
   },
   "dependencies": {
+    "@synvert-hq/synvert-server-common": "^1.1.3",
+    "@synvert-hq/synvert-ui-common": "^1.15.4",
     "node-machine-id": "^1.1.12",
-    "svelte-select": "^4.4.7",
-    "synvert-server-common": "^1.1.1",
-    "synvert-ui-common": "^1.15.2"
+    "svelte-select": "^4.4.7"
   },
   "homepage": "https://synvert.net",
   "bugs": {

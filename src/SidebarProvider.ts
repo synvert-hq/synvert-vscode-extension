@@ -2,7 +2,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import { machineIdSync } from 'node-machine-id';
 import * as vscode from "vscode";
-import { runSynvertRuby, runSynvertJavascript, replaceAllTestResults, replaceTestResult, replaceTestAction, removeTestResult, removeTestAction, handleTestResults } from "synvert-ui-common";
+import { runSynvertRuby, runSynvertJavascript, replaceAllTestResults, replaceTestResult, replaceTestAction, removeTestResult, removeTestAction, handleTestResults } from "@synvert-hq/synvert-ui-common";
 import type { SearchResults } from "./types";
 import { installNpm, installGem, syncJavascriptSnippets, syncRubySnippets, runCommand, showInformationMessage, showErrorMessage } from "./utils";
 import { LocalStorageService } from "./localStorageService";

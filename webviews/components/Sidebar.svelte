@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount, afterUpdate } from "svelte";
   import Select from "svelte-select";
-  import type { Snippet } from "synvert-ui-common";
-  import { fetchSnippets, generateSnippets, filePatternByLanguage, placeholderByLanguage, parsersByLanguage } from "synvert-ui-common";
+  import type { Snippet } from "@synvert-hq/synvert-ui-common";
+  import { fetchSnippets, generateSnippets, filePatternByLanguage, placeholderByLanguage, parsersByLanguage } from "@synvert-hq/synvert-ui-common";
   import type { SelectOption, TestResultExtExt } from "../../src/types";
 
   let updateDependenciesButtonDisabled = false;

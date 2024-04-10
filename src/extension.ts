@@ -7,7 +7,7 @@ import { LocalStorageService } from './localStorageService';
 import { javascriptEnabled, rubyEnabled, typescriptEnabled, cssEnabled, lessEnabled, sassEnabled, scssEnabled } from './configuration';
 import { log } from './log';
 import { runCommand, installGem, installNpm, showErrorMessage, showInformationMessage } from './utils';
-import { DependencyResponse, checkRubyDependencies, checkJavascriptDependencies } from 'synvert-ui-common';
+import { DependencyResponse, checkRubyDependencies, checkJavascriptDependencies } from '@synvert-hq/synvert-ui-common';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
