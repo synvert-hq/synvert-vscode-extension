@@ -30,6 +30,8 @@ import {
   scssEnabled,
   scssMaxFileSize,
   languageEnabled,
+  rubyCommandPath,
+  javascriptCommandPath,
 } from "./configuration";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
@@ -215,32 +217,52 @@ function getNonce(): string {
   return text;
 }
 
-async function testSnippet(language: string, snippet: string, onlyPaths: string, skipPaths: string): Promise<SearchResults> {
+async function testSnippet(language: string, snippetCode: string, onlyPaths: string, skipPaths: string): Promise<SearchResults> {
   if (vscode.workspace.workspaceFolders) {
     for (const folder of vscode.workspace.workspaceFolders) {
       const rootPath = folder.uri.path;
       if (!languageEnabled(language)) {
         return { results: [], errorMessage: `Synvert ${language} is not enabled!` };
       }
-      const additionalCommandArgs = buildAdditionalCommandArgs(language);
+      const additionalArgs = buildAdditionalCommandArgs(language);
       const synvertCommand = language === "ruby" ? runSynvertRuby : runSynvertJavascript;
-      const { output, error } = await synvertCommand(runCommand, "test", rootPath, onlyPaths, skipPaths, additionalCommandArgs, snippet);
+      const commandPath = language === "ruby" ? rubyCommandPath() : javascriptCommandPath();
+      const { output, error } = await synvertCommand({
+        runCommand,
+        executeCommand: "test",
+        rootPath,
+        onlyPaths,
+        skipPaths,
+        additionalArgs,
+        snippetCode,
+        commandPath,
+      });
       return await handleTestResults(output, error, rootPath, path, fs);
     }
   }
   return { results: [], errorMessage: "" };
 }
 
-async function processSnippet(language: string, snippet: string, onlyPaths: string, skipPaths: string): Promise<{ errorMessage: string }> {
+async function processSnippet(language: string, snippetCode: string, onlyPaths: string, skipPaths: string): Promise<{ errorMessage: string }> {
   if (vscode.workspace.workspaceFolders) {
     for (const folder of vscode.workspace.workspaceFolders) {
       const rootPath = folder.uri.path;
       if (!languageEnabled(language)) {
         return { errorMessage: `Synvert ${language} is not enabled!` };
       }
-      const additionalCommandArgs = buildAdditionalCommandArgs(language);
+      const additionalArgs = buildAdditionalCommandArgs(language);
       const synvertCommand = language === "ruby" ? runSynvertRuby : runSynvertJavascript;
-      const { error } = await synvertCommand(runCommand, "run", rootPath, onlyPaths, skipPaths, additionalCommandArgs, snippet);
+      const commandPath = language === "ruby" ? rubyCommandPath() : javascriptCommandPath();
+      const { error } = await synvertCommand({
+        runCommand,
+        executeCommand: "run",
+        rootPath,
+        onlyPaths,
+        skipPaths,
+        additionalArgs,
+        snippetCode,
+        commandPath,
+      });
       return { errorMessage: error || "" };
     }
   }
