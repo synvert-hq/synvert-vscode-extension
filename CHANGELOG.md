@@ -1,5 +1,18 @@
 # Change Log
 
+## [1.3.0] - 2024-04-19
+
+### Changed
+
+- Moving from `xinminlabs` to `synvert-hq`
+- Use `@synvert-hq/synvert-ui-common` and `@synvert-hq/synvert-server-common` packages
+
+### Added
+
+- Add `ruby.command_path` and `javascript.command_path` configurations
+- Use `commandPath` to check ruby and javascript dependencies
+- Use `commandPath` to run and test snippet
+
 ## [1.2.0] - 2024-02-17
 
 ### Added
