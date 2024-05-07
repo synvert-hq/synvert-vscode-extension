@@ -1,5 +1,13 @@
 # Change Log
 
+## [1.4.0] - 2024-05-07
+
+### Changed
+
+- Update `@synvert-hq/synvert-ui-common` to 1.17.0
+- Revert to `bin_path`
+- Use `@synvert-hq/synvert-ui-common` to install and sync synvert
+
 ## [1.3.0] - 2024-04-19
 
 ### Changed
