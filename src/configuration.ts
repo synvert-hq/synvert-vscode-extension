@@ -4,9 +4,9 @@ export const rubyEnabled = (): boolean => {
   return workspace.getConfiguration('synvert').get('ruby.enabled') as boolean;
 };
 
-export const rubyCommandPath = (): string => {
-  return workspace.getConfiguration('synvert').get('ruby.command_path') as string;
-}
+export const rubyBinPath = (): string => {
+  return workspace.getConfiguration('synvert').get('ruby.bin_path') as string;
+};
 
 export const rubyNumberOfWorkers = (): number => {
   return workspace.getConfiguration('synvert').get('ruby.number_of_workers') as number;
@@ -24,9 +24,9 @@ export const javascriptEnabled = (): boolean => {
   return workspace.getConfiguration('synvert').get('javascript.enabled') as boolean;
 };
 
-export const javascriptCommandPath = (): string => {
-  return workspace.getConfiguration('synvert').get('javascript.command_path') as string;
-}
+export const javascriptBinPath = (): string => {
+  return workspace.getConfiguration('synvert').get('javascript.bin_path') as string;
+};
 
 export const javascriptMaxFileSize = (): number => {
   return workspace.getConfiguration('synvert').get('javascript.max_file_size') as number;

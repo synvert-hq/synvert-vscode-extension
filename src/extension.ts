@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 
 import { SidebarProvider } from './SidebarProvider';
 import { LocalStorageService } from './localStorageService';
-import { javascriptEnabled, javascriptCommandPath, rubyEnabled, rubyCommandPath, typescriptEnabled, cssEnabled, lessEnabled, sassEnabled, scssEnabled } from './configuration';
+import { javascriptEnabled, javascriptBinPath, rubyEnabled, rubyBinPath, typescriptEnabled, cssEnabled, lessEnabled, sassEnabled, scssEnabled } from './configuration';
 import { log } from './log';
 import { runCommand, installGem, installNpm, showErrorMessage, showInformationMessage } from './utils';
 import { DependencyResponse, checkRubyDependencies, checkJavascriptDependencies } from '@synvert-hq/synvert-ui-common';
@@ -52,8 +52,8 @@ async function checkRuby() {
     return;
   }
 
-  const commandPath = rubyCommandPath();
-  const response = await checkRubyDependencies({ runCommand, commandPath });
+  const binPath = rubyBinPath();
+  const response = await checkRubyDependencies({ runCommand, binPath });
   switch (response.code) {
     case DependencyResponse.ERROR:
       showErrorMessage(`Error when checking synvert-ruby environment: ${response.error}`);
@@ -78,8 +78,8 @@ async function checkJavascript() {
     return;
   }
 
-  const commandPath = javascriptCommandPath();
-  const response = await checkJavascriptDependencies({ runCommand, commandPath });
+  const binPath = javascriptBinPath();
+  const response = await checkJavascriptDependencies({ runCommand, binPath });
   switch (response.code) {
     case DependencyResponse.ERROR:
       showErrorMessage(`Error when checking synvert-javascript environment: ${response.error}`);

@@ -60,10 +60,10 @@
           "default": true,
           "description": "Enable synvert ruby."
         },
-        "synvert.ruby.command_path": {
+        "synvert.ruby.bin_path": {
           "type": "string",
           "default": "",
-          "description": "Specify the synvert-ruby command path."
+          "description": "Specify synvert ruby bin path (directory containing synvert-ruby command, e.g. if you are using rbenv, it should be /Users/username/.rbenv/shims)"
         },
         "synvert.ruby.number_of_workers": {
           "type": "number",
@@ -125,10 +125,10 @@
           "default": true,
           "description": "Enable synvert javascript."
         },
-        "synvert.javascript.command_path": {
+        "synvert.javascript.bin_path": {
           "type": "string",
           "default": "",
-          "description": "Specify the synvert-javascript command path."
+          "description": "Specify synvert javascript bin path (directory containing synvert-javascript command)"
         },
         "synvert.javascript.max_file_size": {
           "type": "number",

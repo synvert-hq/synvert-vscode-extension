@@ -30,8 +30,8 @@ import {
   scssEnabled,
   scssMaxFileSize,
   languageEnabled,
-  rubyCommandPath,
-  javascriptCommandPath,
+  rubyBinPath,
+  javascriptBinPath,
 } from "./configuration";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
@@ -226,7 +226,7 @@ async function testSnippet(language: string, snippetCode: string, onlyPaths: str
       }
       const additionalArgs = buildAdditionalCommandArgs(language);
       const synvertCommand = language === "ruby" ? runSynvertRuby : runSynvertJavascript;
-      const commandPath = language === "ruby" ? rubyCommandPath() : javascriptCommandPath();
+      const binPath = language === "ruby" ? rubyBinPath() : javascriptBinPath();
       const { output, error } = await synvertCommand({
         runCommand,
         executeCommand: "test",
@@ -235,7 +235,7 @@ async function testSnippet(language: string, snippetCode: string, onlyPaths: str
         skipPaths,
         additionalArgs,
         snippetCode,
-        commandPath,
+        binPath,
       });
       return await handleTestResults(output, error, rootPath, path, fs);
     }
@@ -252,7 +252,7 @@ async function processSnippet(language: string, snippetCode: string, onlyPaths: 
       }
       const additionalArgs = buildAdditionalCommandArgs(language);
       const synvertCommand = language === "ruby" ? runSynvertRuby : runSynvertJavascript;
-      const commandPath = language === "ruby" ? rubyCommandPath() : javascriptCommandPath();
+      const binPath = language === "ruby" ? rubyBinPath() : javascriptBinPath();
       const { error } = await synvertCommand({
         runCommand,
         executeCommand: "run",
@@ -261,7 +261,7 @@ async function processSnippet(language: string, snippetCode: string, onlyPaths: 
         skipPaths,
         additionalArgs,
         snippetCode,
-        commandPath,
+        binPath,
       });
       return { errorMessage: error || "" };
     }
