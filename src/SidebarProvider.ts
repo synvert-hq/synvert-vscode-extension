@@ -2,9 +2,9 @@ import { promises as fs } from "fs";
 import path from "path";
 import { machineIdSync } from 'node-machine-id';
 import * as vscode from "vscode";
-import { runSynvertRuby, runSynvertJavascript, replaceAllTestResults, replaceTestResult, replaceTestAction, removeTestResult, removeTestAction, handleTestResults } from "@synvert-hq/synvert-ui-common";
+import { runSynvertRuby, runSynvertJavascript, installNpm, installGem, syncJavascriptSnippets, syncRubySnippets, replaceAllTestResults, replaceTestResult, replaceTestAction, removeTestResult, removeTestAction, handleTestResults } from "@synvert-hq/synvert-ui-common";
 import type { SearchResults } from "./types";
-import { installNpm, installGem, syncJavascriptSnippets, syncRubySnippets, runCommand, showInformationMessage, showErrorMessage } from "./utils";
+import { runCommand, showInformationMessage, showErrorMessage } from "./utils";
 import { LocalStorageService } from "./localStorageService";
 import {
   rubyEnabled,
@@ -227,7 +227,7 @@ async function testSnippet(language: string, snippetCode: string, onlyPaths: str
       const additionalArgs = buildAdditionalCommandArgs(language);
       const synvertCommand = language === "ruby" ? runSynvertRuby : runSynvertJavascript;
       const binPath = language === "ruby" ? rubyBinPath() : javascriptBinPath();
-      const { output, error } = await synvertCommand({
+      const { stdout, stderr } = await synvertCommand({
         runCommand,
         executeCommand: "test",
         rootPath,
@@ -237,7 +237,7 @@ async function testSnippet(language: string, snippetCode: string, onlyPaths: str
         snippetCode,
         binPath,
       });
-      return await handleTestResults(output, error, rootPath, path, fs);
+      return await handleTestResults(stdout, stderr, rootPath, path, fs);
     }
   }
   return { results: [], errorMessage: "" };
@@ -253,7 +253,7 @@ async function processSnippet(language: string, snippetCode: string, onlyPaths: 
       const additionalArgs = buildAdditionalCommandArgs(language);
       const synvertCommand = language === "ruby" ? runSynvertRuby : runSynvertJavascript;
       const binPath = language === "ruby" ? rubyBinPath() : javascriptBinPath();
-      const { error } = await synvertCommand({
+      const { stderr } = await synvertCommand({
         runCommand,
         executeCommand: "run",
         rootPath,
@@ -263,7 +263,7 @@ async function processSnippet(language: string, snippetCode: string, onlyPaths: 
         snippetCode,
         binPath,
       });
-      return { errorMessage: error || "" };
+      return { errorMessage: stderr || "" };
     }
   }
   return { errorMessage: "" };
@@ -278,29 +278,29 @@ async function updateDependencies(language: string): Promise<{ errorMessage: str
 }
 
 async function updateJavascriptDependencies(): Promise<{ errorMessage: string }> {
-  try {
-    await installNpm("synvert");
-    await syncJavascriptSnippets();
-    return { errorMessage: "" };
-  } catch(error) {
-    if (error instanceof Error) {
-      return { errorMessage: error.message };
-    }
-    return { errorMessage: String(error) };
+  const binPath = javascriptBinPath();
+  const { stderr: installError } = await installNpm({ runCommand, npmName: "synvert", binPath });
+  if (installError) {
+    return { errorMessage: `Failed to update the synvert npm. ${installError}` };
   }
+  const { stderr: syncError } = await syncJavascriptSnippets({ runCommand, binPath });
+  if (syncError) {
+    return { errorMessage: `Failed to sync the synvert javascript snippets. ${syncError}` };
+  }
+  return { errorMessage: "" };
 }
 
 async function updateRubyDependencies(): Promise<{ errorMessage: string }> {
-  try {
-    await installGem(["synvert", "synvert-core", "node_query", "node_mutation", "parser_node_ext", "syntax_tree_ext"]);
-    await syncRubySnippets();
-    return { errorMessage: "" };
-  } catch(error) {
-    if (error instanceof Error) {
-      return { errorMessage: error.message };
-    }
-    return { errorMessage: String(error) };
+  const binPath = rubyBinPath();
+  const { stderr: installError } = await installGem({ runCommand, gemName: ["synvert", "synvert-core", "node_query", "node_mutation", "parser_node_ext", "syntax_tree_ext", "prism_ext"], binPath });
+  if (installError) {
+    return { errorMessage: `Failed to update the synvert gem. ${installError}` };
   }
+  const { stderr: syncError } = await syncRubySnippets({ runCommand, binPath });
+  if (syncError) {
+    return { errorMessage: `Failed to sync the synvert ruby snippets. ${syncError}` };
+  }
+  return { errorMessage: "" };
 }
 
 function buildAdditionalCommandArgs(language: string): string[] {

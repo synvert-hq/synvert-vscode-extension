@@ -6,8 +6,8 @@ import { SidebarProvider } from './SidebarProvider';
 import { LocalStorageService } from './localStorageService';
 import { javascriptEnabled, javascriptBinPath, rubyEnabled, rubyBinPath, typescriptEnabled, cssEnabled, lessEnabled, sassEnabled, scssEnabled } from './configuration';
 import { log } from './log';
-import { runCommand, installGem, installNpm, showErrorMessage, showInformationMessage } from './utils';
-import { DependencyResponse, checkRubyDependencies, checkJavascriptDependencies } from '@synvert-hq/synvert-ui-common';
+import { runCommand, showErrorMessage, showInformationMessage } from './utils';
+import { DependencyResponse, checkRubyDependencies, checkJavascriptDependencies, installGem, installNpm } from '@synvert-hq/synvert-ui-common';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -97,41 +97,66 @@ async function checkJavascript() {
 }
 
 async function showInstallSynvertJavascriptErrorMessage() {
+  const binPath = javascriptBinPath();
   const item = await showErrorMessage('synvert npm not found. Run `npm install -g synvert`.', 'Install Now');
   if (item === 'Install Now') {
-    await installNpm('synvert');
-    showInformationMessage('Successfully installed the synvert npm.');
+    const { stderr } = await installNpm({ runCommand, npmName: 'synvert', binPath });
+    if (stderr) {
+      showErrorMessage(`Failed to install the synvert npm. ${stderr}`);
+    } else {
+      showInformationMessage('Successfully installed the synvert npm.');
+    }
   }
 }
 
 async function showUpdateSynvertJavascriptErrorMessage(remoteSynvertVersion: string, localSynvertVersion: string) {
+  const binPath = javascriptBinPath();
   const item = await showErrorMessage(`synvert npm version ${remoteSynvertVersion} is available. (Current version: ${localSynvertVersion})`, 'Update Now');
   if (item === 'Update Now') {
-    await installNpm('synvert');
-    showInformationMessage('Successfully updated the synvert npm.');
+    const { stderr } = await installNpm({ runCommand, npmName: 'synvert', binPath });
+    if (stderr) {
+      showErrorMessage(`Failed to update the synvert npm. ${stderr}`);
+    } else {
+      showInformationMessage('Successfully updated the synvert npm.');
+    }
   }
 }
 
 async function showInstallSynvertRubyErrorMessage() {
+  const binPath = rubyBinPath();
   const item = await showErrorMessage('synvert gem not found. Run `gem install synvert` or update your Gemfile.', 'Install Now');
   if (item === 'Install Now') {
-    await installGem('synvert');
-    showInformationMessage('Successfully installed the synvert gem.');
+    const { stderr } = await installGem({ runCommand, gemName: 'synvert', binPath });
+    if (stderr) {
+      showErrorMessage(`Failed to install the synvert gem. ${stderr}`);
+    } else {
+      showInformationMessage('Successfully installed the synvert gem.');
+    }
   }
 }
 
 async function showUpdateSynvertRubyErrorMessage(remoteSynvertVersion: string, localSynvertVersion: string) {
+  const binPath = rubyBinPath();
   const item = await showErrorMessage(`synvert gem version ${remoteSynvertVersion} is available. (Current version: ${localSynvertVersion})`, 'Update Now');
   if (item === 'Update Now') {
-    await installGem('synvert');
-    showInformationMessage('Successfully updated the synvert gem.');
+    const { stderr } = await installGem({ runCommand, gemName: 'synvert', binPath });
+    if (stderr) {
+      showErrorMessage(`Failed to update the synvert gem. ${stderr}`);
+    } else {
+      showInformationMessage('Successfully updated the synvert gem.');
+    }
   }
 }
 
 async function showUpdateSynvertCoreRubyErrorMessage(remoteSynvertCoreVersion: string, localSynvertCoreVersion: string) {
+  const binPath = rubyBinPath();
   const item = await showErrorMessage(`synvert-core gem version ${remoteSynvertCoreVersion} is available. (Current version: ${localSynvertCoreVersion})`, 'Update Now');
   if (item === 'Update Now') {
-    await installGem('synvert-core');
-    showInformationMessage('Successfully updated the synvert-core gem.');
+    const { stderr } = await installGem({ runCommand, gemName: 'synvert-core', binPath });
+    if (stderr) {
+      showErrorMessage(`Failed to update the synvert-core gem. ${stderr}`);
+    } else {
+      showInformationMessage('Successfully updated the synvert-core gem.');
+    }
   }
 }
