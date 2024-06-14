@@ -226,7 +226,7 @@
   },
   "dependencies": {
     "@synvert-hq/synvert-server-common": "^1.1.3",
-    "@synvert-hq/synvert-ui-common": "^1.17.0",
+    "@synvert-hq/synvert-ui-common": "^1.18.0",
     "node-machine-id": "^1.1.12",
     "svelte-select": "^4.4.7"
   },
