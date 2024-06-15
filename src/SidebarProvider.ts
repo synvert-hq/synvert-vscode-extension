@@ -79,7 +79,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           if (!data.snippet) {
             return;
           }
-          const results = await testSnippet(data.language, data.snippet, data.onlyPaths, data.skipPaths);
+          const results = await testSnippet(data.language, data.snippet, data.onlyPaths, data.skipPaths, data.respectGitignore);
           webviewView.webview.postMessage({ type: 'doneSearch', ...results });
           break;
         }
@@ -87,7 +87,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           if (!data.snippet) {
             return;
           }
-          const results = await processSnippet(data.language, data.snippet, data.onlyPaths, data.skipPaths);
+          const results = await processSnippet(data.language, data.snippet, data.onlyPaths, data.skipPaths, data.respectGitignore);
           webviewView.webview.postMessage({ type: 'doneReplaceAll', ...results });
           break;
         }
@@ -217,7 +217,7 @@ function getNonce(): string {
   return text;
 }
 
-async function testSnippet(language: string, snippetCode: string, onlyPaths: string, skipPaths: string): Promise<SearchResults> {
+async function testSnippet(language: string, snippetCode: string, onlyPaths: string, skipPaths: string, respectGitignore: boolean): Promise<SearchResults> {
   if (vscode.workspace.workspaceFolders) {
     for (const folder of vscode.workspace.workspaceFolders) {
       const rootPath = folder.uri.path;
@@ -233,6 +233,7 @@ async function testSnippet(language: string, snippetCode: string, onlyPaths: str
         rootPath,
         onlyPaths,
         skipPaths,
+        respectGitignore,
         additionalArgs,
         snippetCode,
         binPath,
@@ -243,7 +244,7 @@ async function testSnippet(language: string, snippetCode: string, onlyPaths: str
   return { results: [], errorMessage: "" };
 }
 
-async function processSnippet(language: string, snippetCode: string, onlyPaths: string, skipPaths: string): Promise<{ errorMessage: string }> {
+async function processSnippet(language: string, snippetCode: string, onlyPaths: string, skipPaths: string, respectGitignore: boolean): Promise<{ errorMessage: string }> {
   if (vscode.workspace.workspaceFolders) {
     for (const folder of vscode.workspace.workspaceFolders) {
       const rootPath = folder.uri.path;
@@ -259,6 +260,7 @@ async function processSnippet(language: string, snippetCode: string, onlyPaths: 
         rootPath,
         onlyPaths,
         skipPaths,
+        respectGitignore,
         additionalArgs,
         snippetCode,
         binPath,

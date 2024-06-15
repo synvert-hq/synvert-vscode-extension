@@ -19,6 +19,7 @@
   let npmVersion = "";
   let onlyPaths = "";
   let skipPaths = "**/node_modules/**,**/dist/**";
+  let respectGitignore = true;
   let nqlOrRules = "rules";
   let generatedSnippets: string[] = [];
   let generatedSnippetIndex: number = 0;
@@ -107,6 +108,7 @@
           nqlOrRules = message.nqlOrRules;
           onlyPaths = message.onlyPaths;
           skipPaths = message.skipPaths;
+          respectGitignore = message.respectGitignore === false ? false : true;
           snippet = message.snippet;
           results = message.results;
 
@@ -201,7 +203,7 @@
 
   afterUpdate(() => {
     // @ts-ignore
-    tsvscode.postMessage({ type: "afterUpdate", showGenerateSnippet, language, parser, filePattern, nodeVersion, npmVersion, inputs, outputs, nqlOrRules, onlyPaths, skipPaths, snippet, results });
+    tsvscode.postMessage({ type: "afterUpdate", showGenerateSnippet, language, parser, filePattern, nodeVersion, npmVersion, inputs, outputs, nqlOrRules, onlyPaths, skipPaths, respectGitignore, snippet, results });
   });
 
   function updateSelectedResult(resultIndex: number) {
@@ -326,7 +328,7 @@
     infoMessage = "";
     searchButtonDisabled = true;
     // @ts-ignore
-    tsvscode.postMessage({ type: 'onSearch', language, snippet, onlyPaths, skipPaths });
+    tsvscode.postMessage({ type: 'onSearch', language, snippet, onlyPaths, skipPaths, respectGitignore });
   }
 
   function replaceAll() {
@@ -338,7 +340,7 @@
       tsvscode.postMessage({ type: 'onReplaceAll', results });
     } else {
       // @ts-ignore
-      tsvscode.postMessage({ type: 'onDirectReplaceAll', language, snippet, onlyPaths, skipPaths });
+      tsvscode.postMessage({ type: 'onDirectReplaceAll', language, snippet, onlyPaths, skipPaths, respectGitignore });
     }
   }
 
@@ -519,6 +521,8 @@
   </span>
 </div>
 <textarea id="snippet" rows=10 bind:value={snippet} on:change={snippetChanged}></textarea>
+<input id="respectGitignore" type="checkbox" bind:checked={respectGitignore} />
+<label for="respectGitignore"><b>Respect .gitignore</b></label>
 <label for="onlyPaths"><b>Files to include</b></label>
 <input id="onlyPaths" bind:value={onlyPaths} placeholder="e.g. frontend/src" />
 <label for="skipPaths"><b>Files to exclude</b></label>
