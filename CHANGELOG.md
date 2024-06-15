@@ -1,5 +1,15 @@
 # Change Log
 
+## [1.5.0] - 2024-06-15
+
+### Added
+
+* Respect `.gitignore`
+
+### Changed
+
+* Update `@synvert-hq/synvert-ui-common` to 1.18.0
+
 ## [1.4.0] - 2024-05-07
 
 ### Changed
