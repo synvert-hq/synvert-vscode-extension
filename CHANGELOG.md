@@ -1,5 +1,11 @@
 # Change Log
 
+## [1.5.1] - 2025-03-11
+
+### Fixed
+
+* Install `@synvert-hq/synvert` instead of `synvert`
+
 ## [1.5.0] - 2024-06-15
 
 ### Added
