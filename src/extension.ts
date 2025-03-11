@@ -98,9 +98,9 @@ async function checkJavascript() {
 
 async function showInstallSynvertJavascriptErrorMessage() {
   const binPath = javascriptBinPath();
-  const item = await showErrorMessage('synvert npm not found. Run `npm install -g synvert`.', 'Install Now');
+  const item = await showErrorMessage('synvert npm not found. Run `npm install -g @synvert-hq/synvert`.', 'Install Now');
   if (item === 'Install Now') {
-    const { stderr } = await installNpm({ runCommand, npmName: 'synvert', binPath });
+    const { stderr } = await installNpm({ runCommand, npmName: '@synvert-hq/synvert', binPath });
     if (stderr) {
       showErrorMessage(`Failed to install the synvert npm. ${stderr}`);
     } else {
@@ -113,7 +113,7 @@ async function showUpdateSynvertJavascriptErrorMessage(remoteSynvertVersion: str
   const binPath = javascriptBinPath();
   const item = await showErrorMessage(`synvert npm version ${remoteSynvertVersion} is available. (Current version: ${localSynvertVersion})`, 'Update Now');
   if (item === 'Update Now') {
-    const { stderr } = await installNpm({ runCommand, npmName: 'synvert', binPath });
+    const { stderr } = await installNpm({ runCommand, npmName: '@synvert-hq/synvert', binPath });
     if (stderr) {
       showErrorMessage(`Failed to update the synvert npm. ${stderr}`);
     } else {

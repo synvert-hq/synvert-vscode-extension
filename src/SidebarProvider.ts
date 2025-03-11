@@ -281,7 +281,7 @@ async function updateDependencies(language: string): Promise<{ errorMessage: str
 
 async function updateJavascriptDependencies(): Promise<{ errorMessage: string }> {
   const binPath = javascriptBinPath();
-  const { stderr: installError } = await installNpm({ runCommand, npmName: "synvert", binPath });
+  const { stderr: installError } = await installNpm({ runCommand, npmName: "@synvert-hq/synvert", binPath });
   if (installError) {
     return { errorMessage: `Failed to update the synvert npm. ${installError}` };
   }
